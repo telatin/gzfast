@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '23 3 * * 1'
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        nim-version: ['2.2.x']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: ${{ matrix.nim-version }}
+      - name: Unit and integration tests
+        run: nimble -y test
+      - name: Build release CLI
+        run: nim c -d:release --threads:on --mm:orc src/gzfast_cli.nim
+      - name: Docs
+        run: nimble -y docs
+      - name: Package install validation
+        run: nimble -y testPackage
+
+  nim-devel:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: devel
+      - run: nimble -y test
+
+  asan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: '2.2.x'
+      - run: nimble -y testAsan
+
+  ubsan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: '2.2.x'
+      - run: nimble -y testUbsan
+
+  fuzz-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: '2.2.x'
+      - run: nimble -y fuzzSmoke
+
+  valgrind:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: '2.2.x'
+      - run: sudo apt-get update && sudo apt-get install -y valgrind
+      - run: nim c --threads:on --mm:orc -p:src --hints:off tests/concurrency/test_workers.nim
+      - run: valgrind --error-exitcode=1 --leak-check=full ./tests/concurrency/test_workers
+      - run: nim c --threads:on --mm:orc -p:src --hints:off tests/unit/test_marker_resolve.nim
+      - run: valgrind --error-exitcode=1 --leak-check=full ./tests/unit/test_marker_resolve
+
+  thread-sanitizer:
+    if: github.event_name == 'schedule'
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jiro4989/setup-nim-action@v2
+        with:
+          nim-version: '2.2.x'
+      - run: >-
+          nim c -r --threads:on --mm:orc -p:src --hints:off
+          --passC:-fsanitize=thread --passL:-fsanitize=thread
+          tests/concurrency/test_bounded_queue.nim
+      - run: >-
+          nim c -r --threads:on --mm:orc -p:src --hints:off
+          --passC:-fsanitize=thread --passL:-fsanitize=thread
+          tests/concurrency/test_public_stress.nim
