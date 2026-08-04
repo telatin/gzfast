@@ -13,13 +13,15 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        nim-version: ['2.2.x']
+        nim-version: ['binary:2.2.10']
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: jiro4989/setup-nim-action@v2
+      - uses: iffy/install-nim@v5
         with:
-          nim-version: ${{ matrix.nim-version }}
+          version: ${{ matrix.nim-version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Unit and integration tests
         run: nimble -y test
       - name: Build release CLI
@@ -34,36 +36,44 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
-      - uses: jiro4989/setup-nim-action@v2
+      - uses: iffy/install-nim@v5
         with:
-          nim-version: devel
+          version: devel
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: nimble -y test
 
   asan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: jiro4989/setup-nim-action@v2
+      - uses: iffy/install-nim@v5
         with:
-          nim-version: '2.2.x'
+          version: 'binary:2.2.10'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: nimble -y testAsan
 
   ubsan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: jiro4989/setup-nim-action@v2
+      - uses: iffy/install-nim@v5
         with:
-          nim-version: '2.2.x'
+          version: 'binary:2.2.10'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: nimble -y testUbsan
 
   fuzz-smoke:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: jiro4989/setup-nim-action@v2
+      - uses: iffy/install-nim@v5
         with:
-          nim-version: '2.2.x'
+          version: 'binary:2.2.10'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: nimble -y fuzzSmoke
 
   valgrind:
@@ -71,9 +81,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: jiro4989/setup-nim-action@v2
+      - uses: iffy/install-nim@v5
         with:
-          nim-version: '2.2.x'
+          version: 'binary:2.2.10'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: sudo apt-get update && sudo apt-get install -y valgrind
       - run: nim c --threads:on --mm:orc -p:src --hints:off tests/concurrency/test_workers.nim
       - run: valgrind --error-exitcode=1 --leak-check=full ./tests/concurrency/test_workers
@@ -86,9 +98,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: jiro4989/setup-nim-action@v2
+      - uses: iffy/install-nim@v5
         with:
-          nim-version: '2.2.x'
+          version: 'binary:2.2.10'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: >-
           nim c -r --threads:on --mm:orc -p:src --hints:off
           --passC:-fsanitize=thread --passL:-fsanitize=thread

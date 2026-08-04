@@ -142,13 +142,16 @@ stderr, never into decompressed stdout.
 | Positional source, shared buffers, bounded queues, worker pool and ordered coordinator | ✅ complete |
 | BGZF and concatenated-member parallelism | ✅ complete |
 | Pure-Nim bit reader, Huffman/dynamic/stored structures and block finder | ✅ complete |
-| Marker/window parallelism for ordinary single-member gzip | milestones 7–8 |
+| Marker decoder and exact marker-free zlib handoff | ✅ complete |
+| Marker resolution and ordinary single-member gzip parallel path | ✅ complete |
+| Corruption, cancellation, large-stream, fuzz and sanitizer hardening | ✅ complete |
+| Profile-driven scalar optimization, BGZF grouping and benchmark automation | ✅ complete |
 
-The bounded parallel runtime is implemented and tested with synthetic
-out-of-order work, but it is not connected to a gzip decode path yet.
-Until the Milestone 5 paths land, every public input still decodes
-through the authoritative sequential path (which is also the permanent
-correctness oracle and fallback).
+Path-based input selects the safest available parallel route: BGZF,
+dense independent members, then the rolling marker/window path for
+ordinary gzip. Unsupported, false-positive, oversized, fixed-only, or
+otherwise unsuitable regions bridge through the authoritative sequential
+backend from the last verified state.
 
 ## Guarantees and caveats
 
@@ -168,14 +171,16 @@ nimble test          # full normal suite
 nimble testFast      # unit tests only
 nimble testSlow      # extended suite
 nimble testSanitize  # ASan/UBSan (Linux)
+nimble fuzzSmoke     # build harnesses and run committed seeds
 nimble testPackage   # pack, clean-room install, consumer build, ldd/otool check
-nimble bench
+nimble bench         # generated release benchmark matrix (CSV)
 nimble docs
 ```
 
 See `ARCHITECTURE.md` for the design, `PROJECT.md` for the full
 implementation brief, `UPSTREAM.md` for pinned upstream references,
-and `THIRD_PARTY_NOTICES.md` for licences of derived/vendored code.
+`benchmarks/PROFILE.md` for measured optimization results, and
+`THIRD_PARTY_NOTICES.md` for licences of derived/vendored code.
 
 ## License
 
