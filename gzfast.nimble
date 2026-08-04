@@ -1,0 +1,131 @@
+# Package
+
+version       = "0.1.0"
+author        = "gzfast contributors"
+description   = "Fast, verified, multithreaded gzip decompression with a bundled zlib (no system libraries required)"
+license       = "MIT"
+srcDir        = "src"
+bin           = @["gzfast_cli"]
+namedBin      = {"gzfast_cli": "gzfast"}.toTable()
+installExt    = @["nim", "c", "h"]
+skipDirs      = @["tests", "benchmarks", "fuzz", ".github"]
+
+# Dependencies
+
+requires "nim >= 2.2.0"
+
+import std/[os, strutils]
+
+task pack, "Create a Nimble package archive in the project root":
+  let stage = "nimcache" / "gzfast-pack" / "gzfast-" & version
+  if dirExists(stage):
+    rmDir(stage)
+  mkDir(stage)
+  # Stage everything the install rules need, mirroring skipDirs.
+  let skip = @["tests", "benchmarks", "fuzz", ".github", ".git",
+               "nimcache", "docs", "rapidgzip", "rapidgzip-rust"]
+  for kind, path in walkDir("."):
+    let name = path.lastPathPart
+    if name in skip or name.startsWith("."):
+      continue
+    case kind
+    of pcDir:
+      cpDir(path, stage / name)
+    of pcFile:
+      if name.endsWith(".tar.gz") or name == "gzfast":
+        continue
+      cpFile(path, stage / name)
+    else:
+      discard
+  exec "tar -czf " & "gzfast-" & version & ".tar.gz -C " &
+    quoteShell("nimcache" / "gzfast-pack") & " " & "gzfast-" & version
+  echo "wrote gzfast-" & version & ".tar.gz"
+
+# Tasks
+
+task test, "Run the complete normal test suite":
+  for t in ["unit/test_zlib_api", "unit/test_header", "unit/test_footer",
+            "unit/test_source", "unit/test_buffers", "unit/test_deflate_bitreader",
+            "unit/test_deflate_huffman",
+            "unit/test_deflate_structures",
+            "unit/test_deflate_blockfinder",
+            "unit/test_deflate_differential",
+            "unit/test_marker_decode",
+            "unit/test_marker_resolve",
+            "unit/test_adaptive",
+            "unit/test_sequential", "integration/test_api",
+            "integration/test_cli", "integration/test_marker_path",
+            "integration/test_large_stream",
+            "corruption/test_matrix",
+            ]:
+    exec "nim c -r --mm:orc --threads:on -p:src --hints:off tests/" & t & ".nim"
+  exec "nim c --mm:orc --hints:off -o:nimcache/run_with_timeout tests/helpers/run_with_timeout.nim"
+  for t in ["concurrency/test_bounded_queue", "concurrency/test_workers",
+            "concurrency/test_member_workers", "concurrency/test_public_stress"]:
+    exec "nim c --mm:orc --threads:on -p:src --hints:off tests/" & t & ".nim"
+    exec "nimcache/run_with_timeout 300000 tests/" & t
+
+task testFast, "Run unit tests only":
+  for t in ["unit/test_zlib_api", "unit/test_header", "unit/test_footer",
+            "unit/test_source", "unit/test_buffers", "unit/test_deflate_bitreader",
+            "unit/test_deflate_huffman",
+            "unit/test_deflate_structures",
+            "unit/test_deflate_blockfinder",
+            "unit/test_deflate_differential",
+            "unit/test_marker_decode",
+            "unit/test_marker_resolve",
+            "unit/test_adaptive",
+            "unit/test_sequential"]:
+    exec "nim c -r --mm:orc --threads:on -p:src --hints:off tests/" & t & ".nim"
+
+task testSlow, "Run the extended/slow suite (currently the normal suite)":
+  exec "nimble test"
+
+task testAsan, "Run high-risk suites under AddressSanitizer":
+  when defined(linux):
+    for t in ["unit/test_zlib_api", "unit/test_source", "unit/test_buffers",
+              "unit/test_deflate_bitreader", "unit/test_deflate_huffman",
+              "unit/test_deflate_structures", "unit/test_marker_decode",
+              "unit/test_marker_resolve", "unit/test_sequential",
+              "integration/test_marker_path", "corruption/test_matrix",
+              "concurrency/test_bounded_queue", "concurrency/test_workers",
+              "concurrency/test_member_workers"]:
+      exec "nim c -r --mm:orc --threads:on -p:src --hints:off " &
+        "--passC:-fsanitize=address -fno-omit-frame-pointer " &
+        "--passL:-fsanitize=address tests/" & t & ".nim"
+  else:
+    echo "testAsan is supported on Linux only"
+
+task testUbsan, "Run high-risk suites under UndefinedBehaviorSanitizer":
+  when defined(linux):
+    for t in ["unit/test_zlib_api", "unit/test_source", "unit/test_buffers",
+              "unit/test_deflate_bitreader", "unit/test_deflate_huffman",
+              "unit/test_deflate_structures", "unit/test_marker_decode",
+              "unit/test_marker_resolve", "unit/test_sequential",
+              "integration/test_marker_path", "corruption/test_matrix",
+              "concurrency/test_bounded_queue", "concurrency/test_workers",
+              "concurrency/test_member_workers"]:
+      exec "nim c -r --mm:orc --threads:on -p:src --hints:off " &
+        "--passC:-fsanitize=undefined -fno-omit-frame-pointer " &
+        "--passL:-fsanitize=undefined tests/" & t & ".nim"
+  else:
+    echo "testUbsan is supported on Linux only"
+
+task testSanitize, "Run ASan and UBSan suites":
+  exec "nimble testAsan"
+  exec "nimble testUbsan"
+
+task fuzzSmoke, "Build fuzz harnesses and run the committed seed corpus":
+  exec "nim c --threads:on --mm:orc -p:src --hints:off -o:nimcache/fuzz_header fuzz/fuzz_header.nim"
+  exec "nim c --threads:on --mm:orc -p:src --hints:off -o:nimcache/fuzz_decode fuzz/fuzz_decode.nim"
+  exec "nimcache/fuzz_header tests/corpus/*.gz"
+  exec "nimcache/fuzz_decode tests/corpus/*.gz"
+
+task testPackage, "Pack, install into a clean Nimble dir and compile a consumer":
+  exec "nim c -r --mm:orc --hints:off tests/package/test_package.nim"
+
+task bench, "Run benchmarks":
+  exec "nim e benchmarks/run_benchmarks.nims"
+
+task docs, "Generate API documentation":
+  exec "nim doc --mm:orc --threads:on --project --outdir:docs src/gzfast.nim"

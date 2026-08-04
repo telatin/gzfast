@@ -1,0 +1,13 @@
+name=empty.gz length=0 crc32=0x0 members=1 expect=ok sha256=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+name=one_byte.gz length=1 crc32=0x8cdc1683 members=1 expect=ok sha256=2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258717921a4881
+name=small_text.gz length=2880 crc32=0x962cf4a members=1 expect=ok sha256=c36c14624a7843c93c6a883916fdabd3466038d245e85ce423c4c017c9ae5fc9
+name=random_256k.gz length=262144 crc32=0xa8ee935 members=1 expect=ok sha256=8d50156a72a399591cdd86f4d1bfb0e934c649c5f0ae06d35ee6d10468b41187
+name=repetitive.gz length=589824 crc32=0xc437a40c members=1 expect=ok sha256=9f8d75bd08bc2c612fd0cc15acad11407e47ff1e0fb7407fdaa112b754fe8ef6
+name=level1.gz length=2880 crc32=0x962cf4a members=1 expect=ok sha256=c36c14624a7843c93c6a883916fdabd3466038d245e85ce423c4c017c9ae5fc9
+name=level9.gz length=589824 crc32=0xc437a40c members=1 expect=ok sha256=9f8d75bd08bc2c612fd0cc15acad11407e47ff1e0fb7407fdaa112b754fe8ef6
+name=stored.gz length=131072 crc32=0xbb7805d0 members=1 expect=ok sha256=1c9f7c663008ba7982f3c350175582595519140f206754e078ff103a4fa39786
+name=fixed_huffman.gz length=2880 crc32=0x962cf4a members=1 expect=ok sha256=c36c14624a7843c93c6a883916fdabd3466038d245e85ce423c4c017c9ae5fc9
+name=fastq.gz length=240000 crc32=0xecf2482b members=1 expect=ok sha256=7ec19e61a1526027909c23557df94a8705d6ce1e227e15bfd1a7e18cc57a47cd
+name=concat_3.gz length=52880 crc32=0x5fe5e3d0 members=3 expect=ok sha256=c36ed10b076268a7a59c17917901da28c5d4f28324f0ee28c3cf4b39819c2dfe
+name=large_fields.gz length=2880 crc32=0x962cf4a members=1 expect=ok sha256=c36c14624a7843c93c6a883916fdabd3466038d245e85ce423c4c017c9ae5fc9
+name=bgzf.gz length=100000 crc32=0xda7470eb members=3 expect=ok sha256=8c7e805422792ef63c602308127aaa5b211946d9b177ca88df510bb0610b8695
