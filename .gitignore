@@ -1,0 +1,30 @@
+# Build artifacts
+nimcache/
+*.o
+docs/
+
+# Built binaries
+/gzfast
+/gzfast_cli
+examples/stream_fastq
+examples/decompress_file
+examples/verify_only
+examples/custom_limits
+
+# Package archives
+gzfast-*.tar.gz
+
+# Test temporaries
+tests/unit/test_*
+tests/integration/test_*
+!tests/unit/test_*.nim
+!tests/integration/test_*.nim
+tests/package/test_package
+
+# Benchmark artifacts
+benchmarks/generated/
+benchmarks/bench_decode
+benchmarks/generate_corpus
+
+# OS noise
+.DS_Store
