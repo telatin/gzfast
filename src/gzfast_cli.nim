@@ -22,6 +22,7 @@ Options:
       --memory SIZE      approximate internal memory ceiling (e.g. 256MiB)
       --output-limit SIZE
                          refuse to decode beyond SIZE bytes (bomb guard)
+      --marker-path      enable experimental ordinary-gzip marker parallelism
       --verify           verify only; discard decoded output
       --stats            print a decode report to stderr
       --quiet            suppress non-error messages
@@ -65,12 +66,25 @@ proc parseSize(s: string): uint64 =
   except ValueError:
     raise newException(ValueError, "invalid size: " & s)
 
+proc optionValue(p: var OptParser; name: string): string =
+  ## Option value accepting both attached (`--opt=val`, `-oval`) and
+  ## space-separated (`--opt val`, `-o val`) forms. std/parseopt only
+  ## consumes the following argument for long options, so short options
+  ## with a separate value are read explicitly here.
+  if p.val.len > 0:
+    return p.val
+  p.next()
+  if p.kind != cmdArgument:
+    raise newException(ValueError, "option --" & name & " requires a value")
+  p.key
+
 proc parseArgs(): CliOptions =
   result.config = defaultGzFastConfig()
   var p = initOptParser(commandLineParams(),
     shortNoVal = {'d', 'c', 'f', 'h'},
-    longNoVal = @["d", "decompress", "c", "stdout", "verify", "stats",
-                  "quiet", "f", "force", "version", "h", "help"])
+    longNoVal = @["d", "decompress", "c", "stdout", "marker-path",
+                  "verify", "stats", "quiet", "f", "force",
+                  "version", "h", "help"])
   while true:
     p.next()
     case p.kind
@@ -84,16 +98,18 @@ proc parseArgs(): CliOptions =
       case p.key
       of "d", "decompress": discard
       of "c", "stdout": result.toStdout = true
-      of "o", "output": result.outputPath = p.val
+      of "o", "output": result.outputPath = p.optionValue("output")
       of "t", "threads":
+        let value = p.optionValue("threads")
         try:
-          result.config.threads = parseInt(p.val)
+          result.config.threads = parseInt(value)
         except ValueError:
-          raise newException(ValueError, "invalid thread count: " & p.val)
+          raise newException(ValueError, "invalid thread count: " & value)
       of "memory":
-        result.config.memoryLimit = parseSize(p.val).int64
+        result.config.memoryLimit = parseSize(p.optionValue("memory")).int64
       of "output-limit":
-        result.config.outputLimit = some(parseSize(p.val))
+        result.config.outputLimit = some(parseSize(p.optionValue("output-limit")))
+      of "marker-path": result.config.enableMarkerPath = true
       of "verify": result.verifyOnly = true
       of "stats": result.showStats = true
       of "quiet": result.quiet = true

@@ -13,6 +13,7 @@ proc bench(path: string; threads: int) =
   var config = defaultGzFastConfig()
   config.threads = threads
   if "marker-" in path:
+    config.enableMarkerPath = true
     config.compressedGridSize = 1024
     config.decodedChunkSize = 1024 * 1024
     config.maxSpeculativeOutput = 4 * 1024 * 1024

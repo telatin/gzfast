@@ -22,6 +22,7 @@ type
     workers: int
     finderWorkspace: DynamicHeaderWorkspace
     runtime: MarkerRuntime
+    firstBatchStarts: seq[uint64] ## probed at open; consumed by first batch
     nextOrdinal: uint64
     resolutionTracker: AllocationTracker
     pending: seq[SharedBuffer] # bounded by horizon + exact bridge
@@ -65,10 +66,25 @@ proc findCandidate(decoder: MarkerPathDecoder; fromBit: uint64;
     decoder.finderWorkspace, candidate,
     min(decoder.config.inputPageSize, BitReaderPageCapacity))
 
+proc collectBatchStarts(decoder: MarkerPathDecoder): seq[uint64] =
+  ## Starting points for the next batch: the authoritative position plus
+  ## one speculative candidate per grid span, up to the horizon.
+  result = @[decoder.currentBit]
+  var search = decoder.currentBit +
+    uint64(decoder.config.compressedGridSize) * 8
+  while result.len <= decoder.horizon:
+    var candidate: DynamicCandidate
+    if not decoder.findCandidate(search, candidate): break
+    if candidate.startBit <= result[^1]: break
+    result.add(candidate.startBit)
+    search = candidate.startBit +
+      uint64(decoder.config.compressedGridSize) * 8
+
 proc account(decoder: MarkerPathDecoder; buffer: SharedBuffer)
+proc releasePending(decoder: MarkerPathDecoder)
 
 proc tryOpenMarkerPath*(path: string; config: GzFastConfig): MarkerPathDecoder =
-  if config.threads == 1:
+  if config.threads == 1 or not config.enableMarkerPath:
     return nil
   let calculated = sizing(config)
   if calculated.workers < 2:
@@ -76,6 +92,12 @@ proc tryOpenMarkerPath*(path: string; config: GzFastConfig): MarkerPathDecoder =
   let owner = openReadAtSource(path)
   let header = owner.view.parseHeaderAt(0, config.maxHeaderSize)
   if header.status != hasOk or header.info.bgzfBlockSize > 0:
+    owner.close()
+    return nil
+  # Small members cannot fill two grid spans, so speculation cannot
+  # overlap; the optimized sequential zlib path is strictly faster.
+  if owner.view.size - header.payloadOffset <
+      2 * uint64(config.compressedGridSize):
     owner.close()
     return nil
   let payloadBit = header.payloadOffset * 8
@@ -113,6 +135,17 @@ proc tryOpenMarkerPath*(path: string; config: GzFastConfig): MarkerPathDecoder =
     result.currentBit = candidate.startBit
   else:
     result.currentBit = candidate.startBit
+  # Probe the first batch before spawning any worker: with no speculative
+  # candidate beyond the authoritative position the batch would be a
+  # single serial job, which the sequential zlib path decodes faster.
+  let starts = result.collectBatchStarts()
+  if starts.len < 2:
+    result.releasePending()
+    owner.close()
+    return nil
+  # Never spawn more workers than the first batch can keep busy.
+  result.workers = min(result.workers, starts.len)
+  result.firstBatchStarts = starts
   let queueCapacity = max(result.horizon * 2 + 2, 4)
   result.runtime = initMarkerRuntime(path, config, result.workers,
                                      queueCapacity, queueCapacity)
@@ -279,16 +312,13 @@ proc prepareBatch(decoder: MarkerPathDecoder) =
   decoder.pendingIndex = 0
   decoder.pendingPos = 0
 
-  var starts = @[decoder.currentBit]
-  var search = decoder.currentBit +
-    uint64(decoder.config.compressedGridSize) * 8
-  while starts.len <= decoder.horizon:
-    var candidate: DynamicCandidate
-    if not decoder.findCandidate(search, candidate): break
-    if candidate.startBit <= starts[^1]: break
-    starts.add(candidate.startBit)
-    search = candidate.startBit +
-      uint64(decoder.config.compressedGridSize) * 8
+  var starts: seq[uint64]
+  if decoder.firstBatchStarts.len > 0:
+    # Candidates probed at open time; the position has not moved since.
+    starts = decoder.firstBatchStarts
+    decoder.firstBatchStarts = @[]
+  else:
+    starts = decoder.collectBatchStarts()
 
   let terminal = starts.len == 1
   let jobCount = if terminal: 1 else: starts.len - 1

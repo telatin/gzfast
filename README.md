@@ -40,10 +40,11 @@ discard input.finish()
   bounded; files far larger than RAM stream without growth. Backpressure
   slows decoding when the consumer is slow. An optional `outputLimit`
   guards against decompression bombs.
-* **Multithreaded.** Path-based input is decoded in parallel
-  (BGZF blocks, concatenated members, and rapidgzip-style
-  marker/window parallelism for ordinary gzip are rolled out across
-  milestones — see the status table below).
+* **Multithreaded where it pays.** Path-based BGZF blocks and
+  concatenated gzip members are decoded in parallel by default. The
+  rapidgzip-style marker/window path for ordinary single-member gzip is
+  implemented but currently opt-in because measured FASTQ workloads are
+  still faster through the sequential zlib path.
 
 ## Requirements
 
@@ -120,10 +121,30 @@ config.memoryLimit = 512 * 1024 * 1024   # approximate internal ceiling
 let decoder = initGzFastDecoder(config)
 ```
 
+### Experimental ordinary-gzip parallelism
+
+Ordinary single-member `.gz` files, including most `FASTQ.gz` files, use
+the optimized sequential zlib path by default even when `threads > 1`.
+To benchmark the rapidgzip-style marker/window path explicitly:
+
+```nim
+var config = defaultGzFastConfig()
+config.threads = 8
+config.enableMarkerPath = true
+let decoder = initGzFastDecoder(config)
+```
+
+or from the CLI:
+
+```bash
+gzfast -dc --threads 8 --marker-path reads.fastq.gz > /dev/null
+```
+
 ### Command line
 
 ```bash
 gzfast -dc --threads 8 reads.fastq.gz | downstream-tool
+gzfast -dc --threads 8 --marker-path reads.fastq.gz > /dev/null
 gzfast --verify suspicious.gz
 gzfast big.gz            # writes ./big
 ```
@@ -147,11 +168,13 @@ stderr, never into decompressed stdout.
 | Corruption, cancellation, large-stream, fuzz and sanitizer hardening | ✅ complete |
 | Profile-driven scalar optimization, BGZF grouping and benchmark automation | ✅ complete |
 
-Path-based input selects the safest available parallel route: BGZF,
-dense independent members, then the rolling marker/window path for
-ordinary gzip. Unsupported, false-positive, oversized, fixed-only, or
-otherwise unsuitable regions bridge through the authoritative sequential
-backend from the last verified state.
+Path-based input selects the safest available route: BGZF, dense
+independent members, then the sequential zlib path. The rolling
+marker/window path for ordinary gzip is available only when
+`enableMarkerPath` or `--marker-path` is set. Unsupported,
+false-positive, oversized, fixed-only, or otherwise unsuitable marker
+regions bridge through the authoritative sequential backend from the
+last verified state.
 
 ## Guarantees and caveats
 
@@ -162,6 +185,8 @@ backend from the last verified state.
   that point (standard streaming-integrity semantics).
 * `threads` is a maximum budget, not a promise to spawn that many
   workers.
+* Ordinary single-member gzip does not use the experimental marker path
+  unless explicitly enabled.
 * The compressed file must not be modified while decoding.
 
 ## Development

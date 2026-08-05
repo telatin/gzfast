@@ -1,6 +1,6 @@
 ## GzFastDecoder: configured factory for streams and direct-output
-## decoding. Until the parallel paths land (later milestones), all
-## decoding uses the authoritative sequential path.
+## decoding. Path-based input selects BGZF, dense-member, optional
+## marker/window, or authoritative sequential decoding.
 
 import std/streams
 import ./config, ./errors, ./report, ./reader
@@ -23,7 +23,7 @@ proc initGzFastDecoder*(threads: int): GzFastDecoder =
 
 proc open*(decoder: GzFastDecoder; path: string): GzFastStream =
   ## Open `path` for forward-only decompression. Path-based input will
-  ## use parallel decoding once the parallel paths are implemented.
+  ## use the safest available path for the configured input.
   openGzFastStreamFromPath(path, decoder.config)
 
 proc openGzFast*(path: string; threads = 0;

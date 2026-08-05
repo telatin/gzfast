@@ -26,6 +26,10 @@ type
     ## Permit a correct sequential fallback when parallel decoding
     ## cannot safely continue.
     allowSequentialFallback*: bool
+    ## Enable the experimental rapidgzip-style marker/window path for
+    ## ordinary single-member gzip files. BGZF and concatenated-member
+    ## parallelism remain enabled independently of this flag.
+    enableMarkerPath*: bool
     ## Maximum accepted combined size of optional gzip header fields.
     maxHeaderSize*: int
 
@@ -40,6 +44,7 @@ proc defaultGzFastConfig*(): GzFastConfig =
     outputLimit: none(uint64),
     memoryLimit: 0,
     allowSequentialFallback: true,
+    enableMarkerPath: false,
     maxHeaderSize: 1024 * 1024
   )
 

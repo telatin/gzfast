@@ -28,3 +28,7 @@ benchmarks/generate_corpus
 
 # OS noise
 .DS_Store
+zlib-1.3.2.tar.gz
+rapidgzip-rust/
+rapidgzip
+files/*.fastq*
