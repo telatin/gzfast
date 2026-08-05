@@ -1,6 +1,6 @@
 ## gzfast command-line utility. Uses only the public library API.
 
-import std/[os, parseopt, streams, strutils, terminal]
+import std/[monotimes, os, parseopt, streams, strutils, terminal, times]
 import ./gzfast
 
 const
@@ -134,12 +134,34 @@ proc defaultOutputPath(inputPath: string): string =
     raise newException(ValueError,
       "input does not end in .gz; use -o or -c to choose an output")
 
-proc printReport(report: DecodeReport) =
+proc pathName(paths: set[DecodePath]): string =
+  for path in paths:
+    if result.len > 0: result.add('+')
+    result.add($path)
+  if result.len == 0:
+    result = "none"
+
+proc formatSeconds(value: float): string =
+  value.formatFloat(ffDecimal, 6)
+
+proc throughputMiB(report: DecodeReport; elapsedSeconds: float): float =
+  if elapsedSeconds <= 0.0:
+    0.0
+  else:
+    (report.decompressedBytes.float / (1024.0 * 1024.0)) / elapsedSeconds
+
+proc printReport(report: DecodeReport; elapsedSeconds, cpuSeconds: float) =
   stderr.writeLine("gzfast: members=" & $report.memberCount &
+    " paths=" & pathName(report.pathsUsed) &
     " compressed=" & $report.compressedBytes & "B" &
     " decompressed=" & $report.decompressedBytes & "B" &
     " crcVerified=" & $report.crcVerified &
-    " peakBuffered=" & $report.peakBufferedBytes & "B")
+    " peakWorkers=" & $report.peakWorkers &
+    " peakBuffered=" & $report.peakBufferedBytes & "B" &
+    " wall=" & elapsedSeconds.formatSeconds & "s" &
+    " cpu=" & cpuSeconds.formatSeconds & "s" &
+    " throughput=" & report.throughputMiB(elapsedSeconds).formatSeconds &
+    "MiB/s")
 
 proc mapError(e: ref GzFastError): int =
   stderr.writeLine("gzfast: error: " & e.msg &
@@ -164,13 +186,17 @@ proc main(): int =
 
   try:
     if opts.verifyOnly:
+      let wallStart = getMonoTime()
+      let cpuStart = cpuTime()
       let reader = decoder.open(opts.inputPath)
       let report = reader.finish()
       reader.close()
+      let elapsed = (getMonoTime() - wallStart).inNanoseconds.float / 1e9
+      let cpu = cpuTime() - cpuStart
       if not opts.quiet:
         stderr.writeLine("gzfast: " & opts.inputPath & ": OK")
       if opts.showStats:
-        printReport(report)
+        printReport(report, elapsed, cpu)
       return 0
 
     if opts.toStdout:
@@ -178,9 +204,13 @@ proc main(): int =
         stderr.writeLine("gzfast: refusing to write compressed-binary " &
           "output to a terminal (use -f to force)")
         return 2
+      let wallStart = getMonoTime()
+      let cpuStart = cpuTime()
       let report = decoder.decodeTo(opts.inputPath, stdout)
+      let elapsed = (getMonoTime() - wallStart).inNanoseconds.float / 1e9
+      let cpu = cpuTime() - cpuStart
       if opts.showStats:
-        printReport(report)
+        printReport(report, elapsed, cpu)
       return 0
 
     let outPath =
@@ -195,11 +225,15 @@ proc main(): int =
       stderr.writeLine("gzfast: " & outPath &
         " already exists (use -f to overwrite)")
       return 2
+    let wallStart = getMonoTime()
+    let cpuStart = cpuTime()
     let report = decompressFile(opts.inputPath, outPath, opts.config)
+    let elapsed = (getMonoTime() - wallStart).inNanoseconds.float / 1e9
+    let cpu = cpuTime() - cpuStart
     if not opts.quiet:
       stderr.writeLine("gzfast: wrote " & outPath)
     if opts.showStats:
-      printReport(report)
+      printReport(report, elapsed, cpu)
     0
   except GzFastError as e:
     mapError(e)

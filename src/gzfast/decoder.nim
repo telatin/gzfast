@@ -72,13 +72,7 @@ proc decodeTo*(decoder: GzFastDecoder; inputPath: string;
     raise newGzFastError(geOutputIo, "nil output file")
   let reader = decoder.open(inputPath)
   try:
-    var buffer = newString(decoder.config.decodedChunkSize)
-    while true:
-      let count = reader.readData(addr buffer[0], buffer.len)
-      if count == 0: break
-      if output.writeBuffer(addr buffer[0], count) != count:
-        raise newGzFastError(geOutputIo, "output file write failed")
-    reader.finish()
+    reader.drainToFile(output, decoder.config.decodedChunkSize)
   finally:
     reader.close()
 

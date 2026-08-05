@@ -186,6 +186,30 @@ proc finish*(reader: GzFastStream): DecodeReport =
     reader.markerDec.verifyRemaining()
     reader.markerDec.report()
 
+proc drainToFile*(reader: GzFastStream; output: File;
+                  fallbackBufferSize: int): DecodeReport =
+  ## Decode to an open file. The sequential backend writes directly from
+  ## its internal output buffer; parallel backends keep the generic pull
+  ## loop so output ordering remains centralized in the public reader.
+  if output.isNil:
+    raise newGzFastError(geOutputIo, "nil output file")
+  if reader.closed:
+    raise newException(IOError, "gzfast: stream is closed")
+  if reader.cancelled:
+    raise newGzFastError(geCancelled, "gzfast: decoding was cancelled")
+  case reader.backend
+  of rbSequential:
+    reader.dec.drainToFile(output)
+    reader.dec.report()
+  of rbParallelMembers, rbMarker:
+    var buffer = newString(max(fallbackBufferSize, 4096))
+    while true:
+      let count = reader.readData(addr buffer[0], buffer.len)
+      if count == 0: break
+      if output.writeBuffer(addr buffer[0], count) != count:
+        raise newGzFastError(geOutputIo, "output file write failed")
+    reader.finish()
+
 proc cancel*(reader: GzFastStream) =
   ## Stop unread work and release resources.
   if not reader.cancelled:

@@ -9,6 +9,7 @@ proc decodeLarge(path: string; expectedLength: uint64):
     tuple[crc: uint32, report: DecodeReport] =
   var config = defaultGzFastConfig()
   config.threads = 4
+  config.enableMarkerPath = true
   config.compressedGridSize = 1024
   config.inputPageSize = 4096
   config.decodedChunkSize = 1024 * 1024

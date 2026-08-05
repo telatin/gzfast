@@ -127,5 +127,10 @@ task testPackage, "Pack, install into a clean Nimble dir and compile a consumer"
 task bench, "Run benchmarks":
   exec "nim e benchmarks/run_benchmarks.nims"
 
+task benchFastq, "Build the FASTQ benchmark harness":
+  exec "nim c -d:release --threads:on --mm:orc -p:src --hints:off " &
+       "-o:benchmarks/bench_fastq benchmarks/bench_fastq.nim"
+  echo "run: benchmarks/bench_fastq FILE.fastq.gz [...]"
+
 task docs, "Generate API documentation":
   exec "nim doc --mm:orc --threads:on --project --outdir:docs src/gzfast.nim"

@@ -49,6 +49,16 @@ suite "gzfast CLI":
     check code == 0
     check output.len == int(f.length)
 
+  test "--stats reports paths, workers and throughput":
+    let (output, code) = execCmdEx(buildCli() & " --verify --stats " &
+      quoteShell(fixturePath("small_text.gz")))
+    check code == 0
+    check "paths=dpSequential" in output
+    check "peakWorkers=1" in output
+    check "wall=" in output
+    check "cpu=" in output
+    check "throughput=" in output
+
   test "--verify succeeds on valid files":
     let (_, code) = runCli( " --verify " &
       quoteShell(fixturePath("fastq.gz")))

@@ -151,7 +151,8 @@ gzfast big.gz            # writes ./big
 
 Exit codes: `0` success, `1` corrupt/truncated data, `2` usage error,
 `3` I/O error, `4` internal error. Progress and statistics always go to
-stderr, never into decompressed stdout.
+stderr, never into decompressed stdout. `--stats` includes the selected
+decode paths, peak worker count, wall/CPU time and decoded throughput.
 
 ## Current milestone status
 
@@ -199,8 +200,22 @@ nimble testSanitize  # ASan/UBSan (Linux)
 nimble fuzzSmoke     # build harnesses and run committed seeds
 nimble testPackage   # pack, clean-room install, consumer build, ldd/otool check
 nimble bench         # generated release benchmark matrix (CSV)
+nimble benchFastq    # build benchmarks/bench_fastq for real FASTQ.gz files
 nimble docs
 ```
+
+For real FASTQ measurements:
+
+```bash
+nimble benchFastq
+benchmarks/bench_fastq --repeat 3 --warmup 1 \
+  --threads 1,4,8 sample.fastq.gz
+```
+
+The FASTQ harness emits CSV rows for `gunzip`, gzfast default thread
+budgets and marker-path opt-in variants. It records file sizes,
+`pathsUsed`, decoded bytes, members, wall/user/system time, throughput,
+peak workers, peak buffered bytes and CRC32 for gzfast rows.
 
 See `ARCHITECTURE.md` for the design, `PROJECT.md` for the full
 implementation brief, `UPSTREAM.md` for pinned upstream references,

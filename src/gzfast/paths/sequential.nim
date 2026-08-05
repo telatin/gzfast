@@ -357,6 +357,23 @@ proc verifyRemaining*(dec: var SequentialDecoder) =
       return
     dec.outPos = dec.outLen
 
+proc drainToFile*(dec: var SequentialDecoder; output: File) =
+  ## Decode directly from the internal output buffer to `output`.
+  ## This avoids the extra caller-buffer copy used by Stream-style reads.
+  if output.isNil:
+    raise newGzFastError(geOutputIo, "nil output file")
+  while true:
+    dec.fillOutput()
+    let available = dec.outLen - dec.outPos
+    if available == 0:
+      if dec.state == smDone:
+        return
+      continue
+    if output.writeBuffer(addr dec.outBuf[dec.outPos], available) != available:
+      raise newGzFastError(geOutputIo, "output file write failed",
+                           dec.currentOffset(), dec.memberCount)
+    dec.outPos += available
+
 proc report*(dec: SequentialDecoder): DecodeReport =
   DecodeReport(
     compressedBytes: dec.currentOffset(),

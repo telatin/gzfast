@@ -50,15 +50,32 @@ proc readEverything(path: string; config: GzFastConfig):
     result.data.add(buffer[0 ..< count])
   result.report = input.finish()
 
+proc markerConfig(threads: int): GzFastConfig =
+  result = defaultGzFastConfig()
+  result.threads = threads
+  result.enableMarkerPath = true
+  result.compressedGridSize = 1024
+
 suite "ordinary gzip marker path":
-  test "rolling marker jobs resolve predecessor matches in order":
+  test "marker path is opt-in for ordinary gzip":
     let fixture = buildParallelMarkerFixture()
-    let path = getTempDir() / "gzfast_marker_parallel.gz"
+    let path = getTempDir() / "gzfast_marker_default_off.gz"
     writeFile(path, fixture.gzip)
     defer: removeFile(path)
     var config = defaultGzFastConfig()
     config.threads = 4
     config.compressedGridSize = 1024
+    let decoded = readEverything(path, config)
+    check decoded.data == fixture.plain
+    check decoded.report.pathsUsed == {dpSequential}
+    check decoded.report.crcVerified
+
+  test "rolling marker jobs resolve predecessor matches in order":
+    let fixture = buildParallelMarkerFixture()
+    let path = getTempDir() / "gzfast_marker_parallel.gz"
+    writeFile(path, fixture.gzip)
+    defer: removeFile(path)
+    var config = markerConfig(4)
     config.inputPageSize = 4096
     config.inFlightChunks = 4
     for workers in [2, 3, 4]:
@@ -80,9 +97,7 @@ suite "ordinary gzip marker path":
     let path = getTempDir() / "gzfast_marker_finish.gz"
     writeFile(path, fixture.gzip)
     defer: removeFile(path)
-    var config = defaultGzFastConfig()
-    config.threads = 3
-    config.compressedGridSize = 1024
+    var config = markerConfig(3)
     let input = initGzFastDecoder(config).open(path)
     var byte: char
     check input.readData(addr byte, 1) == 1
@@ -108,9 +123,7 @@ suite "ordinary gzip marker path":
     let path = getTempDir() / "gzfast_marker_false_candidate.gz"
     writeFile(path, gzipMember(raw.bytes(), payload))
     defer: removeFile(path)
-    var config = defaultGzFastConfig()
-    config.threads = 4
-    config.compressedGridSize = 1024
+    var config = markerConfig(4)
     let decoded = readEverything(path, config)
     check decoded.data == payload
     check decoded.report.crcVerified
@@ -138,9 +151,7 @@ suite "ordinary gzip marker path":
     let path = getTempDir() / "gzfast_marker_boundary_mismatch.gz"
     writeFile(path, gzipMember(raw.bytes(), plain))
     defer: removeFile(path)
-    var config = defaultGzFastConfig()
-    config.threads = 4
-    config.compressedGridSize = 1024
+    var config = markerConfig(4)
     let decoded = readEverything(path, config)
     check decoded.data == plain
     check decoded.report.crcVerified
@@ -155,9 +166,7 @@ suite "ordinary gzip marker path":
     let path = getTempDir() / "gzfast_marker_bad_crc.gz"
     writeFile(path, corrupt)
     defer: removeFile(path)
-    var config = defaultGzFastConfig()
-    config.threads = 4
-    config.compressedGridSize = 1024
+    var config = markerConfig(4)
     let input = initGzFastDecoder(config).open(path)
     defer: input.close()
     var buffer = newString(512)
@@ -172,9 +181,7 @@ suite "ordinary gzip marker path":
     let path = getTempDir() / "gzfast_marker_close.gz"
     writeFile(path, fixture.gzip)
     defer: removeFile(path)
-    var config = defaultGzFastConfig()
-    config.threads = 4
-    config.compressedGridSize = 1024
+    var config = markerConfig(4)
     for _ in 0 ..< 20:
       let input = initGzFastDecoder(config).open(path)
       var byte: char
@@ -186,9 +193,7 @@ suite "ordinary gzip marker path":
     let path = getTempDir() / "gzfast_marker_limit.gz"
     writeFile(path, fixture.gzip)
     defer: removeFile(path)
-    var config = defaultGzFastConfig()
-    config.threads = 4
-    config.compressedGridSize = 1024
+    var config = markerConfig(4)
     config.outputLimit = some(3000'u64)
     let input = initGzFastDecoder(config).open(path)
     defer: input.close()
