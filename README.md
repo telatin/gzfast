@@ -210,12 +210,17 @@ For real FASTQ measurements:
 nimble benchFastq
 benchmarks/bench_fastq --repeat 3 --warmup 1 \
   --threads 1,4,8 sample.fastq.gz
+benchmarks/bench_fastq --summary fastq-bench.csv > fastq-summary.csv
 ```
 
 The FASTQ harness emits CSV rows for `gunzip`, gzfast default thread
 budgets and marker-path opt-in variants. It records file sizes,
 `pathsUsed`, decoded bytes, members, wall/user/system time, throughput,
 peak workers, peak buffered bytes and CRC32 for gzfast rows.
+`--summary` reads a captured harness CSV and emits one aggregate CSV row
+per dataset/variant with mean/stdev/min/max wall time, resource means,
+speedup versus `gunzip`, speedup versus the best default gzfast run for
+that dataset, and marker/default same-thread wall-time ratios.
 
 See `ARCHITECTURE.md` for the design, `PROJECT.md` for the full
 implementation brief, `UPSTREAM.md` for pinned upstream references,
