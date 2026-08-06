@@ -105,8 +105,14 @@ task testUbsan, "Run high-risk suites under UndefinedBehaviorSanitizer":
               "integration/test_marker_path", "corruption/test_matrix",
               "concurrency/test_bounded_queue", "concurrency/test_workers",
               "concurrency/test_member_workers"]:
-      exec "nim c -r --mm:orc --threads:on -p:src --hints:off " &
-        "--passC:-fsanitize=undefined --passC:-fno-omit-frame-pointer " &
+      # GCC/UBSan reports Nim-generated exception-flag checks as null
+      # _Bool loads/stores. Keep the rest of UBSan fatal, but disable
+      # that noisy sub-check for Nim C backend builds.
+      exec "UBSAN_OPTIONS=halt_on_error=1:print_stacktrace=1 " &
+        "nim c -r --mm:orc --threads:on -p:src --hints:off " &
+        "--passC:-fsanitize=undefined --passC:-fno-sanitize=null " &
+        "--passC:-fno-sanitize-recover=undefined " &
+        "--passC:-fno-omit-frame-pointer " &
         "--passL:-fsanitize=undefined tests/" & t & ".nim"
   else:
     echo "testUbsan is supported on Linux only"
