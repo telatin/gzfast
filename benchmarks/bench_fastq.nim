@@ -2,7 +2,7 @@
 ##
 ## This measures gzfast through the library API so path selection, CRC,
 ## decoded byte counts and memory accounting are available in every row.
-## The optional gunzip baseline is wall-time only.
+## The optional gunzip/pigz baselines are wall-time only.
 
 import std/[algorithm, math, monotimes, os, osproc, parsecsv, parseopt,
             strformat, strutils, tables, times]
@@ -22,6 +22,7 @@ type
     repeats: int
     warmups: int
     includeGunzip: bool
+    includePigz: bool
     includeMarker: bool
     summaryPath: string
     threads: seq[int]
@@ -200,6 +201,9 @@ proc groupKey(dataset, variant: string): string =
 proc datasetThreadKey(dataset: string; threads: int): string =
   dataset & "\t" & $threads
 
+proc isExternalVariant(variant: string): bool =
+  variant == "gunzip" or variant.startsWith("pigz-")
+
 proc loadBenchRows(path: string): seq[BenchRow] =
   var parser: CsvParser
   parser.open(path)
@@ -288,7 +292,7 @@ proc summarizeCsv(path: string) =
       group.members = row.members
     group.paths.addUnique(row.paths)
     group.wallValues.add(row.wall)
-    let hasResourceMetrics = row.variant != "gunzip"
+    let hasResourceMetrics = not row.variant.isExternalVariant()
     if row.hasCpu and hasResourceMetrics: group.cpuValues.add(row.cpu)
     if row.hasUser and hasResourceMetrics: group.userValues.add(row.user)
     if row.hasSystem and hasResourceMetrics:
@@ -372,11 +376,12 @@ proc parseArgs(): BenchOptions =
   result.repeats = 3
   result.warmups = 1
   result.includeGunzip = true
+  result.includePigz = true
   result.includeMarker = true
   result.threads = defaultThreads
   var p = initOptParser(commandLineParams(),
     shortNoVal = {'h'},
-    longNoVal = @["help", "no-gunzip", "no-marker"])
+    longNoVal = @["help", "no-gunzip", "no-pigz", "no-marker"])
   while true:
     p.next()
     case p.kind
@@ -388,7 +393,8 @@ proc parseArgs(): BenchOptions =
       case p.key
       of "h", "help":
         echo "usage: bench_fastq [--repeat N] [--warmup N] " &
-          "[--threads 1,4,8] [--no-gunzip] [--no-marker] FILE..."
+          "[--threads 1,4,8] [--no-gunzip] [--no-pigz] " &
+          "[--no-marker] FILE..."
         echo "       bench_fastq --summary RESULTS.csv"
         quit(0)
       of "summary":
@@ -403,6 +409,8 @@ proc parseArgs(): BenchOptions =
         result.threads = parseThreads(p.val)
       of "no-gunzip":
         result.includeGunzip = false
+      of "no-pigz":
+        result.includePigz = false
       of "no-marker":
         result.includeMarker = false
       else:
@@ -422,6 +430,12 @@ proc runGunzip(path: string): tuple[wall: float; exitCode: int] =
   let wallStart = getMonoTime()
   result.exitCode = execShellCmd("gunzip -c " & quoteShell(path) &
                                  " > " & devNull)
+  result.wall = (getMonoTime() - wallStart).inNanoseconds.float / 1e9
+
+proc runPigz(path: string; threads: int): tuple[wall: float; exitCode: int] =
+  let wallStart = getMonoTime()
+  result.exitCode = execShellCmd("pigz -dc -p " & $threads & " " &
+                                 quoteShell(path) & " > " & devNull)
   result.wall = (getMonoTime() - wallStart).inNanoseconds.float / 1e9
 
 proc runGzfast(path: string; threads: int; marker: bool):
@@ -456,11 +470,10 @@ proc printHeader() =
        "paths,decoded_bytes,members,wall_s,cpu_s,user_s,system_s,mib_s," &
        "peak_workers,peak_buffered_bytes,crc32,exit_code"
 
-proc printGunzip(path: string; compressedBytes: uint64; iteration: int;
-                 wall: float; exitCode: int) =
-  echo &"{csv(path.lastPathPart)},{compressedBytes},gunzip,{iteration},0," &
-       &"false,external,0,0,{wall:.6f},,,," &
-       &",0,0,0,{exitCode}"
+proc printExternal(path: string; compressedBytes: uint64; variant: string;
+                   iteration, threads: int; wall: float; exitCode: int) =
+  echo &"{csv(path.lastPathPart)},{compressedBytes},{variant},{iteration}," &
+       &"{threads},false,external,0,0,{wall:.6f},,,,,0,0,0,{exitCode}"
 
 proc printGzfast(path: string; compressedBytes: uint64; variant: string;
                  iteration, threads: int; marker: bool;
@@ -491,11 +504,16 @@ when isMainModule:
     quit(0)
 
   printHeader()
+  let hasGunzip = options.includeGunzip and findExe("gunzip").len > 0
+  let hasPigz = options.includePigz and findExe("pigz").len > 0
   for path in options.files:
     let compressedBytes = uint64(getFileSize(path))
     for _ in 0 ..< options.warmups:
-      if options.includeGunzip and findExe("gunzip").len > 0:
+      if hasGunzip:
         discard runGunzip(path)
+      if hasPigz:
+        for threads in options.threads:
+          discard runPigz(path, threads)
       for threads in options.threads:
         discard runGzfast(path, threads, marker = false)
       if options.includeMarker:
@@ -504,10 +522,15 @@ when isMainModule:
             discard runGzfast(path, threads, marker = true)
 
     for iteration in 1 .. options.repeats:
-      if options.includeGunzip and findExe("gunzip").len > 0:
+      if hasGunzip:
         let gunzip = runGunzip(path)
-        printGunzip(path, compressedBytes, iteration,
-                    gunzip.wall, gunzip.exitCode)
+        printExternal(path, compressedBytes, "gunzip", iteration, 0,
+                      gunzip.wall, gunzip.exitCode)
+      if hasPigz:
+        for threads in options.threads:
+          let pigz = runPigz(path, threads)
+          printExternal(path, compressedBytes, "pigz-t" & $threads,
+                        iteration, threads, pigz.wall, pigz.exitCode)
       for threads in options.threads:
         let run = runGzfast(path, threads, marker = false)
         printGzfast(path, compressedBytes,

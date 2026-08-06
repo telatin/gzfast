@@ -11,8 +11,18 @@ proc run(cmd: string; workdir = ""): tuple[output: string, exitCode: int] =
              else: cmd
   execCmdEx(full, options = {poUsePath, poStdErrToStdOut})
 
+proc packageVersion(projectRoot: string): string =
+  for line in lines(projectRoot / "gzfast.nimble"):
+    let stripped = line.strip()
+    if stripped.startsWith("version"):
+      let eq = stripped.find('=')
+      doAssert eq >= 0, "malformed version line: " & stripped
+      return stripped[eq + 1 .. ^1].strip(chars = {' ', '\t', '"'})
+  raise newException(ValueError, "could not find package version")
+
 proc main() =
   let projectRoot = currentSourcePath().parentDir().parentDir().parentDir()
+  let version = packageVersion(projectRoot)
   let tmp = getTempDir() / "gzfast_pkgtest"
   removeDir(tmp)
   createDir(tmp)
@@ -22,7 +32,7 @@ proc main() =
   var r = run("nimble pack -y", projectRoot)
   doAssert r.exitCode == 0, r.output
 
-  let archive = projectRoot / "gzfast-0.1.0.tar.gz"
+  let archive = projectRoot / ("gzfast-" & version & ".tar.gz")
   doAssert fileExists(archive), "no package archive produced"
   defer: removeFile(archive)
 
@@ -31,7 +41,7 @@ proc main() =
   createDir(unpackDir)
   r = run("tar -xzf " & quoteShell(archive), unpackDir)
   doAssert r.exitCode == 0, r.output
-  let pkgDir = unpackDir / "gzfast-0.1.0"
+  let pkgDir = unpackDir / ("gzfast-" & version)
   doAssert dirExists(pkgDir)
 
   let nimbleDir = tmp / "nimble"

@@ -53,8 +53,15 @@ help:
 	@echo "  FASTQ_SUMMARY_CSV=fastq-summary.csv"
 
 clean:
-	rm -f ./gzfast
-	rm -f ./benchmarks/bench_fastq
+	rm -f ./gzfast ./gzfast_cli ./gzfast-*.tar.gz
+	rm -f ./benchmarks/bench_fastq ./benchmarks/bench_decode ./benchmarks/generate_corpus
+	rm -f ./examples/custom_limits ./examples/decompress_file
+	rm -f ./examples/stream_fastq ./examples/verify_only
+	rm -f ./fuzz/fuzz_decode ./fuzz/fuzz_header
 	rm -f "$(FASTQ_BENCH_CSV)" "$(FASTQ_SUMMARY_CSV)"
-	find . -name '*.nim' -exec sh -c 'rm -f "$${0%.nim}"' {} \;
-	find . -name '*.gz' -exec sh -c 'rm -f "$${0%.gz}"' {} \;
+	rm -rf ./nimcache ./benchmarks/generated
+	find tests/unit tests/integration tests/concurrency tests/corruption \
+		-maxdepth 1 -type f -name 'test_*' ! -name '*.nim' -delete
+	rm -f ./tests/package/test_package
+	rm -f ./tests/helpers/deflate_bits ./tests/helpers/fixtures
+	rm -f ./tests/helpers/gzip_builder ./tests/helpers/run_with_timeout

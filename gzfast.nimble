@@ -131,6 +131,7 @@ task benchFastq, "Build the FASTQ benchmark harness":
   exec "nim c -d:release --threads:on --mm:orc -p:src --hints:off " &
        "-o:benchmarks/bench_fastq benchmarks/bench_fastq.nim"
   echo "run: benchmarks/bench_fastq FILE.fastq.gz [...]"
+  echo "pigz: included automatically when pigz is on PATH; disable with --no-pigz"
   echo "summarize: benchmarks/bench_fastq --summary fastq-bench.csv > fastq-summary.csv"
 
 task docs, "Generate API documentation":

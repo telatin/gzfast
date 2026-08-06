@@ -156,6 +156,8 @@ decode paths, peak worker count, wall/CPU time and decoded throughput.
 
 ## Current milestone status
 
+Current release state: **0.1.0-alpha candidate**.
+
 | Path | Status |
 |---|---|
 | Verified sequential decoding (headers, CRC32, ISIZE, multi-member, output limit) | ✅ complete |
@@ -176,6 +178,28 @@ marker/window path for ordinary gzip is available only when
 false-positive, oversized, fixed-only, or otherwise unsuitable marker
 regions bridge through the authoritative sequential backend from the
 last verified state.
+
+## Current performance status
+
+Latest Linux FASTQ.gz measurements were run on x86-64 Linux with Nim
+2.2.10 using `make bench FASTQ_INPUTS="files/*.gz"
+FASTQ_THREADS=1,4,8`. On ordinary single-member FASTQ.gz, gzfast's
+default path stays on the optimized sequential zlib backend
+(`dpSequential`, `peak_workers=1`) and is consistently faster than
+`gunzip`.
+
+| Dataset | Compressed | Decoded | Best default gzfast | gunzip | Speedup |
+|---|---:|---:|---:|---:|---:|
+| `F5D13_S259_L001_R2_001.fastq.gz` | 5.6 MiB | 21.4 MiB | 0.094776 s (`t4`) | 0.140656 s | 1.48x |
+| `large.fastq.gz` | 78.6 MiB | 355.2 MiB | 1.265969 s (`t4`) | 1.916249 s | 1.51x |
+| `all_R1.fastq.gz` | 346.6 MiB | 1.9 GiB | 6.242879 s (`t4`) | 9.815198 s | 1.57x |
+| `largest.fastq.gz` | 877.8 MiB | 4.0 GiB | 14.732797 s (`t8`) | 22.354369 s | 1.52x |
+
+The marker/window path remains opt-in. On the same run it was slower
+than same-thread default gzfast: about 3.1x slower on the smallest file,
+about 1.12x slower on `large.fastq.gz`, about 1.04-1.05x slower on
+`all_R1.fastq.gz`, and about 1.02x slower on `largest.fastq.gz`, while
+using substantially more peak buffering.
 
 ## Guarantees and caveats
 
@@ -213,10 +237,12 @@ benchmarks/bench_fastq --repeat 3 --warmup 1 \
 benchmarks/bench_fastq --summary fastq-bench.csv > fastq-summary.csv
 ```
 
-The FASTQ harness emits CSV rows for `gunzip`, gzfast default thread
-budgets and marker-path opt-in variants. It records file sizes,
-`pathsUsed`, decoded bytes, members, wall/user/system time, throughput,
-peak workers, peak buffered bytes and CRC32 for gzfast rows.
+The FASTQ harness emits CSV rows for `gunzip`, optional `pigz` baselines
+when `pigz` is on `PATH`, gzfast default thread budgets and marker-path
+opt-in variants. It records file sizes, `pathsUsed`, decoded bytes,
+members, wall/user/system time, throughput, peak workers, peak buffered
+bytes and CRC32 for gzfast rows. Use `--no-pigz` or `--no-gunzip` to
+disable external baselines.
 `--summary` reads a captured harness CSV and emits one aggregate CSV row
 per dataset/variant with mean/stdev/min/max wall time, resource means,
 speedup versus `gunzip`, speedup versus the best default gzfast run for
