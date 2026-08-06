@@ -91,7 +91,7 @@ task testAsan, "Run high-risk suites under AddressSanitizer":
               "concurrency/test_bounded_queue", "concurrency/test_workers",
               "concurrency/test_member_workers"]:
       exec "nim c -r --mm:orc --threads:on -p:src --hints:off " &
-        "--passC:-fsanitize=address -fno-omit-frame-pointer " &
+        "--passC:-fsanitize=address --passC:-fno-omit-frame-pointer " &
         "--passL:-fsanitize=address tests/" & t & ".nim"
   else:
     echo "testAsan is supported on Linux only"
@@ -106,7 +106,7 @@ task testUbsan, "Run high-risk suites under UndefinedBehaviorSanitizer":
               "concurrency/test_bounded_queue", "concurrency/test_workers",
               "concurrency/test_member_workers"]:
       exec "nim c -r --mm:orc --threads:on -p:src --hints:off " &
-        "--passC:-fsanitize=undefined -fno-omit-frame-pointer " &
+        "--passC:-fsanitize=undefined --passC:-fno-omit-frame-pointer " &
         "--passL:-fsanitize=undefined tests/" & t & ".nim"
   else:
     echo "testUbsan is supported on Linux only"
