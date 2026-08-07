@@ -181,25 +181,29 @@ last verified state.
 
 ## Current performance status
 
-Latest Linux FASTQ.gz measurements were run on x86-64 Linux with Nim
-2.2.10 using `make bench FASTQ_INPUTS="files/*.gz"
+Latest Linux FASTQ.gz measurements were reported on x86-64 Linux with
+Nim 2.2.x using `make bench FASTQ_INPUTS="files/*.gz"
 FASTQ_THREADS=1,4,8`. On ordinary single-member FASTQ.gz, gzfast's
 default path stays on the optimized sequential zlib backend
-(`dpSequential`, `peak_workers=1`) and is consistently faster than
-`gunzip`.
+(`dpSequential`, `peak_workers=1`). It is consistently faster than
+`gunzip` and roughly matches `pigz -p 1`; multi-threaded `pigz` remains
+faster on larger ordinary gzip files.
 
-| Dataset | Compressed | Decoded | Best default gzfast | gunzip | Speedup |
-|---|---:|---:|---:|---:|---:|
-| `F5D13_S259_L001_R2_001.fastq.gz` | 5.6 MiB | 21.4 MiB | 0.094776 s (`t4`) | 0.140656 s | 1.48x |
-| `large.fastq.gz` | 78.6 MiB | 355.2 MiB | 1.265969 s (`t4`) | 1.916249 s | 1.51x |
-| `all_R1.fastq.gz` | 346.6 MiB | 1.9 GiB | 6.242879 s (`t4`) | 9.815198 s | 1.57x |
-| `largest.fastq.gz` | 877.8 MiB | 4.0 GiB | 14.732797 s (`t8`) | 22.354369 s | 1.52x |
+| Dataset | Compressed | Decoded | Best default gzfast | gunzip | vs gunzip | `pigz -p1` | Best pigz | vs best pigz |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| `F5D13_S259_L001_R2_001.fastq.gz` | 5.6 MiB | 21.4 MiB | 0.089728 s (`t8`) | 0.143128 s | 1.60x | 0.093459 s | 0.085676 s (`t8`) | 0.95x |
+| `large.fastq.gz` | 78.6 MiB | 355.2 MiB | 1.175133 s (`t8`) | 1.911206 s | 1.63x | 1.177108 s | 1.049381 s (`t8`) | 0.89x |
+| `all_R1.fastq.gz` | 346.6 MiB | 1.9 GiB | 5.863222 s (`t4`) | 9.803621 s | 1.67x | 5.895895 s | 5.172036 s (`t8`) | 0.88x |
+| `largest.fastq.gz` | 877.8 MiB | 4.0 GiB | 13.889799 s (`t4`) | 22.380970 s | 1.61x | 13.942670 s | 12.472309 s (`t8`) | 0.90x |
 
 The marker/window path remains opt-in. On the same run it was slower
 than same-thread default gzfast: about 3.1x slower on the smallest file,
 about 1.12x slower on `large.fastq.gz`, about 1.04-1.05x slower on
 `all_R1.fastq.gz`, and about 1.02x slower on `largest.fastq.gz`, while
-using substantially more peak buffering.
+using substantially more peak buffering. The next performance target is
+therefore not enabling marker mode by default, but improving true
+parallel work for independently decodable gzip layouts while preserving
+the current sequential default for single-member FASTQ.gz.
 
 ## Guarantees and caveats
 
@@ -246,7 +250,8 @@ disable external baselines.
 `--summary` reads a captured harness CSV and emits one aggregate CSV row
 per dataset/variant with mean/stdev/min/max wall time, resource means,
 speedup versus `gunzip`, speedup versus the best default gzfast run for
-that dataset, and marker/default same-thread wall-time ratios.
+that dataset, speedup versus `pigz` baselines when available, and
+marker/default same-thread wall-time ratios.
 
 See `ARCHITECTURE.md` for the design, `PROJECT.md` for the full
 implementation brief, `UPSTREAM.md` for pinned upstream references,

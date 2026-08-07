@@ -216,6 +216,11 @@ proc loadBenchRows(path: string): seq[BenchRow] =
   for column, name in parser.row:
     index[name] = column
 
+  if "wall_s" notin index and "mean_wall_s" in index:
+    raise newException(ValueError,
+      "--summary expects raw bench_fastq CSV rows with wall_s; input looks " &
+      "like an already summarized CSV: " & path)
+
   let required = ["dataset", "compressed_bytes", "variant", "threads",
                   "marker_enabled", "paths", "decoded_bytes", "members",
                   "wall_s", "cpu_s", "user_s", "system_s", "mib_s",
@@ -318,10 +323,21 @@ proc summarizeCsv(path: string) =
   var gunzipByDataset = initTable[string, float]()
   var bestDefaultByDataset = initTable[string, float]()
   var defaultByDatasetThread = initTable[string, float]()
+  var pigzByDatasetThread = initTable[string, float]()
+  var pigzT1ByDataset = initTable[string, float]()
+  var bestPigzByDataset = initTable[string, float]()
   for group in summaries:
     let avgWall = mean(group.wallValues)
     if group.variant == "gunzip":
       gunzipByDataset[group.dataset] = avgWall
+    elif group.variant.startsWith("pigz-"):
+      pigzByDatasetThread[datasetThreadKey(group.dataset, group.threads)] =
+        avgWall
+      if group.threads == 1:
+        pigzT1ByDataset[group.dataset] = avgWall
+      if group.dataset notin bestPigzByDataset or
+          avgWall < bestPigzByDataset[group.dataset]:
+        bestPigzByDataset[group.dataset] = avgWall
     elif group.variant.startsWith("gzfast") and not group.markerEnabled:
       if group.dataset notin bestDefaultByDataset or
           avgWall < bestDefaultByDataset[group.dataset]:
@@ -333,12 +349,25 @@ proc summarizeCsv(path: string) =
        "failed_runs,threads,marker_enabled,paths,mean_wall_s,sd_wall_s," &
        "min_wall_s,max_wall_s,mean_cpu_s,mean_user_s,mean_system_s," &
        "mean_mib_s,peak_workers,peak_buffered_bytes,speedup_vs_gunzip," &
-       "speedup_vs_best_default,marker_wall_ratio_vs_default"
+       "speedup_vs_pigz_t1,speedup_vs_same_thread_pigz," &
+       "speedup_vs_best_pigz,speedup_vs_best_default," &
+       "marker_wall_ratio_vs_default"
   for group in summaries:
     let avgWall = mean(group.wallValues)
     var speedupGunzip = ""
     if group.dataset in gunzipByDataset:
       speedupGunzip = fmtRatio(gunzipByDataset[group.dataset] / avgWall)
+    var speedupPigzT1 = ""
+    if group.dataset in pigzT1ByDataset:
+      speedupPigzT1 = fmtRatio(pigzT1ByDataset[group.dataset] / avgWall)
+    var speedupSameThreadPigz = ""
+    let pigzThreadKey = datasetThreadKey(group.dataset, group.threads)
+    if pigzThreadKey in pigzByDatasetThread:
+      speedupSameThreadPigz =
+        fmtRatio(pigzByDatasetThread[pigzThreadKey] / avgWall)
+    var speedupBestPigz = ""
+    if group.dataset in bestPigzByDataset:
+      speedupBestPigz = fmtRatio(bestPigzByDataset[group.dataset] / avgWall)
     var speedupBestDefault = ""
     if group.dataset in bestDefaultByDataset:
       speedupBestDefault =
@@ -359,7 +388,8 @@ proc summarizeCsv(path: string) =
          &"{fmtMaybe(group.cpuValues)},{fmtMaybe(group.userValues)}," &
          &"{fmtMaybe(group.systemValues)},{fmtMaybe(group.mibValues, 3)}," &
          &"{group.peakWorkers},{group.peakBufferedBytes}," &
-         &"{speedupGunzip},{speedupBestDefault},{markerRatio}"
+         &"{speedupGunzip},{speedupPigzT1},{speedupSameThreadPigz}," &
+         &"{speedupBestPigz},{speedupBestDefault},{markerRatio}"
 
 proc parseThreads(value: string): seq[int] =
   for part in value.split(','):
