@@ -138,6 +138,8 @@ task benchFastq, "Build the FASTQ benchmark harness":
        "-o:benchmarks/bench_fastq benchmarks/bench_fastq.nim"
   echo "run: benchmarks/bench_fastq FILE.fastq.gz [...]"
   echo "pigz: included automatically when pigz is on PATH; disable with --no-pigz"
+  echo "modes: --modes api,cli-null,cli-file,pipe-wc"
+  echo "marker: disabled by default; enable with --marker"
   echo "summarize: benchmarks/bench_fastq --summary fastq-bench.csv > fastq-summary.csv"
 
 task docs, "Generate API documentation":

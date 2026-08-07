@@ -1,8 +1,10 @@
-## FASTQ-oriented benchmark harness.
+## FASTQ-oriented gzip benchmark harness.
 ##
 ## This measures gzfast through the library API so path selection, CRC,
-## decoded byte counts and memory accounting are available in every row.
-## The optional gunzip/pigz baselines are wall-time only.
+## decoded byte counts and memory accounting are available in API rows.
+## CLI and external-tool modes are wall-time only. The harness accepts any
+## gzip-compatible input; FASTQ is the primary production target, not an
+## assumption baked into the measurement loop.
 
 import std/[algorithm, math, monotimes, os, osproc, parsecsv, parseopt,
             strformat, strutils, tables, times]
@@ -16,6 +18,10 @@ when defined(posix):
 const
   defaultThreads = @[1, 4, 8]
   devNull = when defined(windows): "NUL" else: "/dev/null"
+  modeApi = "api-read-crc"
+  modeCliNull = "cli-stdout-null"
+  modeCliFile = "cli-file-output"
+  modePipeWc = "cli-pipe-wc"
 
 type
   BenchOptions = object
@@ -25,6 +31,10 @@ type
     includePigz: bool
     includeMarker: bool
     summaryPath: string
+    gzfastBin: string
+    outputDir: string
+    workloadOverride: string
+    modes: seq[string]
     threads: seq[int]
     files: seq[string]
 
@@ -34,6 +44,8 @@ type
 
   BenchRow = object
     dataset: string
+    workload: string
+    mode: string
     compressedBytes: uint64
     variant: string
     threads: int
@@ -56,6 +68,8 @@ type
 
   SummaryGroup = object
     dataset: string
+    workload: string
+    mode: string
     compressedBytes: uint64
     decodedBytes: uint64
     members: int
@@ -195,14 +209,91 @@ proc fmtRatio(value: float): string =
   else:
     fmtFloat(value, 4)
 
-proc groupKey(dataset, variant: string): string =
-  dataset & "\t" & variant
+proc groupKey(dataset, workload, mode, variant: string): string =
+  dataset & "\t" & workload & "\t" & mode & "\t" & variant
+
+proc datasetModeKey(dataset, mode: string): string =
+  dataset & "\t" & mode
 
 proc datasetThreadKey(dataset: string; threads: int): string =
   dataset & "\t" & $threads
 
+proc datasetModeThreadKey(dataset, mode: string; threads: int): string =
+  dataset & "\t" & mode & "\t" & $threads
+
 proc isExternalVariant(variant: string): bool =
   variant == "gunzip" or variant.startsWith("pigz-")
+
+proc defaultModeForVariant(variant: string): string =
+  if variant.isExternalVariant:
+    modeCliNull
+  elif variant.startsWith("gzfast-cli-null"):
+    modeCliNull
+  elif variant.startsWith("gzfast-cli-file"):
+    modeCliFile
+  elif variant.startsWith("gzfast-pipe-wc") or
+       variant.startsWith("gzfast-cli-pipe-wc"):
+    modePipeWc
+  else:
+    modeApi
+
+proc classifyWorkload*(path: string): string =
+  ## Coarse workload class for filtering summaries. This intentionally uses
+  ## names/layout, not FASTQ parsing, so arbitrary gzip inputs stay valid.
+  let lower = path.toLowerAscii()
+  let name = path.lastPathPart.toLowerAscii()
+  let looksFastq = name.endsWith(".fastq.gz") or name.endsWith(".fq.gz") or
+                   name.endsWith(".fastq.bgz") or name.endsWith(".fq.bgz") or
+                   (name.contains("fastq") and
+                    (name.endsWith(".gz") or name.endsWith(".bgz")))
+  let looksBgzf = lower.contains("bgzf") or name.endsWith(".bgz")
+  let looksConcat = lower.contains("concat") or lower.contains("multimember") or
+                    lower.contains("multi-member") or lower.contains("members")
+  if looksFastq and looksBgzf:
+    "fastq-bgzf"
+  elif looksFastq and looksConcat:
+    "fastq-concat-gzip"
+  elif looksFastq:
+    "fastq-gzip"
+  elif looksBgzf:
+    "bgzf-gzip"
+  elif looksConcat:
+    "concat-gzip"
+  elif lower.contains("stored"):
+    "stored-gzip"
+  elif lower.contains("random"):
+    "random-gzip"
+  elif lower.contains("log") or lower.contains("text") or
+       lower.contains("json") or lower.contains("tsv"):
+    "text-gzip"
+  elif name.endsWith(".gz") or name.endsWith(".bgz"):
+    "gzip"
+  else:
+    "unknown"
+
+proc canonicalMode(value: string): string =
+  case value.strip().toLowerAscii()
+  of "api", "api-read", "api-read-crc", "library":
+    modeApi
+  of "cli-null", "cli-stdout", "cli-stdout-null", "stdout-null":
+    modeCliNull
+  of "cli-file", "cli-output", "cli-file-output", "file-output":
+    modeCliFile
+  of "pipe-wc", "cli-pipe-wc", "wc":
+    modePipeWc
+  else:
+    raise newException(ValueError, "unknown benchmark mode: " & value)
+
+proc parseModes(value: string): seq[string] =
+  for part in value.split(','):
+    let stripped = part.strip()
+    if stripped.len == 0:
+      continue
+    let mode = canonicalMode(stripped)
+    if mode notin result:
+      result.add(mode)
+  if result.len == 0:
+    raise newException(ValueError, "no benchmark modes given")
 
 proc loadBenchRows(path: string): seq[BenchRow] =
   var parser: CsvParser
@@ -232,10 +323,16 @@ proc loadBenchRows(path: string): seq[BenchRow] =
   while parser.readRow():
     var row: BenchRow
     row.dataset = field(parser.row, index, "dataset")
+    row.workload =
+      if "workload" in index: field(parser.row, index, "workload")
+      else: "unknown"
     row.compressedBytes =
       parseUint64Field(field(parser.row, index, "compressed_bytes"),
                        "compressed_bytes")
     row.variant = field(parser.row, index, "variant")
+    row.mode =
+      if "mode" in index: field(parser.row, index, "mode")
+      else: defaultModeForVariant(row.variant)
     row.threads = parseIntField(field(parser.row, index, "threads"),
                                 "threads")
     row.markerEnabled =
@@ -281,9 +378,11 @@ proc summarizeCsv(path: string) =
 
   var groups = initTable[string, SummaryGroup]()
   for row in rows:
-    let key = groupKey(row.dataset, row.variant)
+    let key = groupKey(row.dataset, row.workload, row.mode, row.variant)
     if key notin groups:
       groups[key] = SummaryGroup(dataset: row.dataset,
+                                 workload: row.workload,
+                                 mode: row.mode,
                                  compressedBytes: row.compressedBytes,
                                  variant: row.variant,
                                  threads: row.threads,
@@ -297,7 +396,7 @@ proc summarizeCsv(path: string) =
       group.members = row.members
     group.paths.addUnique(row.paths)
     group.wallValues.add(row.wall)
-    let hasResourceMetrics = not row.variant.isExternalVariant()
+    let hasResourceMetrics = row.mode == modeApi
     if row.hasCpu and hasResourceMetrics: group.cpuValues.add(row.cpu)
     if row.hasUser and hasResourceMetrics: group.userValues.add(row.user)
     if row.hasSystem and hasResourceMetrics:
@@ -315,14 +414,18 @@ proc summarizeCsv(path: string) =
   for _, group in groups:
     summaries.add(group)
   summaries.sort(proc(a, b: SummaryGroup): int =
-    result = cmp(a.dataset, b.dataset)
+    result = cmp(a.workload, b.workload)
+    if result == 0:
+      result = cmp(a.dataset, b.dataset)
+    if result == 0:
+      result = cmp(a.mode, b.mode)
     if result == 0:
       result = cmp(a.variant, b.variant)
   )
 
   var gunzipByDataset = initTable[string, float]()
-  var bestDefaultByDataset = initTable[string, float]()
-  var defaultByDatasetThread = initTable[string, float]()
+  var bestDefaultByDatasetMode = initTable[string, float]()
+  var defaultByDatasetModeThread = initTable[string, float]()
   var pigzByDatasetThread = initTable[string, float]()
   var pigzT1ByDataset = initTable[string, float]()
   var bestPigzByDataset = initTable[string, float]()
@@ -339,19 +442,20 @@ proc summarizeCsv(path: string) =
           avgWall < bestPigzByDataset[group.dataset]:
         bestPigzByDataset[group.dataset] = avgWall
     elif group.variant.startsWith("gzfast") and not group.markerEnabled:
-      if group.dataset notin bestDefaultByDataset or
-          avgWall < bestDefaultByDataset[group.dataset]:
-        bestDefaultByDataset[group.dataset] = avgWall
-      defaultByDatasetThread[datasetThreadKey(group.dataset, group.threads)] =
-        avgWall
+      let defaultKey = datasetModeKey(group.dataset, group.mode)
+      if defaultKey notin bestDefaultByDatasetMode or
+          avgWall < bestDefaultByDatasetMode[defaultKey]:
+        bestDefaultByDatasetMode[defaultKey] = avgWall
+      defaultByDatasetModeThread[datasetModeThreadKey(group.dataset,
+        group.mode, group.threads)] = avgWall
 
-  echo "dataset,compressed_bytes,decoded_bytes,members,variant,runs," &
-       "failed_runs,threads,marker_enabled,paths,mean_wall_s,sd_wall_s," &
-       "min_wall_s,max_wall_s,mean_cpu_s,mean_user_s,mean_system_s," &
-       "mean_mib_s,peak_workers,peak_buffered_bytes,speedup_vs_gunzip," &
-       "speedup_vs_pigz_t1,speedup_vs_same_thread_pigz," &
-       "speedup_vs_best_pigz,speedup_vs_best_default," &
-       "marker_wall_ratio_vs_default"
+  echo "dataset,workload,mode,compressed_bytes,decoded_bytes,members," &
+       "variant,runs,failed_runs,threads,marker_enabled,paths," &
+       "mean_wall_s,sd_wall_s,min_wall_s,max_wall_s,mean_cpu_s," &
+       "mean_user_s,mean_system_s,mean_mib_s,peak_workers," &
+       "peak_buffered_bytes,speedup_vs_gunzip,speedup_vs_pigz_t1," &
+       "speedup_vs_same_thread_pigz,speedup_vs_best_pigz," &
+       "speedup_vs_best_default,marker_wall_ratio_vs_default"
   for group in summaries:
     let avgWall = mean(group.wallValues)
     var speedupGunzip = ""
@@ -369,19 +473,22 @@ proc summarizeCsv(path: string) =
     if group.dataset in bestPigzByDataset:
       speedupBestPigz = fmtRatio(bestPigzByDataset[group.dataset] / avgWall)
     var speedupBestDefault = ""
-    if group.dataset in bestDefaultByDataset:
+    let defaultModeKey = datasetModeKey(group.dataset, group.mode)
+    if defaultModeKey in bestDefaultByDatasetMode:
       speedupBestDefault =
-        fmtRatio(bestDefaultByDataset[group.dataset] / avgWall)
+        fmtRatio(bestDefaultByDatasetMode[defaultModeKey] / avgWall)
     var markerRatio = ""
     if group.markerEnabled:
-      let defaultKey = datasetThreadKey(group.dataset, group.threads)
-      if defaultKey in defaultByDatasetThread:
-        markerRatio = fmtRatio(avgWall / defaultByDatasetThread[defaultKey])
+      let defaultKey = datasetModeThreadKey(group.dataset, group.mode,
+                                            group.threads)
+      if defaultKey in defaultByDatasetModeThread:
+        markerRatio =
+          fmtRatio(avgWall / defaultByDatasetModeThread[defaultKey])
 
-    echo &"{csv(group.dataset)},{group.compressedBytes}," &
-         &"{group.decodedBytes},{group.members},{group.variant}," &
-         &"{group.wallValues.len},{group.failedRuns},{group.threads}," &
-         &"{group.markerEnabled},{csv(joined(group.paths))}," &
+    echo &"{csv(group.dataset)},{group.workload},{group.mode}," &
+         &"{group.compressedBytes},{group.decodedBytes},{group.members}," &
+         &"{group.variant},{group.wallValues.len},{group.failedRuns}," &
+         &"{group.threads},{group.markerEnabled},{csv(joined(group.paths))}," &
          &"{fmtFloat(avgWall)},{fmtFloat(stddev(group.wallValues))}," &
          &"{fmtFloat(minValue(group.wallValues))}," &
          &"{fmtFloat(maxValue(group.wallValues))}," &
@@ -407,11 +514,14 @@ proc parseArgs(): BenchOptions =
   result.warmups = 1
   result.includeGunzip = true
   result.includePigz = true
-  result.includeMarker = true
+  result.includeMarker = false
+  result.gzfastBin = "./gzfast"
+  result.outputDir = getTempDir() / "gzfast-bench-output"
+  result.modes = @[modeApi]
   result.threads = defaultThreads
   var p = initOptParser(commandLineParams(),
     shortNoVal = {'h'},
-    longNoVal = @["help", "no-gunzip", "no-pigz", "no-marker"])
+    longNoVal = @["help", "no-gunzip", "no-pigz", "marker", "no-marker"])
   while true:
     p.next()
     case p.kind
@@ -424,8 +534,16 @@ proc parseArgs(): BenchOptions =
       of "h", "help":
         echo "usage: bench_fastq [--repeat N] [--warmup N] " &
           "[--threads 1,4,8] [--no-gunzip] [--no-pigz] " &
-          "[--no-marker] FILE..."
+          "[--marker] [--modes api,cli-null,cli-file,pipe-wc] " &
+          "[--gzfast-bin ./gzfast] [--output-dir DIR] " &
+          "[--workload LABEL] FILE..."
         echo "       bench_fastq --summary RESULTS.csv"
+        echo ""
+        echo "modes:"
+        echo "  api       library read loop with CRC accounting (default)"
+        echo "  cli-null  gzfast -dc FILE > /dev/null"
+        echo "  cli-file  gzfast FILE writing a temporary output file"
+        echo "  pipe-wc   gzfast -dc FILE | wc -c"
         quit(0)
       of "summary":
         if p.val.len == 0:
@@ -437,10 +555,26 @@ proc parseArgs(): BenchOptions =
         result.warmups = parseInt(p.val)
       of "threads":
         result.threads = parseThreads(p.val)
+      of "modes":
+        result.modes = parseModes(p.val)
+      of "gzfast-bin":
+        if p.val.len == 0:
+          raise newException(ValueError, "--gzfast-bin requires a path")
+        result.gzfastBin = p.val
+      of "output-dir":
+        if p.val.len == 0:
+          raise newException(ValueError, "--output-dir requires a directory")
+        result.outputDir = p.val
+      of "workload":
+        if p.val.len == 0:
+          raise newException(ValueError, "--workload requires a label")
+        result.workloadOverride = p.val
       of "no-gunzip":
         result.includeGunzip = false
       of "no-pigz":
         result.includePigz = false
+      of "marker":
+        result.includeMarker = true
       of "no-marker":
         result.includeMarker = false
       else:
@@ -456,17 +590,67 @@ proc parseArgs(): BenchOptions =
   if result.files.len == 0:
     raise newException(ValueError, "no input files given")
 
-proc runGunzip(path: string): tuple[wall: float; exitCode: int] =
+proc executableAvailable(path: string): bool =
+  if fileExists(path):
+    true
+  else:
+    findExe(path).len > 0
+
+proc runCommand(command: string): tuple[wall: float; exitCode: int] =
   let wallStart = getMonoTime()
-  result.exitCode = execShellCmd("gunzip -c " & quoteShell(path) &
-                                 " > " & devNull)
+  result.exitCode = execShellCmd(command)
   result.wall = (getMonoTime() - wallStart).inNanoseconds.float / 1e9
 
+proc runGunzip(path: string): tuple[wall: float; exitCode: int] =
+  runCommand("gunzip -c " & quoteShell(path) & " > " & devNull)
+
 proc runPigz(path: string; threads: int): tuple[wall: float; exitCode: int] =
-  let wallStart = getMonoTime()
-  result.exitCode = execShellCmd("pigz -dc -p " & $threads & " " &
-                                 quoteShell(path) & " > " & devNull)
-  result.wall = (getMonoTime() - wallStart).inNanoseconds.float / 1e9
+  runCommand("pigz -dc -p " & $threads & " " & quoteShell(path) &
+             " > " & devNull)
+
+proc gzfastBaseCommand(bin, path: string; threads: int; marker: bool;
+                       toStdout: bool): string =
+  result = quoteShell(bin) & " --threads " & $threads
+  if marker:
+    result.add(" --marker-path")
+  if toStdout:
+    result.add(" -dc")
+  result.add(" " & quoteShell(path))
+
+proc temporaryOutputPath(outputDir, path, variant: string;
+                         iteration: int): string =
+  outputDir / (path.lastPathPart & "." & variant & "." & $iteration & ".out")
+
+proc cleanupOutput(path: string) =
+  if fileExists(path):
+    try:
+      removeFile(path)
+    except OSError:
+      discard
+
+proc runGzfastCli(path, bin, mode: string; threads, iteration: int;
+                  outputDir: string; marker = false):
+    tuple[wall: float; exitCode: int] =
+  case mode
+  of modeCliNull:
+    result = runCommand(gzfastBaseCommand(bin, path, threads, marker,
+                                          toStdout = true) & " > " & devNull)
+  of modePipeWc:
+    result = runCommand(gzfastBaseCommand(bin, path, threads, marker,
+                                          toStdout = true) &
+                        " | wc -c > " & devNull)
+  of modeCliFile:
+    createDir(outputDir)
+    let variant = "gzfast-cli-file-t" & $threads
+    let outPath = temporaryOutputPath(outputDir, path, variant, iteration)
+    cleanupOutput(outPath)
+    let command = quoteShell(bin) & " --quiet --force --threads " & $threads &
+      (if marker: " --marker-path" else: "") &
+      " --output " & quoteShell(outPath) & " " & quoteShell(path)
+    result = runCommand(command)
+    cleanupOutput(outPath)
+  else:
+    raise newException(ValueError, "unsupported gzfast CLI mode: " & mode)
 
 proc runGzfast(path: string; threads: int; marker: bool):
     tuple[wall: float; cpu: UsageSample; bytes: uint64; crc: uint32;
@@ -496,22 +680,26 @@ proc throughput(bytes: uint64; wall: float): float =
   else: (bytes.float / (1024.0 * 1024.0)) / wall
 
 proc printHeader() =
-  echo "dataset,compressed_bytes,variant,iteration,threads,marker_enabled," &
-       "paths,decoded_bytes,members,wall_s,cpu_s,user_s,system_s,mib_s," &
-       "peak_workers,peak_buffered_bytes,crc32,exit_code"
+  echo "dataset,workload,mode,compressed_bytes,variant,iteration,threads," &
+       "marker_enabled,paths,decoded_bytes,members,wall_s,cpu_s,user_s," &
+       "system_s,mib_s,peak_workers,peak_buffered_bytes,crc32,exit_code"
 
-proc printExternal(path: string; compressedBytes: uint64; variant: string;
-                   iteration, threads: int; wall: float; exitCode: int) =
-  echo &"{csv(path.lastPathPart)},{compressedBytes},{variant},{iteration}," &
-       &"{threads},false,external,0,0,{wall:.6f},,,,,0,0,0,{exitCode}"
+proc printExternal(path, workload, mode: string; compressedBytes: uint64;
+                   variant: string; iteration, threads: int; wall: float;
+                   exitCode: int; paths = "external") =
+  echo &"{csv(path.lastPathPart)},{workload},{mode},{compressedBytes}," &
+       &"{variant},{iteration},{threads},false,{paths},0,0,{wall:.6f}," &
+       &",,,,0,0,0,{exitCode}"
 
-proc printGzfast(path: string; compressedBytes: uint64; variant: string;
+proc printGzfast(path, workload: string; compressedBytes: uint64;
+                 variant: string;
                  iteration, threads: int; marker: bool;
                  run: tuple[wall: float; cpu: UsageSample; bytes: uint64;
                             crc: uint32; report: DecodeReport]) =
   let cpuTotal = run.cpu.user + run.cpu.system
-  echo &"{csv(path.lastPathPart)},{compressedBytes},{variant},{iteration}," &
-       &"{threads},{marker},{pathName(run.report.pathsUsed)}," &
+  echo &"{csv(path.lastPathPart)},{workload},{modeApi},{compressedBytes}," &
+       &"{variant},{iteration},{threads},{marker}," &
+       &"{pathName(run.report.pathsUsed)}," &
        &"{run.bytes},{run.report.memberCount},{run.wall:.6f}," &
        &"{cpuTotal:.6f},{run.cpu.user:.6f},{run.cpu.system:.6f}," &
        &"{throughput(run.bytes, run.wall):.3f},{run.report.peakWorkers}," &
@@ -536,7 +724,22 @@ when isMainModule:
   printHeader()
   let hasGunzip = options.includeGunzip and findExe("gunzip").len > 0
   let hasPigz = options.includePigz and findExe("pigz").len > 0
+  let needsGzfastBin = modeCliNull in options.modes or
+                       modeCliFile in options.modes or
+                       modePipeWc in options.modes
+  if needsGzfastBin and not executableAvailable(options.gzfastBin):
+    stderr.writeLine("bench_fastq: gzfast binary not found: " &
+                     options.gzfastBin)
+    quit(2)
+  let hasWc = when defined(windows): false else: findExe("wc").len > 0
+  if modePipeWc in options.modes and not hasWc:
+    stderr.writeLine("bench_fastq: wc not found; pipe-wc mode is unavailable")
+    quit(2)
+
   for path in options.files:
+    let workload =
+      if options.workloadOverride.len > 0: options.workloadOverride
+      else: classifyWorkload(path)
     let compressedBytes = uint64(getFileSize(path))
     for _ in 0 ..< options.warmups:
       if hasGunzip:
@@ -544,32 +747,56 @@ when isMainModule:
       if hasPigz:
         for threads in options.threads:
           discard runPigz(path, threads)
-      for threads in options.threads:
-        discard runGzfast(path, threads, marker = false)
-      if options.includeMarker:
+      if modeApi in options.modes:
         for threads in options.threads:
-          if threads > 1:
-            discard runGzfast(path, threads, marker = true)
+          discard runGzfast(path, threads, marker = false)
+        if options.includeMarker:
+          for threads in options.threads:
+            if threads > 1:
+              discard runGzfast(path, threads, marker = true)
+      for mode in options.modes:
+        if mode == modeApi:
+          continue
+        for threads in options.threads:
+          discard runGzfastCli(path, options.gzfastBin, mode, threads, 0,
+                               options.outputDir)
 
     for iteration in 1 .. options.repeats:
       if hasGunzip:
         let gunzip = runGunzip(path)
-        printExternal(path, compressedBytes, "gunzip", iteration, 0,
-                      gunzip.wall, gunzip.exitCode)
+        printExternal(path, workload, modeCliNull, compressedBytes, "gunzip",
+                      iteration, 0, gunzip.wall, gunzip.exitCode)
       if hasPigz:
         for threads in options.threads:
           let pigz = runPigz(path, threads)
-          printExternal(path, compressedBytes, "pigz-t" & $threads,
-                        iteration, threads, pigz.wall, pigz.exitCode)
-      for threads in options.threads:
-        let run = runGzfast(path, threads, marker = false)
-        printGzfast(path, compressedBytes,
-                    "gzfast-t" & $threads, iteration, threads,
-                    false, run)
-      if options.includeMarker:
+          printExternal(path, workload, modeCliNull, compressedBytes,
+                        "pigz-t" & $threads, iteration, threads, pigz.wall,
+                        pigz.exitCode)
+      if modeApi in options.modes:
         for threads in options.threads:
-          if threads <= 1: continue
-          let run = runGzfast(path, threads, marker = true)
-          printGzfast(path, compressedBytes,
-                      "gzfast-t" & $threads & "-marker", iteration,
-                      threads, true, run)
+          let run = runGzfast(path, threads, marker = false)
+          printGzfast(path, workload, compressedBytes,
+                      "gzfast-t" & $threads, iteration, threads,
+                      false, run)
+        if options.includeMarker:
+          for threads in options.threads:
+            if threads <= 1: continue
+            let run = runGzfast(path, threads, marker = true)
+            printGzfast(path, workload, compressedBytes,
+                        "gzfast-t" & $threads & "-marker", iteration,
+                        threads, true, run)
+      for mode in options.modes:
+        if mode == modeApi:
+          continue
+        for threads in options.threads:
+          let run = runGzfastCli(path, options.gzfastBin, mode, threads,
+                                 iteration, options.outputDir)
+          let variant =
+            case mode
+            of modeCliNull: "gzfast-cli-null-t" & $threads
+            of modeCliFile: "gzfast-cli-file-t" & $threads
+            of modePipeWc: "gzfast-cli-pipe-wc-t" & $threads
+            else: "gzfast-cli-t" & $threads
+          printExternal(path, workload, mode, compressedBytes, variant,
+                        iteration, threads, run.wall, run.exitCode,
+                        paths = "cli")

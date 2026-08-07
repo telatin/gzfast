@@ -18,6 +18,8 @@
 /benchmarks/generate_corpus
 /fastq-bench.csv
 /fastq-summary.csv
+/fastq-bench-*.csv
+/fastq-summary-*.csv
 /benchmarks/*.csv
 
 # Generated example binaries

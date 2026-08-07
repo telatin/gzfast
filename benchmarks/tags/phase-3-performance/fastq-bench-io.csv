@@ -1,0 +1,17 @@
+dataset,workload,mode,compressed_bytes,variant,iteration,threads,marker_enabled,paths,decoded_bytes,members,wall_s,cpu_s,user_s,system_s,mib_s,peak_workers,peak_buffered_bytes,crc32,exit_code
+"large.fastq.gz",fastq-gzip,cli-file-output,82407004,gzfast-cli-file-t1,1,1,false,cli,0,0,1.613978,,,,,0,0,0,0
+"large.fastq.gz",fastq-gzip,cli-file-output,82407004,gzfast-cli-file-t4,1,4,false,cli,0,0,1.522797,,,,,0,0,0,0
+"large.fastq.gz",fastq-gzip,cli-pipe-wc,82407004,gzfast-cli-pipe-wc-t1,1,1,false,cli,0,0,1.570522,,,,,0,0,0,0
+"large.fastq.gz",fastq-gzip,cli-pipe-wc,82407004,gzfast-cli-pipe-wc-t4,1,4,false,cli,0,0,1.477510,,,,,0,0,0,0
+"large.fastq.gz",fastq-gzip,cli-file-output,82407004,gzfast-cli-file-t1,2,1,false,cli,0,0,1.473674,,,,,0,0,0,0
+"large.fastq.gz",fastq-gzip,cli-file-output,82407004,gzfast-cli-file-t4,2,4,false,cli,0,0,1.468145,,,,,0,0,0,0
+"large.fastq.gz",fastq-gzip,cli-pipe-wc,82407004,gzfast-cli-pipe-wc-t1,2,1,false,cli,0,0,1.484245,,,,,0,0,0,0
+"large.fastq.gz",fastq-gzip,cli-pipe-wc,82407004,gzfast-cli-pipe-wc-t4,2,4,false,cli,0,0,1.500476,,,,,0,0,0,0
+"largest.fastq.gz",fastq-gzip,cli-file-output,920480739,gzfast-cli-file-t1,1,1,false,cli,0,0,19.203891,,,,,0,0,0,0
+"largest.fastq.gz",fastq-gzip,cli-file-output,920480739,gzfast-cli-file-t4,1,4,false,cli,0,0,16.905296,,,,,0,0,0,0
+"largest.fastq.gz",fastq-gzip,cli-pipe-wc,920480739,gzfast-cli-pipe-wc-t1,1,1,false,cli,0,0,16.916637,,,,,0,0,0,0
+"largest.fastq.gz",fastq-gzip,cli-pipe-wc,920480739,gzfast-cli-pipe-wc-t4,1,4,false,cli,0,0,16.798963,,,,,0,0,0,0
+"largest.fastq.gz",fastq-gzip,cli-file-output,920480739,gzfast-cli-file-t1,2,1,false,cli,0,0,17.446769,,,,,0,0,0,0
+"largest.fastq.gz",fastq-gzip,cli-file-output,920480739,gzfast-cli-file-t4,2,4,false,cli,0,0,16.899934,,,,,0,0,0,0
+"largest.fastq.gz",fastq-gzip,cli-pipe-wc,920480739,gzfast-cli-pipe-wc-t1,2,1,false,cli,0,0,17.285478,,,,,0,0,0,0
+"largest.fastq.gz",fastq-gzip,cli-pipe-wc,920480739,gzfast-cli-pipe-wc-t4,2,4,false,cli,0,0,17.435772,,,,,0,0,0,0
