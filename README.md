@@ -236,22 +236,50 @@ For real FASTQ measurements:
 
 ```bash
 nimble benchFastq
+make bench BENCH_INPUTS="files/*.gz" BENCH_THREADS=1,4,8 \
+  BENCH_MODES=api,cli-null,cli-file,pipe-wc
 benchmarks/bench_fastq --repeat 3 --warmup 1 \
   --threads 1,4,8 sample.fastq.gz
+benchmarks/bench_fastq --repeat 3 --warmup 1 \
+  --threads 1,4,8 --modes api,cli-null,cli-file,pipe-wc \
+  ordinary.fastq.gz bgzf.fastq.gz concat.fastq.gz generic.gz
 benchmarks/bench_fastq --summary fastq-bench.csv > fastq-summary.csv
 ```
 
+Recommended production benchmark mix:
+
+* ordinary single-member FASTQ.gz files at several sizes;
+* BGZF FASTQ or BGZF-like gzip blocks to exercise independent-member
+  scaling;
+* concatenated-member FASTQ.gz to test member-parallel scheduling;
+* non-FASTQ gzip controls such as logs/text, repetitive data, stored
+  blocks, random-ish data and many tiny members.
+
 The FASTQ harness emits CSV rows for `gunzip`, optional `pigz` baselines
-when `pigz` is on `PATH`, gzfast default thread budgets and marker-path
-opt-in variants. It records file sizes, `pathsUsed`, decoded bytes,
-members, wall/user/system time, throughput, peak workers, peak buffered
-bytes and CRC32 for gzfast rows. Use `--no-pigz` or `--no-gunzip` to
-disable external baselines.
+when `pigz` is on `PATH`, gzfast default thread budgets, API marker-path
+opt-in variants, and optional CLI output modes. The harness accepts any
+gzip-compatible input and classifies rows with a coarse `workload` label
+such as `fastq-gzip`, `fastq-bgzf`, `fastq-concat-gzip`, `bgzf-gzip`,
+`concat-gzip`, `stored-gzip` or `gzip`; FASTQ is the production target,
+not a hard-coded assumption.
+
+`--modes` accepts:
+
+* `api`: library read loop with decoded-byte, CRC, path and memory
+  accounting.
+* `cli-null`: `gzfast -dc FILE > /dev/null`.
+* `cli-file`: `gzfast FILE` writing a temporary output file.
+* `pipe-wc`: `gzfast -dc FILE | wc -c`.
+
+The harness records file sizes, `pathsUsed`, decoded bytes, members,
+wall/user/system time, throughput, peak workers, peak buffered bytes and
+CRC32 for API rows. CLI and external-tool rows are wall-time only. Use
+`--no-pigz` or `--no-gunzip` to disable external baselines.
 `--summary` reads a captured harness CSV and emits one aggregate CSV row
 per dataset/variant with mean/stdev/min/max wall time, resource means,
 speedup versus `gunzip`, speedup versus the best default gzfast run for
-that dataset, speedup versus `pigz` baselines when available, and
-marker/default same-thread wall-time ratios.
+that dataset and output mode, speedup versus `pigz` baselines when
+available, and marker/default same-thread wall-time ratios.
 
 See `ARCHITECTURE.md` for the design, `PROJECT.md` for the full
 implementation brief, `UPSTREAM.md` for pinned upstream references,
