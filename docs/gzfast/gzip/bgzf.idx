@@ -1,0 +1,8 @@
+nimTitle	bgzf	gzfast/gzip/bgzf.html	module src/gzfast/gzip/bgzf		0
+nim	blsOk	gzfast/gzip/bgzf.html#blsOk	BgzfLinkStatus.blsOk		7
+nim	blsEof	gzfast/gzip/bgzf.html#blsEof	BgzfLinkStatus.blsEof		7
+nim	blsNotBgzf	gzfast/gzip/bgzf.html#blsNotBgzf	BgzfLinkStatus.blsNotBgzf		7
+nim	blsInvalid	gzfast/gzip/bgzf.html#blsInvalid	BgzfLinkStatus.blsInvalid		7
+nim	BgzfLinkStatus	gzfast/gzip/bgzf.html#BgzfLinkStatus	enum BgzfLinkStatus		7
+nim	BgzfLink	gzfast/gzip/bgzf.html#BgzfLink	object BgzfLink		13
+nim	inspectBgzfLink	gzfast/gzip/bgzf.html#inspectBgzfLink,ReadAtSource,uint64,int	proc inspectBgzfLink(source: ReadAtSource; offset: uint64; maxHeaderSize: int): BgzfLink		18

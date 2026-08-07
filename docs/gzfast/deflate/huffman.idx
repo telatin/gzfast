@@ -1,0 +1,18 @@
+nimTitle	huffman	gzfast/deflate/huffman.html	module src/gzfast/deflate/huffman		0
+nim	HuffmanTableSize	gzfast/deflate/huffman.html#HuffmanTableSize	const HuffmanTableSize		6
+nim	InvalidHuffmanEntry	gzfast/deflate/huffman.html#InvalidHuffmanEntry	const InvalidHuffmanEntry		7
+nim	hbsOk	gzfast/deflate/huffman.html#hbsOk	HuffmanBuildStatus.hbsOk		11
+nim	hbsEmpty	gzfast/deflate/huffman.html#hbsEmpty	HuffmanBuildStatus.hbsEmpty		11
+nim	hbsLengthTooLong	gzfast/deflate/huffman.html#hbsLengthTooLong	HuffmanBuildStatus.hbsLengthTooLong		11
+nim	hbsSymbolTooLarge	gzfast/deflate/huffman.html#hbsSymbolTooLarge	HuffmanBuildStatus.hbsSymbolTooLarge		11
+nim	hbsOversubscribed	gzfast/deflate/huffman.html#hbsOversubscribed	HuffmanBuildStatus.hbsOversubscribed		11
+nim	hbsIncomplete	gzfast/deflate/huffman.html#hbsIncomplete	HuffmanBuildStatus.hbsIncomplete		11
+nim	hbsCollision	gzfast/deflate/huffman.html#hbsCollision	HuffmanBuildStatus.hbsCollision		11
+nim	HuffmanBuildStatus	gzfast/deflate/huffman.html#HuffmanBuildStatus	enum HuffmanBuildStatus		11
+nim	HuffmanTable	gzfast/deflate/huffman.html#HuffmanTable	object HuffmanTable		20
+nim	reverseLowBits	gzfast/deflate/huffman.html#reverseLowBits,uint32,int	proc reverseLowBits(value: uint32; count: int): uint32		25
+nim	buildHuffman	gzfast/deflate/huffman.html#buildHuffman,HuffmanTable,openArray[uint8]	proc buildHuffman(table: var HuffmanTable; lengths: openArray[uint8];\n             allowEmpty = false): HuffmanBuildStatus		37
+nim	tryDecode	gzfast/deflate/huffman.html#tryDecode,HuffmanTable,BitReader,uint16	proc tryDecode(table: HuffmanTable; reader: var BitReader; symbol: var uint16): bool		92
+nim	fixedLiteralLengths	gzfast/deflate/huffman.html#fixedLiteralLengths	proc fixedLiteralLengths(): array[FixedLiteralCodes, uint8]		109
+nim	fixedDistanceLengths	gzfast/deflate/huffman.html#fixedDistanceLengths	proc fixedDistanceLengths(): array[MaxDistanceCodes, uint8]		115
+nim	buildFixedTrees	gzfast/deflate/huffman.html#buildFixedTrees,HuffmanTable,HuffmanTable	proc buildFixedTrees(literal, distance: var HuffmanTable): bool		118

@@ -1,0 +1,13 @@
+nimTitle	decoder	gzfast/decoder.html	module src/gzfast/decoder		0
+nim	GzFastDecoder	gzfast/decoder.html#GzFastDecoder	type GzFastDecoder		9
+nim	initGzFastDecoder	gzfast/decoder.html#initGzFastDecoder,GzFastConfig	proc initGzFastDecoder(config: GzFastConfig): GzFastDecoder		12
+nim	initGzFastDecoder	gzfast/decoder.html#initGzFastDecoder	proc initGzFastDecoder(): GzFastDecoder		16
+nim	initGzFastDecoder	gzfast/decoder.html#initGzFastDecoder,int	proc initGzFastDecoder(threads: int): GzFastDecoder		19
+nim	open	gzfast/decoder.html#open,GzFastDecoder,string	proc open(decoder: GzFastDecoder; path: string): GzFastStream		24
+nim	openGzFast	gzfast/decoder.html#openGzFast,string,int,int64	proc openGzFast(path: string; threads = 0; memoryLimit: int64 = 0): GzFastStream		29
+nim	openGzFastSequential	gzfast/decoder.html#openGzFastSequential,Stream	proc openGzFastSequential(input: Stream; config = defaultGzFastConfig()): GzFastStream		37
+nim	decodeTo	gzfast/decoder.html#decodeTo,GzFastDecoder,string,Stream	proc decodeTo(decoder: GzFastDecoder; inputPath: string; output: Stream): DecodeReport		46
+nim	decodeTo	gzfast/decoder.html#decodeTo,GzFastDecoder,string,File	proc decodeTo(decoder: GzFastDecoder; inputPath: string; output: File): DecodeReport		68
+nim	decompressFile	gzfast/decoder.html#decompressFile,string,string	proc decompressFile(inputPath: string; outputPath: string;\n               config = defaultGzFastConfig()): DecodeReport		79
+nimgrp	initgzfastdecoder	gzfast/decoder.html#initGzFastDecoder-procs-all	proc		12
+nimgrp	decodeto	gzfast/decoder.html#decodeTo-procs-all	proc		46

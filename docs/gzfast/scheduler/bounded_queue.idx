@@ -1,0 +1,23 @@
+nimTitle	bounded_queue	gzfast/scheduler/bounded_queue.html	module src/gzfast/scheduler/bounded_queue		0
+nim	qsOk	gzfast/scheduler/bounded_queue.html#qsOk	QueueStatus.qsOk		10
+nim	qsClosed	gzfast/scheduler/bounded_queue.html#qsClosed	QueueStatus.qsClosed		10
+nim	qsCancelled	gzfast/scheduler/bounded_queue.html#qsCancelled	QueueStatus.qsCancelled		10
+nim	qsEmpty	gzfast/scheduler/bounded_queue.html#qsEmpty	QueueStatus.qsEmpty		10
+nim	qsFull	gzfast/scheduler/bounded_queue.html#qsFull	QueueStatus.qsFull		10
+nim	QueueStatus	gzfast/scheduler/bounded_queue.html#QueueStatus	enum QueueStatus		10
+nim	CancellationToken	gzfast/scheduler/bounded_queue.html#CancellationToken	object CancellationToken		17
+nim	BoundedQueue	gzfast/scheduler/bounded_queue.html#BoundedQueue	object BoundedQueue		20
+nim	initCancellationToken	gzfast/scheduler/bounded_queue.html#initCancellationToken,CancellationToken	proc initCancellationToken(token: var CancellationToken)		29
+nim	requestCancel	gzfast/scheduler/bounded_queue.html#requestCancel,CancellationToken	proc requestCancel(token: var CancellationToken)		32
+nim	isCancelled	gzfast/scheduler/bounded_queue.html#isCancelled,CancellationToken	proc isCancelled(token: var CancellationToken): bool		35
+nim	initBoundedQueue	gzfast/scheduler/bounded_queue.html#initBoundedQueue,BoundedQueue[T],int	proc initBoundedQueue[T](queue: var BoundedQueue[T]; capacity: int)		41
+nim	wakeAll	gzfast/scheduler/bounded_queue.html#wakeAll,BoundedQueue[T]	proc wakeAll[T](queue: var BoundedQueue[T])		58
+nim	close	gzfast/scheduler/bounded_queue.html#close,BoundedQueue[T]	proc close[T](queue: var BoundedQueue[T])		69
+nim	push	gzfast/scheduler/bounded_queue.html#push,BoundedQueue[T],T,ptr.CancellationToken	proc push[T](queue: var BoundedQueue[T]; item: T;\n        cancellation: ptr CancellationToken = nil): QueueStatus		81
+nim	pop	gzfast/scheduler/bounded_queue.html#pop,BoundedQueue[T],T,ptr.CancellationToken	proc pop[T](queue: var BoundedQueue[T]; item: var T;\n       cancellation: ptr CancellationToken = nil): QueueStatus		100
+nim	tryPush	gzfast/scheduler/bounded_queue.html#tryPush,BoundedQueue[T],T	proc tryPush[T](queue: var BoundedQueue[T]; item: T): QueueStatus		120
+nim	tryPop	gzfast/scheduler/bounded_queue.html#tryPop,BoundedQueue[T],T	proc tryPop[T](queue: var BoundedQueue[T]; item: var T): QueueStatus		135
+nim	len	gzfast/scheduler/bounded_queue.html#len,BoundedQueue[T]	proc len[T](queue: var BoundedQueue[T]): int		149
+nim	capacity	gzfast/scheduler/bounded_queue.html#capacity,BoundedQueue[T]	proc capacity[T](queue: BoundedQueue[T]): int		156
+nim	isClosed	gzfast/scheduler/bounded_queue.html#isClosed,BoundedQueue[T]	proc isClosed[T](queue: var BoundedQueue[T]): bool		159
+nim	deinitBoundedQueue	gzfast/scheduler/bounded_queue.html#deinitBoundedQueue,BoundedQueue[T]	proc deinitBoundedQueue[T](queue: var BoundedQueue[T])		166

@@ -1,0 +1,2 @@
+nimTitle	bgzf	gzfast/paths/bgzf.html	module src/gzfast/paths/bgzf		0
+nim	planBgzfJob	gzfast/paths/bgzf.html#planBgzfJob,ReadAtSource,uint64,uint64,int	proc planBgzfJob(source: ReadAtSource; offset, ordinal: uint64; maxHeaderSize: int): tuple[\n    status: BgzfLinkStatus, job: DecodeJob]		8

@@ -1,0 +1,14 @@
+nimTitle	bitreader	gzfast/deflate/bitreader.html	module src/gzfast/deflate/bitreader		0
+nim	BitReaderPageCapacity	gzfast/deflate/bitreader.html#BitReaderPageCapacity	const BitReaderPageCapacity		10
+nim	MaxBitReadWidth	gzfast/deflate/bitreader.html#MaxBitReadWidth	const MaxBitReadWidth		11
+nim	BitReader	gzfast/deflate/bitreader.html#BitReader	object BitReader		14
+nim	initBitReader	gzfast/deflate/bitreader.html#initBitReader,ReadAtSource,uint64	proc initBitReader(source: ReadAtSource; startBit = 0'u64;\n              pageSize = BitReaderPageCapacity): BitReader		66
+nim	isValid	gzfast/deflate/bitreader.html#isValid,BitReader	proc isValid(reader: BitReader): bool		86
+nim	position	gzfast/deflate/bitreader.html#position,BitReader	proc position(reader: BitReader): uint64		89
+nim	remainingBits	gzfast/deflate/bitreader.html#remainingBits,BitReader	proc remainingBits(reader: BitReader): uint64		92
+nim	tryPeekBits	gzfast/deflate/bitreader.html#tryPeekBits,BitReader,int,uint32	proc tryPeekBits(reader: var BitReader; count: int; value: var uint32): bool		96
+nim	tryPeekBitsPadded	gzfast/deflate/bitreader.html#tryPeekBitsPadded,BitReader,int,uint32,int	proc tryPeekBitsPadded(reader: var BitReader; count: int; value: var uint32;\n                  available: var int): bool		109
+nim	tryReadBits	gzfast/deflate/bitreader.html#tryReadBits,BitReader,int,uint32	proc tryReadBits(reader: var BitReader; count: int; value: var uint32): bool		127
+nim	tryAdvance	gzfast/deflate/bitreader.html#tryAdvance,BitReader,int	proc tryAdvance(reader: var BitReader; count: int): bool		138
+nim	alignToByte	gzfast/deflate/bitreader.html#alignToByte,BitReader	proc alignToByte(reader: var BitReader): bool		142
+nim	tryReadByte	gzfast/deflate/bitreader.html#tryReadByte,BitReader,byte	proc tryReadByte(reader: var BitReader; value: var byte): bool		146

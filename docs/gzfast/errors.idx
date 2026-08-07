@@ -1,0 +1,15 @@
+nimTitle	errors	gzfast/errors.html	module src/gzfast/errors		0
+nim	geInputIo	gzfast/errors.html#geInputIo	GzFastErrorKind.geInputIo		4
+nim	geOutputIo	gzfast/errors.html#geOutputIo	GzFastErrorKind.geOutputIo		4
+nim	geInvalidHeader	gzfast/errors.html#geInvalidHeader	GzFastErrorKind.geInvalidHeader		4
+nim	geInvalidDeflate	gzfast/errors.html#geInvalidDeflate	GzFastErrorKind.geInvalidDeflate		4
+nim	geTruncatedInput	gzfast/errors.html#geTruncatedInput	GzFastErrorKind.geTruncatedInput		4
+nim	geChecksumMismatch	gzfast/errors.html#geChecksumMismatch	GzFastErrorKind.geChecksumMismatch		4
+nim	geSizeMismatch	gzfast/errors.html#geSizeMismatch	GzFastErrorKind.geSizeMismatch		4
+nim	geOutputLimit	gzfast/errors.html#geOutputLimit	GzFastErrorKind.geOutputLimit		4
+nim	geCancelled	gzfast/errors.html#geCancelled	GzFastErrorKind.geCancelled		4
+nim	geInternal	gzfast/errors.html#geInternal	GzFastErrorKind.geInternal		4
+nim	GzFastErrorKind	gzfast/errors.html#GzFastErrorKind	enum GzFastErrorKind		4
+nim	GzFastError	gzfast/errors.html#GzFastError	object GzFastError		16
+nim	GzFastConfigError	gzfast/errors.html#GzFastConfigError	object GzFastConfigError		24
+nim	newGzFastError	gzfast/errors.html#newGzFastError,GzFastErrorKind,string,uint64,uint64	proc newGzFastError(kind: GzFastErrorKind; msg: string; compressedOffset: uint64 = 0;\n               memberIndex: uint64 = 0): ref GzFastError		26

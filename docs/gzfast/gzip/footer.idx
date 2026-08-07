@@ -1,0 +1,3 @@
+nimTitle	footer	gzfast/gzip/footer.html	module src/gzfast/gzip/footer		0
+nim	GzipFooter	gzfast/gzip/footer.html#GzipFooter	object GzipFooter		4
+nim	parseGzipFooter	gzfast/gzip/footer.html#parseGzipFooter,array[,byte]	proc parseGzipFooter(b: array[8, byte]): GzipFooter		8

@@ -1,0 +1,9 @@
+nimTitle	member_parallel	gzfast/paths/member_parallel.html	module src/gzfast/paths/member_parallel		0
+nim	ParallelMemberDecoder	gzfast/paths/member_parallel.html#ParallelMemberDecoder	type ParallelMemberDecoder		19
+nim	tryOpenParallelMemberDecoder	gzfast/paths/member_parallel.html#tryOpenParallelMemberDecoder,string,GzFastConfig	proc tryOpenParallelMemberDecoder(path: string; config: GzFastConfig): ParallelMemberDecoder		77
+nim	readData	gzfast/paths/member_parallel.html#readData,ParallelMemberDecoder,pointer,int	proc readData(decoder: ParallelMemberDecoder; buffer: pointer; length: int): int		322
+nim	atEnd	gzfast/paths/member_parallel.html#atEnd,ParallelMemberDecoder	proc atEnd(decoder: ParallelMemberDecoder): bool		362
+nim	verifyRemaining	gzfast/paths/member_parallel.html#verifyRemaining,ParallelMemberDecoder	proc verifyRemaining(decoder: ParallelMemberDecoder)		371
+nim	close	gzfast/paths/member_parallel.html#close,ParallelMemberDecoder	proc close(decoder: ParallelMemberDecoder)		382
+nim	report	gzfast/paths/member_parallel.html#report,ParallelMemberDecoder	proc report(decoder: ParallelMemberDecoder): DecodeReport		393
+nim	statsSnapshot	gzfast/paths/member_parallel.html#statsSnapshot,ParallelMemberDecoder	proc statsSnapshot(decoder: ParallelMemberDecoder): DecoderStats		421

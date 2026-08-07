@@ -1,0 +1,4 @@
+nimTitle	config	gzfast/config.html	module src/gzfast/config		0
+nim	GzFastConfig	gzfast/config.html#GzFastConfig	object GzFastConfig		7
+nim	defaultGzFastConfig	gzfast/config.html#defaultGzFastConfig	proc defaultGzFastConfig(): GzFastConfig		36
+nim	validate	gzfast/config.html#validate,GzFastConfig	proc validate(config: GzFastConfig)		51

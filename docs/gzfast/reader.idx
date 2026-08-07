@@ -1,0 +1,8 @@
+nimTitle	reader	gzfast/reader.html	module src/gzfast/reader		0
+nim	GzFastStream	gzfast/reader.html#GzFastStream	type GzFastStream		15
+nim	openGzFastStreamFromPath	gzfast/reader.html#openGzFastStreamFromPath,string,GzFastConfig	proc openGzFastStreamFromPath(path: string; config: GzFastConfig): GzFastStream		154
+nim	openGzFastStreamFromStream	gzfast/reader.html#openGzFastStreamFromStream,Stream,GzFastConfig	proc openGzFastStreamFromStream(input: Stream; config: GzFastConfig): GzFastStream		166
+nim	finish	gzfast/reader.html#finish,GzFastStream	proc finish(reader: GzFastStream): DecodeReport		170
+nim	drainToFile	gzfast/reader.html#drainToFile,GzFastStream,File,int	proc drainToFile(reader: GzFastStream; output: File; fallbackBufferSize: int): DecodeReport		189
+nim	cancel	gzfast/reader.html#cancel,GzFastStream	proc cancel(reader: GzFastStream)		213
+nim	stats	gzfast/reader.html#stats,GzFastStream	proc stats(reader: GzFastStream): DecoderStats		222

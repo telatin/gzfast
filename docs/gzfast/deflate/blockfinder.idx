@@ -1,0 +1,3 @@
+nimTitle	blockfinder	gzfast/deflate/blockfinder.html	module src/gzfast/deflate/blockfinder		0
+nim	DynamicCandidate	gzfast/deflate/blockfinder.html#DynamicCandidate	object DynamicCandidate		10
+nim	findNextDynamicCandidate	gzfast/deflate/blockfinder.html#findNextDynamicCandidate,ReadAtSource,uint64,uint64,DynamicHeaderWorkspace,DynamicCandidate	proc findNextDynamicCandidate(source: ReadAtSource; startBit, endBit: uint64;\n                         workspace: DynamicHeaderWorkspace;\n                         candidate: var DynamicCandidate;\n                         pageSize = BitReaderPageCapacity): bool		16

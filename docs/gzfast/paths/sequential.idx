@@ -1,0 +1,13 @@
+nimTitle	sequential	gzfast/paths/sequential.html	module src/gzfast/paths/sequential		0
+nim	SequentialDecoder	gzfast/paths/sequential.html#SequentialDecoder	object SequentialDecoder		32
+nim	openSequentialDecoder	gzfast/paths/sequential.html#openSequentialDecoder,string,GzFastConfig	proc openSequentialDecoder(path: string; config: GzFastConfig): SequentialDecoder		80
+nim	openSequentialDecoderAt	gzfast/paths/sequential.html#openSequentialDecoderAt,string,uint64,GzFastConfig	proc openSequentialDecoderAt(path: string; offset: uint64; config: GzFastConfig): SequentialDecoder		88
+nim	openSequentialDecoder	gzfast/paths/sequential.html#openSequentialDecoder,Stream,GzFastConfig	proc openSequentialDecoder(input: Stream; config: GzFastConfig): SequentialDecoder		106
+nim	close	gzfast/paths/sequential.html#close,SequentialDecoder	proc close(dec: var SequentialDecoder)		114
+nim	readData	gzfast/paths/sequential.html#readData,SequentialDecoder,pointer,int	proc readData(dec: var SequentialDecoder; buffer: pointer; bufLen: int): int		303
+nim	atEnd	gzfast/paths/sequential.html#atEnd,SequentialDecoder	proc atEnd(dec: var SequentialDecoder): bool		347
+nim	verifyRemaining	gzfast/paths/sequential.html#verifyRemaining,SequentialDecoder	proc verifyRemaining(dec: var SequentialDecoder)		352
+nim	drainToFile	gzfast/paths/sequential.html#drainToFile,SequentialDecoder,File	proc drainToFile(dec: var SequentialDecoder; output: File)		360
+nim	report	gzfast/paths/sequential.html#report,SequentialDecoder	proc report(dec: SequentialDecoder): DecodeReport		377
+nim	statsSnapshot	gzfast/paths/sequential.html#statsSnapshot,SequentialDecoder	proc statsSnapshot(dec: SequentialDecoder): DecoderStats		388
+nimgrp	opensequentialdecoder	gzfast/paths/sequential.html#openSequentialDecoder-procs-all	proc		80

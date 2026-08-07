@@ -1,0 +1,2 @@
+nimTitle	adaptive	gzfast/scheduler/adaptive.html	module src/gzfast/scheduler/adaptive		0
+nim	initialWorkerTarget	gzfast/scheduler/adaptive.html#initialWorkerTarget,int	proc initialWorkerTarget(maximum: int; availableWork = high(int)): int		5

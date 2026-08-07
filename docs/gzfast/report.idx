@@ -1,0 +1,10 @@
+nimTitle	report	gzfast/report.html	module src/gzfast/report		0
+nim	dpSequential	gzfast/report.html#dpSequential	DecodePath.dpSequential		4
+nim	dpStoredBlocks	gzfast/report.html#dpStoredBlocks	DecodePath.dpStoredBlocks		4
+nim	dpBgzf	gzfast/report.html#dpBgzf	DecodePath.dpBgzf		4
+nim	dpMultiMember	gzfast/report.html#dpMultiMember	DecodePath.dpMultiMember		4
+nim	dpMarkerWindow	gzfast/report.html#dpMarkerWindow	DecodePath.dpMarkerWindow		4
+nim	dpMixed	gzfast/report.html#dpMixed	DecodePath.dpMixed		4
+nim	DecodePath	gzfast/report.html#DecodePath	enum DecodePath		4
+nim	DecodeReport	gzfast/report.html#DecodeReport	object DecodeReport		12
+nim	DecoderStats	gzfast/report.html#DecoderStats	object DecoderStats		23

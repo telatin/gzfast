@@ -1,0 +1,12 @@
+nimTitle	marker_resolve	gzfast/deflate/marker_resolve.html	module src/gzfast/deflate/marker_resolve		0
+nim	mrsOk	gzfast/deflate/marker_resolve.html#mrsOk	MarkerResolveStatus.mrsOk		7
+nim	mrsInvalidSymbol	gzfast/deflate/marker_resolve.html#mrsInvalidSymbol	MarkerResolveStatus.mrsInvalidSymbol		7
+nim	mrsWindowTooSmall	gzfast/deflate/marker_resolve.html#mrsWindowTooSmall	MarkerResolveStatus.mrsWindowTooSmall		7
+nim	mrsAllocationFailure	gzfast/deflate/marker_resolve.html#mrsAllocationFailure	MarkerResolveStatus.mrsAllocationFailure		7
+nim	MarkerResolveStatus	gzfast/deflate/marker_resolve.html#MarkerResolveStatus	enum MarkerResolveStatus		7
+nim	ResolvedWindow	gzfast/deflate/marker_resolve.html#ResolvedWindow	object ResolvedWindow		13
+nim	initResolvedWindow	gzfast/deflate/marker_resolve.html#initResolvedWindow,openArray[byte]	proc initResolvedWindow(data: openArray[byte]): ResolvedWindow		17
+nim	asOpenArray	gzfast/deflate/marker_resolve.html#asOpenArray.t,ResolvedWindow	template asOpenArray(window: var ResolvedWindow): untyped		25
+nim	resolveMarkers	gzfast/deflate/marker_resolve.html#resolveMarkers,MarkerBuffer,ResolvedWindow,SharedBuffer,ptr.AllocationTracker	proc resolveMarkers(marked: MarkerBuffer; predecessor: ResolvedWindow;\n               output: var SharedBuffer; tracker: ptr AllocationTracker = nil): MarkerResolveStatus		45
+nim	windowAfter	gzfast/deflate/marker_resolve.html#windowAfter,ResolvedWindow,MarkerBuffer,ResolvedWindow	proc windowAfter(predecessor: ResolvedWindow; marked: MarkerBuffer;\n            outWindow: var ResolvedWindow): MarkerResolveStatus		91
+nim	advanceWindow	gzfast/deflate/marker_resolve.html#advanceWindow,ResolvedWindow,openArray[byte]	proc advanceWindow(predecessor: ResolvedWindow; decoded: openArray[byte]): ResolvedWindow		112

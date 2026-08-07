@@ -1,0 +1,29 @@
+nimTitle	marker_decode	gzfast/deflate/marker_decode.html	module src/gzfast/deflate/marker_decode		0
+nim	DeflateWindowSize	gzfast/deflate/marker_decode.html#DeflateWindowSize	const DeflateWindowSize		11
+nim	MarkerBase	gzfast/deflate/marker_decode.html#MarkerBase	const MarkerBase		12
+nim	mdsBoundary	gzfast/deflate/marker_decode.html#mdsBoundary	MarkerDecodeStatus.mdsBoundary		15
+nim	mdsStreamEnd	gzfast/deflate/marker_decode.html#mdsStreamEnd	MarkerDecodeStatus.mdsStreamEnd		15
+nim	mdsMarkerFreeBoundary	gzfast/deflate/marker_decode.html#mdsMarkerFreeBoundary	MarkerDecodeStatus.mdsMarkerFreeBoundary		15
+nim	mdsUnexpectedEof	gzfast/deflate/marker_decode.html#mdsUnexpectedEof	MarkerDecodeStatus.mdsUnexpectedEof		15
+nim	mdsInvalidBlockType	gzfast/deflate/marker_decode.html#mdsInvalidBlockType	MarkerDecodeStatus.mdsInvalidBlockType		15
+nim	mdsInvalidStoredLength	gzfast/deflate/marker_decode.html#mdsInvalidStoredLength	MarkerDecodeStatus.mdsInvalidStoredLength		15
+nim	mdsInvalidDynamicHeader	gzfast/deflate/marker_decode.html#mdsInvalidDynamicHeader	MarkerDecodeStatus.mdsInvalidDynamicHeader		15
+nim	mdsInvalidSymbol	gzfast/deflate/marker_decode.html#mdsInvalidSymbol	MarkerDecodeStatus.mdsInvalidSymbol		15
+nim	mdsInvalidDistance	gzfast/deflate/marker_decode.html#mdsInvalidDistance	MarkerDecodeStatus.mdsInvalidDistance		15
+nim	mdsOutputLimit	gzfast/deflate/marker_decode.html#mdsOutputLimit	MarkerDecodeStatus.mdsOutputLimit		15
+nim	MarkerDecodeStatus	gzfast/deflate/marker_decode.html#MarkerDecodeStatus	enum MarkerDecodeStatus		15
+nim	MarkerBuffer	gzfast/deflate/marker_decode.html#MarkerBuffer	object MarkerBuffer		27
+nim	MarkerDecoderWorkspace	gzfast/deflate/marker_decode.html#MarkerDecoderWorkspace	type MarkerDecoderWorkspace		33
+nim	MarkerDecodeResult	gzfast/deflate/marker_decode.html#MarkerDecodeResult	object MarkerDecodeResult		38
+nim	newMarkerDecoderWorkspace	gzfast/deflate/marker_decode.html#newMarkerDecoderWorkspace	proc newMarkerDecoderWorkspace(): MarkerDecoderWorkspace		46
+nim	initMarkerBuffer	gzfast/deflate/marker_decode.html#initMarkerBuffer,int,ptr.AllocationTracker	proc initMarkerBuffer(maximumSymbols: int; tracker: ptr AllocationTracker = nil): MarkerBuffer		52
+nim	release	gzfast/deflate/marker_decode.html#release,MarkerBuffer	proc release(buffer: var MarkerBuffer; expected = boWorker)		64
+nim	symbolAt	gzfast/deflate/marker_decode.html#symbolAt,MarkerBuffer,int	proc symbolAt(buffer: MarkerBuffer; index: int): uint16		68
+nim	isMarker	gzfast/deflate/marker_decode.html#isMarker,uint16	proc isMarker(symbol: uint16): bool		73
+nim	isLiteral	gzfast/deflate/marker_decode.html#isLiteral,uint16	proc isLiteral(symbol: uint16): bool		74
+nim	markerIndex	gzfast/deflate/marker_decode.html#markerIndex,uint16	proc markerIndex(symbol: uint16): int		75
+nim	appendLiteral	gzfast/deflate/marker_decode.html#appendLiteral,MarkerBuffer,byte	proc appendLiteral(buffer: var MarkerBuffer; value: byte): bool		96
+nim	copyMatch	gzfast/deflate/marker_decode.html#copyMatch,MarkerBuffer,int,int	proc copyMatch(buffer: var MarkerBuffer; distance, length: int): bool		99
+nim	copyMatchScalar	gzfast/deflate/marker_decode.html#copyMatchScalar,MarkerBuffer,int,int	proc copyMatchScalar(buffer: var MarkerBuffer; distance, length: int): bool		150
+nim	markerFreeWindow	gzfast/deflate/marker_decode.html#markerFreeWindow,MarkerBuffer,array[DeflateWindowSize,byte]	proc markerFreeWindow(buffer: MarkerBuffer;\n                 window: var array[DeflateWindowSize, byte]): bool		163
+nim	decodeMarkerChunk	gzfast/deflate/marker_decode.html#decodeMarkerChunk,ReadAtSource,uint64,uint64,int,MarkerDecoderWorkspace,ptr.AllocationTracker	proc decodeMarkerChunk(source: ReadAtSource; startBit, estimatedStopBit: uint64;\n                  maximumSymbols: int; workspace: MarkerDecoderWorkspace;\n                  tracker: ptr AllocationTracker = nil;\n                  pageSize = BitReaderPageCapacity): MarkerDecodeResult		234

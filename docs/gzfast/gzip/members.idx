@@ -1,0 +1,9 @@
+nimTitle	members	gzfast/gzip/members.html	module src/gzfast/gzip/members		0
+nim	hasOk	gzfast/gzip/members.html#hasOk	HeaderAtStatus.hasOk		8
+nim	hasInvalid	gzfast/gzip/members.html#hasInvalid	HeaderAtStatus.hasInvalid		8
+nim	hasTruncated	gzfast/gzip/members.html#hasTruncated	HeaderAtStatus.hasTruncated		8
+nim	hasTooLarge	gzfast/gzip/members.html#hasTooLarge	HeaderAtStatus.hasTooLarge		8
+nim	HeaderAtStatus	gzfast/gzip/members.html#HeaderAtStatus	enum HeaderAtStatus		8
+nim	HeaderAtResult	gzfast/gzip/members.html#HeaderAtResult	object HeaderAtResult		14
+nim	parseHeaderAt	gzfast/gzip/members.html#parseHeaderAt,ReadAtSource,uint64,int	proc parseHeaderAt(source: ReadAtSource; offset: uint64; maxHeaderSize: int): HeaderAtResult		20
+nim	scanHeaderCandidates	gzfast/gzip/members.html#scanHeaderCandidates,ReadAtSource,uint64,uint64,int,int	proc scanHeaderCandidates(source: ReadAtSource; startOffset, endOffset: uint64;\n                     maxHeaderSize, maxCandidates: int): seq[uint64]		53

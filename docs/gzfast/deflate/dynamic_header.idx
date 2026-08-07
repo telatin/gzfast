@@ -1,0 +1,16 @@
+nimTitle	dynamic_header	gzfast/deflate/dynamic_header.html	module src/gzfast/deflate/dynamic_header		0
+nim	dhsOk	gzfast/deflate/dynamic_header.html#dhsOk	DynamicHeaderStatus.dhsOk		6
+nim	dhsUnexpectedEof	gzfast/deflate/dynamic_header.html#dhsUnexpectedEof	DynamicHeaderStatus.dhsUnexpectedEof		6
+nim	dhsInvalidCounts	gzfast/deflate/dynamic_header.html#dhsInvalidCounts	DynamicHeaderStatus.dhsInvalidCounts		6
+nim	dhsInvalidPrecode	gzfast/deflate/dynamic_header.html#dhsInvalidPrecode	DynamicHeaderStatus.dhsInvalidPrecode		6
+nim	dhsInvalidRepeat	gzfast/deflate/dynamic_header.html#dhsInvalidRepeat	DynamicHeaderStatus.dhsInvalidRepeat		6
+nim	dhsRepeatOverflow	gzfast/deflate/dynamic_header.html#dhsRepeatOverflow	DynamicHeaderStatus.dhsRepeatOverflow		6
+nim	dhsMissingEndOfBlock	gzfast/deflate/dynamic_header.html#dhsMissingEndOfBlock	DynamicHeaderStatus.dhsMissingEndOfBlock		6
+nim	dhsReservedDistance	gzfast/deflate/dynamic_header.html#dhsReservedDistance	DynamicHeaderStatus.dhsReservedDistance		6
+nim	dhsInvalidLiteralTree	gzfast/deflate/dynamic_header.html#dhsInvalidLiteralTree	DynamicHeaderStatus.dhsInvalidLiteralTree		6
+nim	dhsInvalidDistanceTree	gzfast/deflate/dynamic_header.html#dhsInvalidDistanceTree	DynamicHeaderStatus.dhsInvalidDistanceTree		6
+nim	DynamicHeaderStatus	gzfast/deflate/dynamic_header.html#DynamicHeaderStatus	enum DynamicHeaderStatus		6
+nim	DynamicHeaderInfo	gzfast/deflate/dynamic_header.html#DynamicHeaderInfo	object DynamicHeaderInfo		18
+nim	DynamicHeaderWorkspace	gzfast/deflate/dynamic_header.html#DynamicHeaderWorkspace	type DynamicHeaderWorkspace		25
+nim	newDynamicHeaderWorkspace	gzfast/deflate/dynamic_header.html#newDynamicHeaderWorkspace	proc newDynamicHeaderWorkspace(): DynamicHeaderWorkspace		32
+nim	parseDynamicHeader	gzfast/deflate/dynamic_header.html#parseDynamicHeader,BitReader,DynamicHeaderWorkspace,DynamicHeaderInfo	proc parseDynamicHeader(reader: var BitReader; workspace: DynamicHeaderWorkspace;\n                   info: var DynamicHeaderInfo): DynamicHeaderStatus		42

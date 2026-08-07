@@ -1,0 +1,11 @@
+nimTitle	header	gzfast/gzip/header.html	module src/gzfast/gzip/header		0
+nim	hfNeedMore	gzfast/gzip/header.html#hfNeedMore	HeaderFeedKind.hfNeedMore		16
+nim	hfDone	gzfast/gzip/header.html#hfDone	HeaderFeedKind.hfDone		16
+nim	hfError	gzfast/gzip/header.html#hfError	HeaderFeedKind.hfError		16
+nim	HeaderFeedKind	gzfast/gzip/header.html#HeaderFeedKind	enum HeaderFeedKind		16
+nim	HeaderFeedResult	gzfast/gzip/header.html#HeaderFeedResult	object HeaderFeedResult		21
+nim	GzipHeaderParser	gzfast/gzip/header.html#GzipHeaderParser	object GzipHeaderParser		30
+nim	GzipHeaderInfo	gzfast/gzip/header.html#GzipHeaderInfo	object GzipHeaderInfo		45
+nim	initGzipHeaderParser	gzfast/gzip/header.html#initGzipHeaderParser	proc initGzipHeaderParser(): GzipHeaderParser		58
+nim	info	gzfast/gzip/header.html#info,GzipHeaderParser	proc info(p: GzipHeaderParser): GzipHeaderInfo		61
+nim	feed	gzfast/gzip/header.html#feed,GzipHeaderParser,byte,uint32	proc feed(p: var GzipHeaderParser; b: byte; crcOfByte: uint32): HeaderFeedResult		95

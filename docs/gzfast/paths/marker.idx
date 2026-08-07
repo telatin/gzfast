@@ -1,0 +1,9 @@
+nimTitle	marker	gzfast/paths/marker.html	module src/gzfast/paths/marker		0
+nim	MarkerPathDecoder	gzfast/paths/marker.html#MarkerPathDecoder	type MarkerPathDecoder		14
+nim	tryOpenMarkerPath	gzfast/paths/marker.html#tryOpenMarkerPath,string,GzFastConfig	proc tryOpenMarkerPath(path: string; config: GzFastConfig): MarkerPathDecoder		86
+nim	readData	gzfast/paths/marker.html#readData,MarkerPathDecoder,pointer,int	proc readData(decoder: MarkerPathDecoder; destination: pointer; length: int): int		393
+nim	atEnd	gzfast/paths/marker.html#atEnd,MarkerPathDecoder	proc atEnd(decoder: MarkerPathDecoder): bool		417
+nim	verifyRemaining	gzfast/paths/marker.html#verifyRemaining,MarkerPathDecoder	proc verifyRemaining(decoder: MarkerPathDecoder)		423
+nim	close	gzfast/paths/marker.html#close,MarkerPathDecoder	proc close(decoder: MarkerPathDecoder)		436
+nim	report	gzfast/paths/marker.html#report,MarkerPathDecoder	proc report(decoder: MarkerPathDecoder): DecodeReport		444
+nim	statsSnapshot	gzfast/paths/marker.html#statsSnapshot,MarkerPathDecoder	proc statsSnapshot(decoder: MarkerPathDecoder): DecoderStats		464

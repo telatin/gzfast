@@ -1,0 +1,13 @@
+nimTitle	constants	gzfast/deflate/constants.html	module src/gzfast/deflate/constants		0
+nim	MaxCodeBits	gzfast/deflate/constants.html#MaxCodeBits	const MaxCodeBits		4
+nim	MaxLiteralCodes	gzfast/deflate/constants.html#MaxLiteralCodes	const MaxLiteralCodes		5
+nim	FixedLiteralCodes	gzfast/deflate/constants.html#FixedLiteralCodes	const FixedLiteralCodes		6
+nim	MaxDistanceCodes	gzfast/deflate/constants.html#MaxDistanceCodes	const MaxDistanceCodes		7
+nim	PrecodeSymbols	gzfast/deflate/constants.html#PrecodeSymbols	const PrecodeSymbols		8
+nim	MaxCombinedCodeLengths	gzfast/deflate/constants.html#MaxCombinedCodeLengths	const MaxCombinedCodeLengths		9
+nim	EndOfBlockSymbol	gzfast/deflate/constants.html#EndOfBlockSymbol	const EndOfBlockSymbol		10
+nim	PrecodeOrder	gzfast/deflate/constants.html#PrecodeOrder	const PrecodeOrder		12
+nim	LengthBases	gzfast/deflate/constants.html#LengthBases	const LengthBases		15
+nim	LengthExtraBits	gzfast/deflate/constants.html#LengthExtraBits	const LengthExtraBits		18
+nim	DistanceBases	gzfast/deflate/constants.html#DistanceBases	const DistanceBases		22
+nim	DistanceExtraBits	gzfast/deflate/constants.html#DistanceExtraBits	const DistanceExtraBits		26

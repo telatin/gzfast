@@ -1,0 +1,15 @@
+nimTitle	coordinator	gzfast/scheduler/coordinator.html	module src/gzfast/scheduler/coordinator		0
+nim	cisAccepted	gzfast/scheduler/coordinator.html#cisAccepted	CoordinatorInsertStatus.cisAccepted		7
+nim	cisStale	gzfast/scheduler/coordinator.html#cisStale	CoordinatorInsertStatus.cisStale		7
+nim	cisOutOfWindow	gzfast/scheduler/coordinator.html#cisOutOfWindow	CoordinatorInsertStatus.cisOutOfWindow		7
+nim	cisDuplicate	gzfast/scheduler/coordinator.html#cisDuplicate	CoordinatorInsertStatus.cisDuplicate		7
+nim	CoordinatorInsertStatus	gzfast/scheduler/coordinator.html#CoordinatorInsertStatus	enum CoordinatorInsertStatus		7
+nim	OrderedCoordinator	gzfast/scheduler/coordinator.html#OrderedCoordinator	object OrderedCoordinator		13
+nim	initOrderedCoordinator	gzfast/scheduler/coordinator.html#initOrderedCoordinator,OrderedCoordinator,int,uint64	proc initOrderedCoordinator(coordinator: var OrderedCoordinator; capacity: int;\n                       firstOrdinal = 0'u64)		21
+nim	insert	gzfast/scheduler/coordinator.html#insert,OrderedCoordinator,JobResult	proc insert(coordinator: var OrderedCoordinator; incoming: var JobResult): CoordinatorInsertStatus		39
+nim	popReady	gzfast/scheduler/coordinator.html#popReady,OrderedCoordinator,JobResult	proc popReady(coordinator: var OrderedCoordinator; outResult: var JobResult): bool		58
+nim	drainAndRelease	gzfast/scheduler/coordinator.html#drainAndRelease,OrderedCoordinator	proc drainAndRelease(coordinator: var OrderedCoordinator)		71
+nim	deinitOrderedCoordinator	gzfast/scheduler/coordinator.html#deinitOrderedCoordinator,OrderedCoordinator	proc deinitOrderedCoordinator(coordinator: var OrderedCoordinator)		82
+nim	len	gzfast/scheduler/coordinator.html#len,OrderedCoordinator	proc len(coordinator: OrderedCoordinator): int		90
+nim	capacity	gzfast/scheduler/coordinator.html#capacity,OrderedCoordinator	proc capacity(coordinator: OrderedCoordinator): int		93
+nim	nextOrdinal	gzfast/scheduler/coordinator.html#nextOrdinal,OrderedCoordinator	proc nextOrdinal(coordinator: OrderedCoordinator): uint64		96

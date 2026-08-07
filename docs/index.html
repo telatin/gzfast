@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>gzfast</title>
+<link rel="stylesheet" type="text/css" href="nimdoc.out.css">
+<style>
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-background);
+    color: var(--text);
+    font-family: Lato, sans-serif;
+  }
+  .landing { text-align: center; max-width: 640px; }
+  .landing h1 { font-size: 2.5rem; font-weight: 900; margin: 0 0 0.3em; }
+  .landing .tagline { font-size: 1.1rem; margin: 0 0 1em; color: var(--hint); }
+  .landing .desc { font-size: 0.95rem; line-height: 1.5; margin: 0 0 1.2em; color: var(--text); }
+  .landing a { display: inline-block; margin: 0 0.4em; padding: 0.6em 1.4em; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.95rem; }
+  .landing .btns { margin-bottom: 1.5em; }
+  .landing .docs { background: var(--anchor); color: #fff; }
+  .landing .docs:hover { filter: brightness(1.1); }
+  .landing .repo { background: var(--third-background); color: var(--text); }
+  .landing .repo:hover { background: var(--border); }
+  pre { text-align: left; background: var(--secondary-background); border: 1px solid var(--border); border-radius: 6px; padding: 0.8em 1em; font-size: 0.85rem; overflow-x: auto; margin: 0 0 1.2em; }
+  code { font-family: "Source Code Pro", monospace; }
+  .landing .legal { font-size: 0.78rem; color: var(--hint); line-height: 1.5; }
+  .landing .legal a { display: inline; margin: 0; padding: 0; font-weight: 400; font-size: inherit; color: var(--anchor); background: none; }
+</style>
+</head>
+<body>
+<div class="landing">
+  <h1>gzfast</h1>
+  <p class="tagline">Fast, verified, multithreaded GZip decompression for Nim</p>
+  <p class="desc">
+    No external dependencies. A private copy of zlib 1.3.2 is bundled and
+    compiled into your application via Nim's inline <code>{.compile.}</code>
+    mechanism. No <code>zlib-dev</code>, no shared libraries, no CMake, no Rust.
+  </p>
+  <div class="btns">
+    <a class="docs" href="theindex.html">Documentation</a>
+    <a class="repo" href="https://github.com/telatin/gzfast">Repository</a>
+  </div>
+  <pre><code>import gzfast
+
+let input = openGzFast("reads.fastq.gz", threads = 8)
+defer: input.close()
+
+for line in input.lines:
+  discard line
+
+discard input.finish()</code></pre>
+  <p class="legal">
+    gzfast is released under the
+    <a href="https://github.com/telatin/gzfast/blob/main/LICENSE">MIT License</a>.
+    This software bundles
+    <a href="https://zlib.net/">zlib 1.3.2</a>
+    (Copyright &copy; 1995–2024 Jean-loup Gailly and Mark Adler),
+    used under the terms of the
+    <a href="https://github.com/telatin/gzfast/blob/main/src/vendor/zlib-1.3.2/README">zlib License</a>.
+  </p>
+</div>
+</body>
+</html>

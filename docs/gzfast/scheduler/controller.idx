@@ -1,0 +1,51 @@
+nimTitle	controller	gzfast/scheduler/controller.html	module src/gzfast/scheduler/controller		0
+nim	rnsOk	gzfast/scheduler/controller.html#rnsOk	RuntimeNextStatus.rnsOk		9
+nim	rnsClosed	gzfast/scheduler/controller.html#rnsClosed	RuntimeNextStatus.rnsClosed		9
+nim	rnsCancelled	gzfast/scheduler/controller.html#rnsCancelled	RuntimeNextStatus.rnsCancelled		9
+nim	rnsCoordinatorError	gzfast/scheduler/controller.html#rnsCoordinatorError	RuntimeNextStatus.rnsCoordinatorError		9
+nim	RuntimeNextStatus	gzfast/scheduler/controller.html#RuntimeNextStatus	enum RuntimeNextStatus		9
+nim	SyntheticRuntime	gzfast/scheduler/controller.html#SyntheticRuntime	type SyntheticRuntime		15
+nim	MemberRuntime	gzfast/scheduler/controller.html#MemberRuntime	type MemberRuntime		25
+nim	MarkerRuntime	gzfast/scheduler/controller.html#MarkerRuntime	type MarkerRuntime		36
+nim	initSyntheticRuntime	gzfast/scheduler/controller.html#initSyntheticRuntime,int,int,int	proc initSyntheticRuntime(workerCount, queueCapacity, reorderCapacity: int): SyntheticRuntime		47
+nim	submit	gzfast/scheduler/controller.html#submit,SyntheticRuntime,DecodeJob	proc submit(runtime: SyntheticRuntime; job: DecodeJob): QueueStatus		58
+nim	closeAdmission	gzfast/scheduler/controller.html#closeAdmission,SyntheticRuntime	proc closeAdmission(runtime: SyntheticRuntime)		61
+nim	nextOrdered	gzfast/scheduler/controller.html#nextOrdered,SyntheticRuntime,JobResult	proc nextOrdered(runtime: SyntheticRuntime; outResult: var JobResult): RuntimeNextStatus		64
+nim	joinWorkers	gzfast/scheduler/controller.html#joinWorkers,SyntheticRuntime	proc joinWorkers(runtime: SyntheticRuntime)		83
+nim	cancelAndJoin	gzfast/scheduler/controller.html#cancelAndJoin,SyntheticRuntime	proc cancelAndJoin(runtime: SyntheticRuntime)		97
+nim	deinit	gzfast/scheduler/controller.html#deinit,SyntheticRuntime	proc deinit(runtime: SyntheticRuntime)		112
+nim	allocations	gzfast/scheduler/controller.html#allocations,SyntheticRuntime	proc allocations(runtime: SyntheticRuntime): AllocationSnapshot		125
+nim	workerStats	gzfast/scheduler/controller.html#workerStats,SyntheticRuntime	proc workerStats(runtime: SyntheticRuntime): WorkerStatsSnapshot		128
+nim	initMemberRuntime	gzfast/scheduler/controller.html#initMemberRuntime,string,GzFastConfig,int,int,int	proc initMemberRuntime(path: string; config: GzFastConfig;\n                  workerCount, queueCapacity, reorderCapacity: int): MemberRuntime		131
+nim	initMemberRuntime	gzfast/scheduler/controller.html#initMemberRuntime,OwnedReadAtSource,GzFastConfig,int,int,int	proc initMemberRuntime(owner: OwnedReadAtSource; config: GzFastConfig;\n                  workerCount, queueCapacity, reorderCapacity: int): MemberRuntime		145
+nim	submit	gzfast/scheduler/controller.html#submit,MemberRuntime,DecodeJob	proc submit(runtime: MemberRuntime; job: DecodeJob): QueueStatus		160
+nim	closeAdmission	gzfast/scheduler/controller.html#closeAdmission,MemberRuntime	proc closeAdmission(runtime: MemberRuntime)		163
+nim	nextOrdered	gzfast/scheduler/controller.html#nextOrdered,MemberRuntime,JobResult	proc nextOrdered(runtime: MemberRuntime; outResult: var JobResult): RuntimeNextStatus		166
+nim	joinWorkers	gzfast/scheduler/controller.html#joinWorkers,MemberRuntime	proc joinWorkers(runtime: MemberRuntime)		184
+nim	cancelAndJoin	gzfast/scheduler/controller.html#cancelAndJoin,MemberRuntime	proc cancelAndJoin(runtime: MemberRuntime)		196
+nim	deinit	gzfast/scheduler/controller.html#deinit,MemberRuntime	proc deinit(runtime: MemberRuntime)		209
+nim	allocations	gzfast/scheduler/controller.html#allocations,MemberRuntime	proc allocations(runtime: MemberRuntime): AllocationSnapshot		223
+nim	workerStats	gzfast/scheduler/controller.html#workerStats,MemberRuntime	proc workerStats(runtime: MemberRuntime): WorkerStatsSnapshot		226
+nim	source	gzfast/scheduler/controller.html#source,MemberRuntime	proc source(runtime: MemberRuntime): ReadAtSource		229
+nim	initMarkerRuntime	gzfast/scheduler/controller.html#initMarkerRuntime,OwnedReadAtSource,GzFastConfig,int,int,int	proc initMarkerRuntime(owner: OwnedReadAtSource; config: GzFastConfig;\n                  workerCount, queueCapacity, reorderCapacity: int): MarkerRuntime		232
+nim	initMarkerRuntime	gzfast/scheduler/controller.html#initMarkerRuntime,string,GzFastConfig,int,int,int	proc initMarkerRuntime(path: string; config: GzFastConfig;\n                  workerCount, queueCapacity, reorderCapacity: int): MarkerRuntime		247
+nim	submit	gzfast/scheduler/controller.html#submit,MarkerRuntime,DecodeJob	proc submit(runtime: MarkerRuntime; job: DecodeJob): QueueStatus		258
+nim	closeAdmission	gzfast/scheduler/controller.html#closeAdmission,MarkerRuntime	proc closeAdmission(runtime: MarkerRuntime)		261
+nim	nextOrdered	gzfast/scheduler/controller.html#nextOrdered,MarkerRuntime,JobResult	proc nextOrdered(runtime: MarkerRuntime; outResult: var JobResult): RuntimeNextStatus		263
+nim	cancelAndJoin	gzfast/scheduler/controller.html#cancelAndJoin,MarkerRuntime	proc cancelAndJoin(runtime: MarkerRuntime)		290
+nim	joinWorkers	gzfast/scheduler/controller.html#joinWorkers,MarkerRuntime	proc joinWorkers(runtime: MarkerRuntime)		301
+nim	deinit	gzfast/scheduler/controller.html#deinit,MarkerRuntime	proc deinit(runtime: MarkerRuntime)		307
+nim	allocations	gzfast/scheduler/controller.html#allocations,MarkerRuntime	proc allocations(runtime: MarkerRuntime): AllocationSnapshot		319
+nim	workerStats	gzfast/scheduler/controller.html#workerStats,MarkerRuntime	proc workerStats(runtime: MarkerRuntime): WorkerStatsSnapshot		321
+nim	source	gzfast/scheduler/controller.html#source,MarkerRuntime	proc source(runtime: MarkerRuntime): ReadAtSource		323
+nimgrp	source	gzfast/scheduler/controller.html#source-procs-all	proc		229
+nimgrp	workerstats	gzfast/scheduler/controller.html#workerStats-procs-all	proc		128
+nimgrp	deinit	gzfast/scheduler/controller.html#deinit-procs-all	proc		112
+nimgrp	allocations	gzfast/scheduler/controller.html#allocations-procs-all	proc		125
+nimgrp	nextordered	gzfast/scheduler/controller.html#nextOrdered-procs-all	proc		64
+nimgrp	initmemberruntime	gzfast/scheduler/controller.html#initMemberRuntime-procs-all	proc		131
+nimgrp	initmarkerruntime	gzfast/scheduler/controller.html#initMarkerRuntime-procs-all	proc		232
+nimgrp	closeadmission	gzfast/scheduler/controller.html#closeAdmission-procs-all	proc		61
+nimgrp	submit	gzfast/scheduler/controller.html#submit-procs-all	proc		58
+nimgrp	cancelandjoin	gzfast/scheduler/controller.html#cancelAndJoin-procs-all	proc		97
+nimgrp	joinworkers	gzfast/scheduler/controller.html#joinWorkers-procs-all	proc		83

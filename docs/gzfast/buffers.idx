@@ -1,0 +1,21 @@
+nimTitle	buffers	gzfast/buffers.html	module src/gzfast/buffers		0
+nim	boNone	gzfast/buffers.html#boNone	BufferOwner.boNone		11
+nim	boWorker	gzfast/buffers.html#boWorker	BufferOwner.boWorker		11
+nim	boResultQueue	gzfast/buffers.html#boResultQueue	BufferOwner.boResultQueue		11
+nim	boCoordinator	gzfast/buffers.html#boCoordinator	BufferOwner.boCoordinator		11
+nim	boOutputQueue	gzfast/buffers.html#boOutputQueue	BufferOwner.boOutputQueue		11
+nim	boReader	gzfast/buffers.html#boReader	BufferOwner.boReader		11
+nim	BufferOwner	gzfast/buffers.html#BufferOwner	enum BufferOwner		11
+nim	AllocationTracker	gzfast/buffers.html#AllocationTracker	object AllocationTracker		19
+nim	AllocationSnapshot	gzfast/buffers.html#AllocationSnapshot	object AllocationSnapshot		25
+nim	SharedBuffer	gzfast/buffers.html#SharedBuffer	object SharedBuffer		31
+nim	initAllocationTracker	gzfast/buffers.html#initAllocationTracker,AllocationTracker	proc initAllocationTracker(tracker: var AllocationTracker)		39
+nim	snapshot	gzfast/buffers.html#snapshot,AllocationTracker	proc snapshot(tracker: var AllocationTracker): AllocationSnapshot		92
+nim	byteCapacity	gzfast/buffers.html#byteCapacity,SharedBuffer	proc byteCapacity(buffer: SharedBuffer): int		100
+nim	allocSharedBuffer	gzfast/buffers.html#allocSharedBuffer,int,int,ptr.AllocationTracker	proc allocSharedBuffer(capacity: int; elementWidth = 1; owner = boWorker;\n                  tracker: ptr AllocationTracker = nil; zeroed = false): SharedBuffer		106
+nim	setLength	gzfast/buffers.html#setLength,SharedBuffer,int	proc setLength(buffer: var SharedBuffer; length: int)		125
+nim	reserve	gzfast/buffers.html#reserve,SharedBuffer,int	proc reserve(buffer: var SharedBuffer; minimumCapacity: int;\n        maximumCapacity = high(int))		130
+nim	transfer	gzfast/buffers.html#transfer,SharedBuffer,BufferOwner,BufferOwner	proc transfer(buffer: var SharedBuffer; expected, next: BufferOwner): bool		161
+nim	take	gzfast/buffers.html#take,SharedBuffer,BufferOwner,BufferOwner	proc take(source: var SharedBuffer; expected: BufferOwner; next: BufferOwner): SharedBuffer		168
+nim	release	gzfast/buffers.html#release,SharedBuffer	proc release(buffer: var SharedBuffer; expected = boNone)		177
+nim	byteAt	gzfast/buffers.html#byteAt,SharedBuffer,int	proc byteAt(buffer: SharedBuffer; index: int): ptr byte		190

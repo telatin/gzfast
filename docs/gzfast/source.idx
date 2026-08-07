@@ -1,0 +1,9 @@
+nimTitle	source	gzfast/source.html	module src/gzfast/source		0
+nim	ReadAtProc	gzfast/source.html#ReadAtProc	type ReadAtProc		10
+nim	ReadAtSource	gzfast/source.html#ReadAtSource	object ReadAtSource		16
+nim	OwnedReadAtSource	gzfast/source.html#OwnedReadAtSource	type OwnedReadAtSource		21
+nim	openReadAtSource	gzfast/source.html#openReadAtSource,string	proc openReadAtSource(path: string): OwnedReadAtSource		60
+nim	openMemoryReadAtSource	gzfast/source.html#openMemoryReadAtSource,openArray[byte]	proc openMemoryReadAtSource(data: openArray[byte]): OwnedReadAtSource		76
+nim	close	gzfast/source.html#close,OwnedReadAtSource	proc close(owner: OwnedReadAtSource)		95
+nim	readAt	gzfast/source.html#readAt,ReadAtSource,uint64,pointer,int	proc readAt(source: ReadAtSource; offset: uint64; destination: pointer; length: int): int		102
+nim	readExactAt	gzfast/source.html#readExactAt,ReadAtSource,uint64,pointer,int	proc readExactAt(source: ReadAtSource; offset: uint64; destination: pointer;\n            length: int)		119

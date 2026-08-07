@@ -1,0 +1,8 @@
+nimTitle	block_header	gzfast/deflate/block_header.html	module src/gzfast/deflate/block_header		0
+nim	dbtStored	gzfast/deflate/block_header.html#dbtStored	DeflateBlockType.dbtStored		6
+nim	dbtFixed	gzfast/deflate/block_header.html#dbtFixed	DeflateBlockType.dbtFixed		6
+nim	dbtDynamic	gzfast/deflate/block_header.html#dbtDynamic	DeflateBlockType.dbtDynamic		6
+nim	dbtReserved	gzfast/deflate/block_header.html#dbtReserved	DeflateBlockType.dbtReserved		6
+nim	DeflateBlockType	gzfast/deflate/block_header.html#DeflateBlockType	enum DeflateBlockType		6
+nim	DeflateBlockHeader	gzfast/deflate/block_header.html#DeflateBlockHeader	object DeflateBlockHeader		12
+nim	tryReadBlockHeader	gzfast/deflate/block_header.html#tryReadBlockHeader,BitReader,DeflateBlockHeader	proc tryReadBlockHeader(reader: var BitReader; header: var DeflateBlockHeader): bool		18

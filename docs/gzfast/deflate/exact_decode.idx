@@ -1,0 +1,12 @@
+nimTitle	exact_decode	gzfast/deflate/exact_decode.html	module src/gzfast/deflate/exact_decode		0
+nim	edsBoundary	gzfast/deflate/exact_decode.html#edsBoundary	ExactDecodeStatus.edsBoundary		7
+nim	edsStreamEnd	gzfast/deflate/exact_decode.html#edsStreamEnd	ExactDecodeStatus.edsStreamEnd		7
+nim	edsUnexpectedEof	gzfast/deflate/exact_decode.html#edsUnexpectedEof	ExactDecodeStatus.edsUnexpectedEof		7
+nim	edsInvalidDeflate	gzfast/deflate/exact_decode.html#edsInvalidDeflate	ExactDecodeStatus.edsInvalidDeflate		7
+nim	edsOutputLimit	gzfast/deflate/exact_decode.html#edsOutputLimit	ExactDecodeStatus.edsOutputLimit		7
+nim	edsBoundaryMismatch	gzfast/deflate/exact_decode.html#edsBoundaryMismatch	ExactDecodeStatus.edsBoundaryMismatch		7
+nim	edsBackendError	gzfast/deflate/exact_decode.html#edsBackendError	ExactDecodeStatus.edsBackendError		7
+nim	ExactDecodeStatus	gzfast/deflate/exact_decode.html#ExactDecodeStatus	enum ExactDecodeStatus		7
+nim	ExactDecodeResult	gzfast/deflate/exact_decode.html#ExactDecodeResult	object ExactDecodeResult		16
+nim	release	gzfast/deflate/exact_decode.html#release,ExactDecodeResult	proc release(result: var ExactDecodeResult; expected = boWorker)		22
+nim	inflateExactFromBoundary	gzfast/deflate/exact_decode.html#inflateExactFromBoundary,ReadAtSource,uint64,openArray[byte],int,ptr.AllocationTracker,int	proc inflateExactFromBoundary(source: ReadAtSource; startBit: uint64;\n                         dictionary: openArray[byte]; maximumOutput: int;\n                         minimumStopBit = high(uint64); exactStop = false;\n                         tracker: ptr AllocationTracker = nil; pageSize = 4096): ExactDecodeResult		26

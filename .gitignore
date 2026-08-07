@@ -9,7 +9,6 @@
 /gzfast
 /gzfast_cli
 /gzfast-*.tar.gz
-/docs/
 
 # Generated benchmark artifacts
 /benchmarks/generated/

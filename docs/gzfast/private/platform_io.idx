@@ -1,0 +1,5 @@
+nimTitle	platform_io	gzfast/private/platform_io.html	module src/gzfast/private/platform_io		0
+nim	PlatformFileContext	gzfast/private/platform_io.html#PlatformFileContext	object PlatformFileContext		13
+nim	openPlatformFile	gzfast/private/platform_io.html#openPlatformFile,string,PlatformFileContext,uint64	proc openPlatformFile(path: string; context: var PlatformFileContext;\n                 size: var uint64): bool		16
+nim	closePlatformFile	gzfast/private/platform_io.html#closePlatformFile,PlatformFileContext	proc closePlatformFile(context: var PlatformFileContext)		29
+nim	platformReadAt	gzfast/private/platform_io.html#platformReadAt,pointer,uint64,pointer,int	proc platformReadAt(rawContext: pointer; offset: uint64; destination: pointer;\n               length: int): int		34

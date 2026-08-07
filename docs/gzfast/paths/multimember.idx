@@ -1,0 +1,2 @@
+nimTitle	multimember	gzfast/paths/multimember.html	module src/gzfast/paths/multimember		0
+nim	planMemberBatch	gzfast/paths/multimember.html#planMemberBatch,ReadAtSource,uint64,uint64,int,int,uint64	proc planMemberBatch(source: ReadAtSource; authoritativeStart: uint64;\n                scanEnd: uint64; maxHeaderSize, maxCandidates: int;\n                firstOrdinal: uint64): seq[DecodeJob]		7

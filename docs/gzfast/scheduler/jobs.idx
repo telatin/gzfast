@@ -1,0 +1,27 @@
+nimTitle	jobs	gzfast/scheduler/jobs.html	module src/gzfast/scheduler/jobs		0
+nim	jkDecodeBoundary	gzfast/scheduler/jobs.html#jkDecodeBoundary	JobKind.jkDecodeBoundary		6
+nim	jkResolveMarkers	gzfast/scheduler/jobs.html#jkResolveMarkers	JobKind.jkResolveMarkers		6
+nim	jkDecodeBgzfGroup	gzfast/scheduler/jobs.html#jkDecodeBgzfGroup	JobKind.jkDecodeBgzfGroup		6
+nim	jkDecodeMember	gzfast/scheduler/jobs.html#jkDecodeMember	JobKind.jkDecodeMember		6
+nim	jkDecodeStoredRange	gzfast/scheduler/jobs.html#jkDecodeStoredRange	JobKind.jkDecodeStoredRange		6
+nim	jkShutdown	gzfast/scheduler/jobs.html#jkShutdown	JobKind.jkShutdown		6
+nim	JobKind	gzfast/scheduler/jobs.html#JobKind	enum JobKind		6
+nim	weNone	gzfast/scheduler/jobs.html#weNone	WorkerErrorKind.weNone		14
+nim	weCancelled	gzfast/scheduler/jobs.html#weCancelled	WorkerErrorKind.weCancelled		14
+nim	weInvalidJob	gzfast/scheduler/jobs.html#weInvalidJob	WorkerErrorKind.weInvalidJob		14
+nim	weAllocation	gzfast/scheduler/jobs.html#weAllocation	WorkerErrorKind.weAllocation		14
+nim	weInvalidHeader	gzfast/scheduler/jobs.html#weInvalidHeader	WorkerErrorKind.weInvalidHeader		14
+nim	weInvalidDeflate	gzfast/scheduler/jobs.html#weInvalidDeflate	WorkerErrorKind.weInvalidDeflate		14
+nim	weTruncated	gzfast/scheduler/jobs.html#weTruncated	WorkerErrorKind.weTruncated		14
+nim	weChecksum	gzfast/scheduler/jobs.html#weChecksum	WorkerErrorKind.weChecksum		14
+nim	weSize	gzfast/scheduler/jobs.html#weSize	WorkerErrorKind.weSize		14
+nim	weOutputCap	gzfast/scheduler/jobs.html#weOutputCap	WorkerErrorKind.weOutputCap		14
+nim	weInternal	gzfast/scheduler/jobs.html#weInternal	WorkerErrorKind.weInternal		14
+nim	WorkerErrorKind	gzfast/scheduler/jobs.html#WorkerErrorKind	enum WorkerErrorKind		14
+nim	jrsOk	gzfast/scheduler/jobs.html#jrsOk	ResultStatus.jrsOk		27
+nim	jrsRejected	gzfast/scheduler/jobs.html#jrsRejected	ResultStatus.jrsRejected		27
+nim	jrsError	gzfast/scheduler/jobs.html#jrsError	ResultStatus.jrsError		27
+nim	ResultStatus	gzfast/scheduler/jobs.html#ResultStatus	enum ResultStatus		27
+nim	DecodeJob	gzfast/scheduler/jobs.html#DecodeJob	object DecodeJob		32
+nim	WorkerErrorRecord	gzfast/scheduler/jobs.html#WorkerErrorRecord	object WorkerErrorRecord		52
+nim	JobResult	gzfast/scheduler/jobs.html#JobResult	object JobResult		58
