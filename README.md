@@ -237,11 +237,14 @@ For real FASTQ measurements:
 ```bash
 nimble benchFastq
 make bench BENCH_INPUTS="files/*.gz" BENCH_THREADS=1,4,8 \
-  BENCH_MODES=api,cli-null,cli-file,pipe-wc
+  BENCH_MODES=api,cli-null
+make bench-controls
+make bench-io IO_INPUTS="files/large.fastq.gz files/largest.fastq.gz"
+make bench-exhaustive EXHAUSTIVE_INPUTS="files/*.gz"
 benchmarks/bench_fastq --repeat 3 --warmup 1 \
-  --threads 1,4,8 sample.fastq.gz
+  --threads 1,4,8 --modes api,cli-null --no-marker sample.fastq.gz
 benchmarks/bench_fastq --repeat 3 --warmup 1 \
-  --threads 1,4,8 --modes api,cli-null,cli-file,pipe-wc \
+  --threads 1,4,8 --modes api,cli-null,cli-file,pipe-wc --marker \
   ordinary.fastq.gz bgzf.fastq.gz concat.fastq.gz generic.gz
 benchmarks/bench_fastq --summary fastq-bench.csv > fastq-summary.csv
 ```
@@ -256,12 +259,12 @@ Recommended production benchmark mix:
   blocks, random-ish data and many tiny members.
 
 The FASTQ harness emits CSV rows for `gunzip`, optional `pigz` baselines
-when `pigz` is on `PATH`, gzfast default thread budgets, API marker-path
-opt-in variants, and optional CLI output modes. The harness accepts any
-gzip-compatible input and classifies rows with a coarse `workload` label
-such as `fastq-gzip`, `fastq-bgzf`, `fastq-concat-gzip`, `bgzf-gzip`,
-`concat-gzip`, `stored-gzip` or `gzip`; FASTQ is the production target,
-not a hard-coded assumption.
+when `pigz` is on `PATH`, gzfast default thread budgets, optional API
+marker-path variants, and optional CLI output modes. The harness accepts
+any gzip-compatible input and classifies rows with a coarse `workload`
+label such as `fastq-gzip`, `fastq-bgzf`, `fastq-concat-gzip`,
+`bgzf-gzip`, `concat-gzip`, `text-gzip`, `stored-gzip`, `random-gzip`
+or `gzip`; FASTQ is the production target, not a hard-coded assumption.
 
 `--modes` accepts:
 
@@ -270,6 +273,19 @@ not a hard-coded assumption.
 * `cli-null`: `gzfast -dc FILE > /dev/null`.
 * `cli-file`: `gzfast FILE` writing a temporary output file.
 * `pipe-wc`: `gzfast -dc FILE | wc -c`.
+
+Marker-path variants are disabled by default in the real-file harness
+because they are experimental and expensive; pass `--marker` when
+explicitly measuring that path. `make bench` uses the practical
+`api,cli-null` matrix. `make bench-exhaustive` restores the full
+API/CLI/file/pipe plus marker matrix, and `make bench-io` isolates file
+output and pipe-consumer overhead on selected inputs.
+
+`make bench-controls` creates deterministic generated controls under
+`benchmarks/generated`: FASTQ-shaped single-member gzip, concatenated
+FASTQ-shaped gzip, FASTQ-shaped BGZF, repeated BGZF blocks and many tiny
+members, plus line-oriented text and stored-block pseudo-random gzip
+controls.
 
 The harness records file sizes, `pathsUsed`, decoded bytes, members,
 wall/user/system time, throughput, peak workers, peak buffered bytes and
@@ -290,4 +306,3 @@ implementation brief, `UPSTREAM.md` for pinned upstream references,
 
 MIT (gzfast itself). The vendored zlib 1.3.2 is under the zlib license;
 see `THIRD_PARTY_NOTICES.md`.
-# gzfast

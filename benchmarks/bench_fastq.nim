@@ -261,6 +261,11 @@ proc classifyWorkload*(path: string): string =
     "concat-gzip"
   elif lower.contains("stored"):
     "stored-gzip"
+  elif lower.contains("random"):
+    "random-gzip"
+  elif lower.contains("log") or lower.contains("text") or
+       lower.contains("json") or lower.contains("tsv"):
+    "text-gzip"
   elif name.endsWith(".gz") or name.endsWith(".bgz"):
     "gzip"
   else:
@@ -509,14 +514,14 @@ proc parseArgs(): BenchOptions =
   result.warmups = 1
   result.includeGunzip = true
   result.includePigz = true
-  result.includeMarker = true
+  result.includeMarker = false
   result.gzfastBin = "./gzfast"
   result.outputDir = getTempDir() / "gzfast-bench-output"
   result.modes = @[modeApi]
   result.threads = defaultThreads
   var p = initOptParser(commandLineParams(),
     shortNoVal = {'h'},
-    longNoVal = @["help", "no-gunzip", "no-pigz", "no-marker"])
+    longNoVal = @["help", "no-gunzip", "no-pigz", "marker", "no-marker"])
   while true:
     p.next()
     case p.kind
@@ -529,7 +534,7 @@ proc parseArgs(): BenchOptions =
       of "h", "help":
         echo "usage: bench_fastq [--repeat N] [--warmup N] " &
           "[--threads 1,4,8] [--no-gunzip] [--no-pigz] " &
-          "[--no-marker] [--modes api,cli-null,cli-file,pipe-wc] " &
+          "[--marker] [--modes api,cli-null,cli-file,pipe-wc] " &
           "[--gzfast-bin ./gzfast] [--output-dir DIR] " &
           "[--workload LABEL] FILE..."
         echo "       bench_fastq --summary RESULTS.csv"
@@ -568,6 +573,8 @@ proc parseArgs(): BenchOptions =
         result.includeGunzip = false
       of "no-pigz":
         result.includePigz = false
+      of "marker":
+        result.includeMarker = true
       of "no-marker":
         result.includeMarker = false
       else:
