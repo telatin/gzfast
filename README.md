@@ -222,11 +222,13 @@ the current sequential default for single-member FASTQ.gz.
 
 ```bash
 nimble test          # full normal suite
+nimble testCi        # push/PR confidence suite
 nimble testFast      # unit tests only
 nimble testSlow      # extended suite
 nimble testSanitize  # ASan/UBSan (Linux)
 nimble fuzzSmoke     # build harnesses and run committed seeds
 nimble testPackage   # pack, clean-room install, consumer build, ldd/otool check
+nimble testRelease   # local pre-release validation
 nimble bench         # generated release benchmark matrix (CSV)
 nimble benchFastq    # build benchmarks/bench_fastq for real FASTQ.gz files
 nimble docs

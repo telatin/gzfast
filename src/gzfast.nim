@@ -26,6 +26,7 @@ import std/streams
 import ./gzfast/config
 import ./gzfast/errors
 import ./gzfast/report
+import ./gzfast/span
 import ./gzfast/reader
 import ./gzfast/decoder
 
@@ -35,7 +36,8 @@ export options.none, options.some, options.Option
 export GzFastConfig, defaultGzFastConfig, validate
 export GzFastError, GzFastErrorKind, GzFastConfigError
 export DecodePath, DecodeReport, DecoderStats
-export GzFastStream, finish, cancel, stats
+export DecodedSpan
+export GzFastStream, finish, cancel, stats, peekDecoded, consumeDecoded
 export GzFastDecoder, initGzFastDecoder
 export open, openGzFast, openGzFastSequential
 export decodeTo, decompressFile

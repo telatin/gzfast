@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.1.0"
+version       = "0.1.1"
 author        = "gzfast contributors"
 description   = "Fast, verified, multithreaded gzip decompression with a bundled zlib (no system libraries required)"
 license       = "MIT"
@@ -78,8 +78,19 @@ task testFast, "Run unit tests only":
             "unit/test_sequential"]:
     exec "nim c -r --mm:orc --threads:on -p:src --hints:off tests/" & t & ".nim"
 
+task testCi, "Run the push/PR confidence suite":
+  exec "nimble testFast"
+  for t in ["integration/test_api", "integration/test_cli"]:
+    exec "nim c -r --mm:orc --threads:on -p:src --hints:off tests/" & t & ".nim"
+
 task testSlow, "Run the extended/slow suite (currently the normal suite)":
   exec "nimble test"
+
+task testRelease, "Run local pre-release validation":
+  exec "nimble test"
+  exec "nimble testSanitize"
+  exec "nimble fuzzSmoke"
+  exec "nimble testPackage"
 
 task testAsan, "Run high-risk suites under AddressSanitizer":
   when defined(linux):

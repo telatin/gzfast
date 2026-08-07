@@ -51,6 +51,58 @@ suite "public API":
     check input.atEnd()
     input.close()
 
+  test "peekDecoded and consumeDecoded stream borrowed sequential spans":
+    let reference = block:
+      let input = openGzFast(fixturePath("small_text.gz"), threads = 1)
+      defer: input.close()
+      input.readAll()
+
+    let input = openGzFast(fixturePath("small_text.gz"), threads = 1)
+    var actual = newStringOfCap(reference.len)
+    while true:
+      let span = input.peekDecoded()
+      if span.len == 0:
+        break
+      check span.data != nil
+      let take = min(span.len, 17)
+      for i in 0..<take:
+        actual.add char(span.data[i])
+      input.consumeDecoded(take)
+    let report = input.finish()
+    input.close()
+    check actual == reference
+    check report.crcVerified
+    check report.decompressedBytes == uint64(reference.len)
+
+  test "peekDecoded works on parallel-backed readers":
+    let reference = block:
+      let input = openGzFast(fixturePath("bgzf.gz"), threads = 1)
+      defer: input.close()
+      input.readAll()
+
+    let input = openGzFast(fixturePath("bgzf.gz"), threads = 4)
+    var actual = newStringOfCap(reference.len)
+    while true:
+      let span = input.peekDecoded()
+      if span.len == 0:
+        break
+      for i in 0..<span.len:
+        actual.add char(span.data[i])
+      input.consumeDecoded(span.len)
+    let report = input.finish()
+    input.close()
+    check actual == reference
+    check report.crcVerified
+    check dpBgzf in report.pathsUsed
+
+  test "consumeDecoded rejects counts beyond the current span":
+    let input = openGzFast(fixturePath("small_text.gz"), threads = 1)
+    let span = input.peekDecoded()
+    check span.len > 0
+    expect ValueError:
+      input.consumeDecoded(span.len + 1)
+    input.close()
+
   test "cancel stops reading":
     let input = openGzFast(fixturePath("repetitive.gz"))
     var buf = newString(16)

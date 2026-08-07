@@ -1,10 +1,12 @@
 ## GzFastStream: a forward-only std/streams-compatible reader.
 
 import std/streams
-import ./config, ./errors, ./report
+import ./config, ./errors, ./report, ./span
 import ./paths/member_parallel
 import ./paths/marker
 import ./paths/sequential
+
+const fallbackSpanSize = 1024 * 1024
 
 type
   ReaderBackend = enum
@@ -20,43 +22,70 @@ type
     dec: SequentialDecoder
     parallelDec: ParallelMemberDecoder
     markerDec: MarkerPathDecoder
+    borrowBuf: seq[byte]
+    borrowPos, borrowLen: int
     closed: bool
     cancelled: bool
+
+proc ensureReadable(gs: GzFastStream) {.inline.} =
+  if gs.closed:
+    raise newException(IOError, "gzfast: stream is closed")
+  if gs.cancelled:
+    raise newGzFastError(geCancelled, "gzfast: decoding was cancelled")
+
+proc borrowedSpan(gs: GzFastStream): DecodedSpan {.inline.} =
+  let available = gs.borrowLen - gs.borrowPos
+  if available <= 0:
+    return DecodedSpan(data: nil, len: 0)
+  DecodedSpan(
+    data: cast[ptr UncheckedArray[byte]](addr gs.borrowBuf[gs.borrowPos]),
+    len: available
+  )
+
+proc consumeBorrowed(gs: GzFastStream; n: int) {.inline.} =
+  let available = gs.borrowLen - gs.borrowPos
+  if n < 0 or n > available:
+    raise newException(ValueError,
+      "consumeDecoded count exceeds available decoded bytes")
+  gs.borrowPos += n
+  if gs.borrowPos == gs.borrowLen:
+    gs.borrowPos = 0
+    gs.borrowLen = 0
 
 proc gsReadData(s: Stream; buffer: pointer; bufLen: int): int
     {.nimcall, gcsafe, tags: [ReadIOEffect], raises: [IOError, OSError].} =
   let gs = GzFastStream(s)
-  if gs.closed:
-    raise newException(IOError, "gzfast: stream is closed")
-  if gs.cancelled:
-    raise newGzFastError(geCancelled, "gzfast: decoding was cancelled")
+  gs.ensureReadable()
   case gs.backend
-  of rbSequential: gs.dec.readData(buffer, bufLen)
+  of rbSequential:
+    gs.dec.readData(buffer, bufLen)
   of rbParallelMembers:
     {.cast(raises: [IOError, OSError]), cast(tags: [ReadIOEffect]).}:
-      gs.parallelDec.readData(buffer, bufLen)
+      let borrowed = min(bufLen, gs.borrowLen - gs.borrowPos)
+      if borrowed > 0:
+        copyMem(buffer, addr gs.borrowBuf[gs.borrowPos], borrowed)
+        gs.consumeBorrowed(borrowed)
+        borrowed
+      else:
+        gs.parallelDec.readData(buffer, bufLen)
   of rbMarker:
     {.cast(raises: [IOError, OSError]), cast(tags: [ReadIOEffect]).}:
-      gs.markerDec.readData(buffer, bufLen)
+      let borrowed = min(bufLen, gs.borrowLen - gs.borrowPos)
+      if borrowed > 0:
+        copyMem(buffer, addr gs.borrowBuf[gs.borrowPos], borrowed)
+        gs.consumeBorrowed(borrowed)
+        borrowed
+      else:
+        gs.markerDec.readData(buffer, bufLen)
 
 proc gsReadDataStr(s: Stream; buffer: var string; slice: Slice[int]): int
     {.nimcall, gcsafe, tags: [ReadIOEffect], raises: [IOError, OSError].} =
   let gs = GzFastStream(s)
-  if gs.closed:
-    raise newException(IOError, "gzfast: stream is closed")
-  if gs.cancelled:
-    raise newGzFastError(geCancelled, "gzfast: decoding was cancelled")
   if slice.b < slice.a:
     return 0
-  case gs.backend
-  of rbSequential:
-    gs.dec.readData(addr buffer[slice.a], slice.b - slice.a + 1)
-  of rbParallelMembers:
-    {.cast(raises: [IOError, OSError]), cast(tags: [ReadIOEffect]).}:
-      gs.parallelDec.readData(addr buffer[slice.a], slice.b - slice.a + 1)
-  of rbMarker:
-    {.cast(raises: [IOError, OSError]), cast(tags: [ReadIOEffect]).}:
-      gs.markerDec.readData(addr buffer[slice.a], slice.b - slice.a + 1)
+  if buffer.len <= slice.b:
+    buffer.setLen(slice.b + 1)
+  result = gsReadData(s, addr buffer[slice.a], slice.b - slice.a + 1)
 
 proc gsAtEnd(s: Stream): bool
     {.nimcall, gcsafe, tags: [ReadIOEffect], raises: [IOError, OSError].} =
@@ -167,14 +196,52 @@ proc openGzFastStreamFromStream*(input: Stream;
                                  config: GzFastConfig): GzFastStream =
   newGzFastStream(openSequentialDecoder(input, config))
 
+proc peekDecoded*(reader: GzFastStream): DecodedSpan {.inline.} =
+  ## Return a borrowed view of decoded bytes currently available.
+  ##
+  ## For the sequential backend this points directly at the decoder output
+  ## buffer. Other backends fill a private fallback buffer so callers can use
+  ## the same pull interface without changing backend selection. The returned
+  ## pointer is invalidated by the next operation on `reader`.
+  reader.ensureReadable()
+  case reader.backend
+  of rbSequential:
+    reader.dec.peekDecoded()
+  of rbParallelMembers:
+    if reader.borrowPos < reader.borrowLen:
+      return reader.borrowedSpan()
+    if reader.borrowBuf.len == 0:
+      reader.borrowBuf = newSeq[byte](fallbackSpanSize)
+    reader.borrowPos = 0
+    reader.borrowLen = reader.parallelDec.readData(
+      addr reader.borrowBuf[0], reader.borrowBuf.len)
+    reader.borrowedSpan()
+  of rbMarker:
+    if reader.borrowPos < reader.borrowLen:
+      return reader.borrowedSpan()
+    if reader.borrowBuf.len == 0:
+      reader.borrowBuf = newSeq[byte](fallbackSpanSize)
+    reader.borrowPos = 0
+    reader.borrowLen = reader.markerDec.readData(
+      addr reader.borrowBuf[0], reader.borrowBuf.len)
+    reader.borrowedSpan()
+
+proc consumeDecoded*(reader: GzFastStream; n: int) {.inline.} =
+  ## Consume `n` bytes from the span returned by `peekDecoded`.
+  reader.ensureReadable()
+  case reader.backend
+  of rbSequential:
+    reader.dec.consumeDecoded(n)
+  of rbParallelMembers, rbMarker:
+    reader.consumeBorrowed(n)
+
 proc finish*(reader: GzFastStream): DecodeReport =
   ## If EOF has already been reached, return the completed report.
   ## Otherwise discard subsequent decoded output while continuing to
   ## decode and verify the complete compressed stream.
-  if reader.closed:
-    raise newException(IOError, "gzfast: stream is closed")
-  if reader.cancelled:
-    raise newGzFastError(geCancelled, "gzfast: decoding was cancelled")
+  reader.ensureReadable()
+  reader.borrowPos = 0
+  reader.borrowLen = 0
   case reader.backend
   of rbSequential:
     reader.dec.verifyRemaining()

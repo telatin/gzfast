@@ -7,6 +7,7 @@
 
 import std/[options, streams]
 import ../config, ../errors, ../report
+import ../span
 import ../private/zlib_api
 import ../gzip/header, ../gzip/footer
 
@@ -285,7 +286,7 @@ proc parseMemberFooter(dec: var SequentialDecoder) =
   inc dec.memberCount
   dec.state = smHeader
 
-proc fillOutput(dec: var SequentialDecoder) =
+proc fillOutput(dec: var SequentialDecoder) {.inline.} =
   ## Ensure at least one decoded byte is available or decoding is done.
   while dec.outPos == dec.outLen and dec.state != smDone:
     case dec.state
@@ -299,6 +300,25 @@ proc fillOutput(dec: var SequentialDecoder) =
       dec.parseMemberFooter()
     of smDone:
       discard
+
+proc peekDecoded*(dec: var SequentialDecoder): DecodedSpan {.inline.} =
+  ## Return a borrowed view of the currently buffered decoded output.
+  dec.fillOutput()
+  let available = dec.outLen - dec.outPos
+  if available <= 0:
+    return DecodedSpan(data: nil, len: 0)
+  DecodedSpan(
+    data: cast[ptr UncheckedArray[byte]](addr dec.outBuf[dec.outPos]),
+    len: available
+  )
+
+proc consumeDecoded*(dec: var SequentialDecoder; n: int) {.inline.} =
+  ## Advance by `n` bytes from the span returned by `peekDecoded`.
+  let available = dec.outLen - dec.outPos
+  if n < 0 or n > available:
+    raise newException(ValueError,
+      "consumeDecoded count exceeds available decoded bytes")
+  dec.outPos += n
 
 proc readData*(dec: var SequentialDecoder; buffer: pointer;
                bufLen: int): int =
