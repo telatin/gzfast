@@ -1,6 +1,7 @@
 ## Integration tests for the gzfast CLI binary.
 
 import std/[unittest, os, osproc, strutils, streams]
+import gzfast
 import gzfast/private/zlib_api
 import ../helpers/fixtures
 
@@ -30,6 +31,33 @@ proc runCli(args: string): tuple[output: string, exitCode: int] =
   result.exitCode = p.waitForExit()
   p.close()
 
+proc runCliWithInput(args, input: string): tuple[output: string, exitCode: int] =
+  let cmd = buildCli() & (if args.len > 0: " " & args else: "")
+  let p = startProcess(cmd, options = {poUsePath, poEvalCommand})
+  p.inputStream.write(input)
+  p.inputStream.close()
+  var outStr = newStringOfCap(1 shl 20)
+  while not p.outputStream.atEnd:
+    outStr.add p.outputStream.readStr(1 shl 16)
+  result.output = outStr
+  result.exitCode = p.waitForExit()
+  p.close()
+
+proc decodeGzipBytes(data: string): string =
+  let path = getTempDir() / "gzfast_cli_compressed_stdout.gz"
+  writeFile(path, data)
+  defer: removeFile(path)
+  let input = openGzFast(path, threads = 1)
+  defer: input.close()
+  result = input.readAll()
+  discard input.finish()
+
+proc readGzip(path: string): string =
+  let input = openGzFast(path, threads = 1)
+  defer: input.close()
+  result = input.readAll()
+  discard input.finish()
+
 suite "gzfast CLI":
   test "binary builds":
     check buildCli().fileExists
@@ -42,12 +70,80 @@ suite "gzfast CLI":
     check output.len == int(f.length)
     check crc32(output) == f.crc32
 
+  test "--stdout keeps decompression output behavior":
+    let f = fixtureByName("small_text.gz")
+    let (output, code) = runCli(" --stdout " &
+      quoteShell(fixturePath(f.name)))
+    check code == 0
+    check output.len == int(f.length)
+    check crc32(output) == f.crc32
+
   test "--stats never contaminates stdout":
     let f = fixtureByName("small_text.gz")
     let (output, code) = runCli( " -dc --stats " &
       quoteShell(fixturePath(f.name)))
     check code == 0
     check output.len == int(f.length)
+
+  test "-c compresses a file to stdout":
+    let payload = "CLI compression from a file\n".repeat(4096)
+    let path = getTempDir() / "gzfast_cli_compress_input.txt"
+    writeFile(path, payload)
+    defer: removeFile(path)
+
+    let (output, code) = runCli(" -c " & quoteShell(path))
+    check code == 0
+    check decodeGzipBytes(output) == payload
+
+  test "-c -o compresses a file to the requested path":
+    let payload = "CLI compression to a path\n".repeat(2048)
+    let inputPath = getTempDir() / "gzfast_cli_compress_path.txt"
+    let outputPath = getTempDir() / "gzfast_cli_compress_path.txt.gz"
+    writeFile(inputPath, payload)
+    if fileExists(outputPath): removeFile(outputPath)
+    defer:
+      removeFile(inputPath)
+      if fileExists(outputPath): removeFile(outputPath)
+
+    let (_, code) = runCli(" -c -o " & quoteShell(outputPath) & " " &
+      quoteShell(inputPath))
+    check code == 0
+    check readGzip(outputPath) == payload
+
+  test "-c reads stdin when no input path is given":
+    let payload = "CLI compression from stdin\n".repeat(3072)
+    let (output, code) = runCliWithInput("-c", payload)
+    check code == 0
+    check decodeGzipBytes(output) == payload
+
+  test "compression refuses an existing output without force":
+    let inputPath = getTempDir() / "gzfast_cli_compress_existing.txt"
+    let outputPath = inputPath & ".gz"
+    writeFile(inputPath, "new data")
+    writeFile(outputPath, "existing data")
+    defer:
+      removeFile(inputPath)
+      removeFile(outputPath)
+
+    let (_, code) = runCli(" -c -o " & quoteShell(outputPath) & " " &
+      quoteShell(inputPath))
+    check code == 2
+    check readFile(outputPath) == "existing data"
+
+  test "compression refuses in-place output even with force":
+    let path = getTempDir() / "gzfast_cli_compress_in_place.txt"
+    let payload = "must remain intact"
+    writeFile(path, payload)
+    defer: removeFile(path)
+
+    let (_, code) = runCli(" -c -f -o " & quoteShell(path) & " " &
+      quoteShell(path))
+    check code == 2
+    check readFile(path) == payload
+
+  test "compression missing input gives exit 3":
+    let (_, code) = runCli(" -c /nonexistent-gzfast-input")
+    check code == 3
 
   test "--stats reports paths, workers and throughput":
     let (output, code) = execCmdEx(buildCli() & " --verify --stats " &

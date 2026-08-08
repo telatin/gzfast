@@ -25,6 +25,22 @@ real-file CSV schema used for production inputs.
 Large real FASTQ and comparison tools remain environment-specific release
 benchmarks and must record input checksums and hardware details.
 
+## Writer datasets
+
+`bench_writer.nim` generates deterministic uncompressed inputs for writer
+regression measurements:
+
+| Dataset | Purpose |
+|---|---|
+| `text` | Structured log-like lines with changing fields and repeated vocabulary |
+| `random` | Deterministic pseudo-random bytes that should remain effectively incompressible |
+| `fastq` | Four-line, 150-base FASTQ-shaped records with varying identifiers, sequences, and quality characters |
+
+The default size is 64 MiB per dataset. Each gzfast, `gzip`, and `pigz -p1`
+output at levels 1, 6, and 9 is decoded and checked for exact size and CRC32
+after timing. This benchmark documents expected single-thread writer behavior;
+it is not intended to claim parity with multi-threaded pigz.
+
 For Phase 3 production benchmarking, use `benchmarks/bench_fastq` as a
 real-file harness over a mixed gzip workload rather than FASTQ alone. A useful
 matrix is:

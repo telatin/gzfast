@@ -4,19 +4,21 @@ import std/[monotimes, os, parseopt, streams, strutils, terminal, times]
 import ./gzfast
 
 const
-  version = "0.1.0"
+  version = "0.2.0"
 
 const helpText = """
-gzfast — fast, verified gzip decompression (no system zlib required)
+gzfast — fast, verified gzip I/O (no system zlib required)
 
 Usage:
   gzfast [options] FILE
   gzfast -dc [options] FILE
+  gzfast -c [options] [FILE]
   gzfast --verify [options] FILE
 
 Options:
-  -d, --decompress       decompress (default; compression is not supported)
-  -c, --stdout           write to standard output
+  -d, --decompress       decompress (default)
+  -c, --compress         compress; read stdin when FILE is omitted
+      --stdout           write to standard output
   -o, --output PATH      write to PATH
   -t, --threads N        maximum worker threads (0 = automatic)
       --memory SIZE      approximate internal memory ceiling (e.g. 256MiB)
@@ -24,7 +26,7 @@ Options:
                          refuse to decode beyond SIZE bytes (bomb guard)
       --marker-path      enable experimental ordinary-gzip marker parallelism
       --verify           verify only; discard decoded output
-      --stats            print a decode report to stderr
+      --stats            print an operation report to stderr
       --quiet            suppress non-error messages
   -f, --force            allow overwriting existing output and binary on a TTY
       --version          print version
@@ -38,6 +40,9 @@ type
   CliOptions = object
     inputPath: string
     outputPath: string
+    compress: bool
+    decompressExplicit: bool
+    longCompress: bool
     toStdout: bool
     force: bool
     verifyOnly: bool
@@ -82,7 +87,7 @@ proc parseArgs(): CliOptions =
   result.config = defaultGzFastConfig()
   var p = initOptParser(commandLineParams(),
     shortNoVal = {'d', 'c', 'f', 'h'},
-    longNoVal = @["d", "decompress", "c", "stdout", "marker-path",
+    longNoVal = @["d", "decompress", "c", "compress", "stdout", "marker-path",
                   "verify", "stats", "quiet", "f", "force",
                   "version", "h", "help"])
   while true:
@@ -96,8 +101,12 @@ proc parseArgs(): CliOptions =
       result.inputPath = p.key
     of cmdShortOption, cmdLongOption:
       case p.key
-      of "d", "decompress": discard
-      of "c", "stdout": result.toStdout = true
+      of "d", "decompress": result.decompressExplicit = true
+      of "c": result.compress = true
+      of "compress":
+        result.compress = true
+        result.longCompress = true
+      of "stdout": result.toStdout = true
       of "o", "output": result.outputPath = p.optionValue("output")
       of "t", "threads":
         let value = p.optionValue("threads")
@@ -122,7 +131,20 @@ proc parseArgs(): CliOptions =
         quit(0)
       else:
         raise newException(ValueError, "unknown option: --" & p.key)
-  if result.inputPath.len == 0:
+  # Preserve the established `-dc` spelling for decompression to stdout.
+  if result.decompressExplicit and result.compress:
+    if result.longCompress:
+      raise newException(ValueError,
+        "--compress and --decompress cannot be used together")
+    result.compress = false
+    result.toStdout = true
+  if result.compress and result.verifyOnly:
+    raise newException(ValueError,
+      "--verify is only available for decompression")
+  if result.compress and result.toStdout and result.outputPath.len > 0:
+    raise newException(ValueError,
+      "--stdout and --output cannot be used together")
+  if result.inputPath.len == 0 and not result.compress:
     raise newException(ValueError, "no input file given")
 
 proc defaultOutputPath(inputPath: string): string =
@@ -132,7 +154,7 @@ proc defaultOutputPath(inputPath: string): string =
     inputPath[0 ..< inputPath.len - 4]
   else:
     raise newException(ValueError,
-      "input does not end in .gz; use -o or -c to choose an output")
+      "input does not end in .gz; use -o or --stdout to choose an output")
 
 proc pathName(paths: set[DecodePath]): string =
   for path in paths:
@@ -163,6 +185,76 @@ proc printReport(report: DecodeReport; elapsedSeconds, cpuSeconds: float) =
     " throughput=" & report.throughputMiB(elapsedSeconds).formatSeconds &
     "MiB/s")
 
+proc printWriteReport(report: GzipWriteReport;
+                      elapsedSeconds, cpuSeconds: float) =
+  let throughput =
+    if elapsedSeconds <= 0.0: 0.0
+    else: (report.uncompressedBytes.float / (1024.0 * 1024.0)) / elapsedSeconds
+  stderr.writeLine("gzfast: compressed=" & $report.compressedBytes & "B" &
+    " uncompressed=" & $report.uncompressedBytes & "B" &
+    " crc32=" & $report.crc32 &
+    " isize=" & $report.isize &
+    " wall=" & elapsedSeconds.formatSeconds & "s" &
+    " cpu=" & cpuSeconds.formatSeconds & "s" &
+    " throughput=" & throughput.formatSeconds & "MiB/s")
+
+proc compressInput(input: File; writer: GzFastWriter): GzipWriteReport =
+  var buffer = newSeq[byte](1 shl 20)
+  while true:
+    let count = input.readBuffer(addr buffer[0], buffer.len)
+    if count == 0:
+      break
+    discard writer.writeData(addr buffer[0], count)
+  writer.finish()
+
+proc runCompression(opts: CliOptions): int =
+  if opts.inputPath.len > 0 and opts.inputPath != "-" and
+      opts.outputPath.len > 0 and fileExists(opts.inputPath) and
+      fileExists(opts.outputPath):
+    try:
+      if sameFile(opts.inputPath, opts.outputPath):
+        stderr.writeLine("gzfast: input and output refer to the same file")
+        return 2
+    except OSError:
+      discard
+  if opts.outputPath.len > 0 and fileExists(opts.outputPath) and not opts.force:
+    stderr.writeLine("gzfast: " & opts.outputPath &
+      " already exists (use -f to overwrite)")
+    return 2
+  if opts.outputPath.len == 0 and isatty(stdout) and not opts.force:
+    stderr.writeLine("gzfast: refusing to write compressed-binary " &
+      "output to a terminal (use -f to force)")
+    return 2
+
+  var input = stdin
+  var ownsInput = false
+  if opts.inputPath.len > 0 and opts.inputPath != "-":
+    if not open(input, opts.inputPath, fmRead):
+      raise newException(IOError,
+        "cannot open input file: " & opts.inputPath)
+    ownsInput = true
+  defer:
+    if ownsInput:
+      input.close()
+
+  let writer =
+    if opts.outputPath.len > 0: openGzFastWriter(opts.outputPath)
+    else: openGzFastWriter(stdout, ownsOutput = false)
+  let wallStart = getMonoTime()
+  let cpuStart = cpuTime()
+  var report: GzipWriteReport
+  try:
+    report = compressInput(input, writer)
+  finally:
+    writer.close()
+  let elapsed = (getMonoTime() - wallStart).inNanoseconds.float / 1e9
+  let cpu = cpuTime() - cpuStart
+  if not opts.quiet and opts.outputPath.len > 0:
+    stderr.writeLine("gzfast: wrote " & opts.outputPath)
+  if opts.showStats:
+    printWriteReport(report, elapsed, cpu)
+  0
+
 proc mapError(e: ref GzFastError): int =
   stderr.writeLine("gzfast: error: " & e.msg &
     " (compressed offset " & $e.compressedOffset &
@@ -182,9 +274,11 @@ proc main(): int =
     stderr.writeLine("gzfast: " & e.msg)
     return 2
 
-  let decoder = initGzFastDecoder(opts.config)
-
   try:
+    if opts.compress:
+      return runCompression(opts)
+
+    let decoder = initGzFastDecoder(opts.config)
     if opts.verifyOnly:
       let wallStart = getMonoTime()
       let cpuStart = cpuTime()
