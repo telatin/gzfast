@@ -157,5 +157,12 @@ task benchFastq, "Build the FASTQ benchmark harness":
   echo "marker: disabled by default; enable with --marker"
   echo "summarize: benchmarks/bench_fastq --summary fastq-bench.csv > fastq-summary.csv"
 
+task benchWriter, "Build the gzip writer benchmark harness":
+  exec "nim c -d:release --threads:on --mm:orc -p:src --hints:off " &
+       "-o:benchmarks/bench_writer benchmarks/bench_writer.nim"
+  echo "run: benchmarks/bench_writer --repeat 3 --warmup 1 > writer-bench.csv"
+  echo "quick: benchmarks/bench_writer --size 8MiB --repeat 1 --warmup 0"
+  echo "summarize: benchmarks/bench_writer --summary writer-bench.csv > writer-summary.csv"
+
 task docs, "Generate API documentation":
   exec "nim doc --mm:orc --threads:on --project --outdir:docs src/gzfast.nim"
