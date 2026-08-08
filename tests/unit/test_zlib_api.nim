@@ -51,6 +51,38 @@ suite "vendored zlib shim":
     check produced == expected.len
     check outBuf[0 ..< produced] == expected
 
+  test "raw deflate of a buffer":
+    let plain = "The shim can emit raw deflate data without a gzip wrapper."
+    let deflater = gzDeflaterCreate(6, gzDefaultStrategy)
+    check not deflater.isNil
+    defer: gzDeflaterDestroy(deflater)
+
+    var compressedBuf = newString(256)
+    var defInPtr = cast[ptr byte](unsafeAddr plain[0])
+    var defInLen = csize_t(plain.len)
+    var defOutPtr = cast[ptr byte](addr compressedBuf[0])
+    var defOutLen = csize_t(compressedBuf.len)
+    let defRet = gzDeflaterStep(deflater, addr defInPtr, addr defInLen,
+                                addr defOutPtr, addr defOutLen, gzFinish)
+    check defRet == gzStreamEnd
+    check defInLen == 0
+    let compressedLen = compressedBuf.len - int(defOutLen)
+    check compressedLen > 0
+
+    let inflater = gzInflaterCreate()
+    check not inflater.isNil
+    defer: gzInflaterDestroy(inflater)
+    var outBuf = newString(plain.len)
+    var infInPtr = cast[ptr byte](addr compressedBuf[0])
+    var infInLen = csize_t(compressedLen)
+    var infOutPtr = cast[ptr byte](addr outBuf[0])
+    var infOutLen = csize_t(outBuf.len)
+    let infRet = gzInflaterStep(inflater, addr infInPtr, addr infInLen,
+                                addr infOutPtr, addr infOutLen, gzFinish)
+    check infRet == gzStreamEnd
+    check infInLen == 0
+    check outBuf == plain
+
   test "inflater reset and reuse across many decodes":
     let compressed = readFixture("raw_deflate.bin")
     let expected = readFixture("raw_deflate.expected")

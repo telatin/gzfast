@@ -1,4 +1,4 @@
-## gzfast — fast, verified, multithreaded gzip decompression for Nim.
+## gzfast — fast, verified gzip I/O for Nim.
 ##
 ## This module is the entire public import surface:
 ##
@@ -10,6 +10,10 @@
 ## for line in input.lines:
 ##   discard line
 ## discard input.finish()
+##
+## let output = openGzFastWriter("out.gz")
+## discard output.writeString("hello\n")
+## output.close()
 ## ```
 ##
 ## Guarantees:
@@ -18,6 +22,8 @@
 ## * Bounded streaming memory, independent of file size.
 ## * Reading to EOF (or calling `finish`) verifies every member's
 ##   CRC32 and ISIZE, including concatenated members.
+## * Gzip writing emits a standard header, raw-DEFLATE payload, and
+##   CRC32/ISIZE trailer.
 ## * The stream is forward-only; seeking is unsupported.
 
 import std/options
@@ -29,15 +35,20 @@ import ./gzfast/report
 import ./gzfast/span
 import ./gzfast/reader
 import ./gzfast/decoder
+import ./gzfast/writer
 
 export streams
 export options.none, options.some, options.Option
 
-export GzFastConfig, defaultGzFastConfig, validate
+export GzFastConfig, GzFastWriteConfig
+export defaultGzFastConfig, defaultGzFastWriteConfig, validate
 export GzFastError, GzFastErrorKind, GzFastConfigError
-export DecodePath, DecodeReport, DecoderStats
+export DecodePath, DecodeReport, DecoderStats, GzipWriteReport
 export DecodedSpan
 export GzFastStream, finish, cancel, stats, peekDecoded, consumeDecoded
+export GzFastWriter
 export GzFastDecoder, initGzFastDecoder
 export open, openGzFast, openGzFastSequential
 export decodeTo, decompressFile
+export openGzFastWriter, writeData, writeString, writeBytes, writeLine
+export flush, close

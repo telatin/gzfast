@@ -33,6 +33,14 @@ type
     ## Maximum accepted combined size of optional gzip header fields.
     maxHeaderSize*: int
 
+  GzFastWriteConfig* = object
+    ## zlib compression level. Zero stores input without compression.
+    level*: int
+    ## Size of the reusable compressed-output staging buffer.
+    outputBufferSize*: int
+    ## zlib compression strategy. Zero is the default strategy.
+    strategy*: int
+
 proc defaultGzFastConfig*(): GzFastConfig =
   GzFastConfig(
     threads: 0,
@@ -46,6 +54,13 @@ proc defaultGzFastConfig*(): GzFastConfig =
     allowSequentialFallback: true,
     enableMarkerPath: false,
     maxHeaderSize: 1024 * 1024
+  )
+
+proc defaultGzFastWriteConfig*(): GzFastWriteConfig =
+  GzFastWriteConfig(
+    level: 6,
+    outputBufferSize: 1024 * 1024,
+    strategy: 0
   )
 
 proc validate*(config: GzFastConfig) =
@@ -70,3 +85,14 @@ proc validate*(config: GzFastConfig) =
     fail "maxHeaderSize must be between 1 KiB and 64 MiB"
   if config.outputLimit.isSome and config.outputLimit.get == 0:
     fail "outputLimit, when set, must be > 0"
+
+proc validate*(config: GzFastWriteConfig) =
+  ## Raises GzFastConfigError on invalid writer values.
+  template fail(msg: string) =
+    raise newException(GzFastConfigError, msg)
+  if config.level < 0 or config.level > 9:
+    fail "level must be between 0 and 9"
+  if config.outputBufferSize <= 0:
+    fail "outputBufferSize must be > 0"
+  if config.strategy < 0 or config.strategy > 4:
+    fail "strategy must be between 0 and 4"

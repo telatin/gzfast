@@ -18,6 +18,10 @@ struct gzfast_inflater {
     z_stream strm;
 };
 
+struct gzfast_deflater {
+    z_stream strm;
+};
+
 /* Clamp a size_t to zlib's uInt (the vendored zlib uses 32-bit uInt). */
 static uInt gzfast_clamp_uInt(size_t n) {
     return n > (size_t)0xFFFFFFFFu ? 0xFFFFFFFFu : (uInt)n;
@@ -161,4 +165,77 @@ uint32_t gzfast_crc32_combine(uint32_t first,
 
 const char* gzfast_zlib_version(void) {
     return zlibVersion();
+}
+
+gzfast_deflater* gzfast_deflater_create(int level, int strategy) {
+    gzfast_deflater* s = (gzfast_deflater*)calloc(1, sizeof(gzfast_deflater));
+    int ret;
+    if (s == NULL) {
+        return NULL;
+    }
+    s->strm.zalloc = Z_NULL;
+    s->strm.zfree = Z_NULL;
+    s->strm.opaque = Z_NULL;
+    /* Negative window bits: raw DEFLATE, no zlib/gzip wrapper. */
+    ret = deflateInit2_(&s->strm, level, Z_DEFLATED, -MAX_WBITS, 8,
+                        strategy, ZLIB_VERSION, (int)sizeof(z_stream));
+    if (ret != Z_OK) {
+        free(s);
+        return NULL;
+    }
+    return s;
+}
+
+void gzfast_deflater_destroy(gzfast_deflater* state) {
+    if (state == NULL) {
+        return;
+    }
+    (void)deflateEnd(&state->strm);
+    free(state);
+}
+
+int gzfast_deflater_step(gzfast_deflater* state,
+                         const unsigned char** input,
+                         size_t* input_length,
+                         unsigned char** output,
+                         size_t* output_length,
+                         int flush_mode) {
+    uInt in_before;
+    uInt out_before;
+    int ret;
+
+    if (state == NULL || input == NULL || input_length == NULL ||
+        output == NULL || output_length == NULL) {
+        return GZFAST_Z_STREAM_ERROR;
+    }
+
+    state->strm.next_in = (Bytef*)*input;
+    in_before = gzfast_clamp_uInt(*input_length);
+    state->strm.avail_in = in_before;
+    state->strm.next_out = (Bytef*)*output;
+    out_before = gzfast_clamp_uInt(*output_length);
+    state->strm.avail_out = out_before;
+
+    ret = deflate(&state->strm, flush_mode);
+
+    *input += (size_t)(in_before - state->strm.avail_in);
+    *input_length -= (size_t)(in_before - state->strm.avail_in);
+    *output += (size_t)(out_before - state->strm.avail_out);
+    *output_length -= (size_t)(out_before - state->strm.avail_out);
+
+    return ret;
+}
+
+uint64_t gzfast_deflater_total_in(const gzfast_deflater* state) {
+    if (state == NULL) {
+        return 0;
+    }
+    return (uint64_t)state->strm.total_in;
+}
+
+uint64_t gzfast_deflater_total_out(const gzfast_deflater* state) {
+    if (state == NULL) {
+        return 0;
+    }
+    return (uint64_t)state->strm.total_out;
 }

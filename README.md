@@ -1,7 +1,7 @@
 # gzfast
 
-Fast, verified, multithreaded decompression of gzip files for Nim —
-with **zero system library requirements**.
+Fast, verified gzip I/O for Nim, with multithreaded decompression and
+**zero system library requirements**.
 
 ```nim
 import gzfast
@@ -36,6 +36,9 @@ discard input.finish()
   guarantees the *entire* compressed input was validated: gzip headers,
   optional fields, DEFLATE syntax, and every member's CRC32 and ISIZE —
   including every member of concatenated gzip and BGZF.
+* **Generic gzip writing.** `GzFastWriter` writes standard gzip streams
+  incrementally with caller-owned buffers, maintaining CRC32 and ISIZE
+  and finishing the trailer from `close()` or `finish()`.
 * **Bounded memory.** Input, output and speculative buffers are all
   bounded; files far larger than RAM stream without growth. Backpressure
   slows decoding when the consumer is slow. An optional `outputLimit`
@@ -95,6 +98,28 @@ discard decompressFile("reads.fastq.gz", "reads.fastq")
 
 Only the caller's thread touches the output object; it never needs to
 be thread-safe.
+
+### Streaming writer
+
+```nim
+import gzfast
+
+var config = defaultGzFastWriteConfig()
+config.level = 6
+
+let output = openGzFastWriter("records.gz", config)
+defer: output.close()
+
+var outputBuffer = newString(4 * 1024 * 1024)
+# fill outputBuffer in batches
+discard output.writeData(addr outputBuffer[0], outputBuffer.len)
+```
+
+`writeData` accepts a pointer and length so callers can batch many
+records into one reusable buffer without one string allocation per
+record. Convenience wrappers `writeString`, `writeBytes`, and
+`writeLine` are also available. `close()` is idempotent and finishes the
+gzip member; `finish()` returns a `GzipWriteReport`.
 
 ### Non-positional sources (pipes, sockets, memory)
 

@@ -29,3 +29,10 @@ type
     activeWorkers*: int
     bufferedBytes*: uint64
     finished*: bool
+
+  GzipWriteReport* = object
+    ## Deterministic summary of a completed gzip write.
+    compressedBytes*: uint64
+    uncompressedBytes*: uint64
+    crc32*: uint32
+    isize*: uint32

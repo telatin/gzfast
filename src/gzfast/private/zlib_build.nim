@@ -15,12 +15,13 @@ import std/os
 const vendorDir = currentSourcePath().parentDir() / ".." / ".." / "vendor"
 const zlibDir = vendorDir / "zlib-1.3.2"
 
-# Production inflate subset (see vendor/README.md). The deflate-side
-# sources are compiled only by tests/helpers for fixture generation.
+# Production inflate/deflate subset (see vendor/README.md).
 {.compile: zlibDir / "adler32.c".}
 {.compile: zlibDir / "crc32.c".}
+{.compile: zlibDir / "deflate.c".}
 {.compile: zlibDir / "inffast.c".}
 {.compile: zlibDir / "inflate.c".}
 {.compile: zlibDir / "inftrees.c".}
+{.compile: zlibDir / "trees.c".}
 {.compile: zlibDir / "zutil.c".}
 {.compile: vendorDir / "gzfast_zlib_shim.c".}

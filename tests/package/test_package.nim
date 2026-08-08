@@ -66,6 +66,11 @@ import gzfast
 import std/os
 
 let here = currentSourcePath().parentDir()
+let written = here / "written.gz"
+let writer = openGzFastWriter(written)
+discard writer.writeString("consumer-write-ok\n")
+writer.close()
+
 let f = openGzFast(here / "sample.gz")
 var total = 0
 var buf = newString(4096)
@@ -77,7 +82,14 @@ let report = f.finish()
 f.close()
 doAssert report.crcVerified
 doAssert report.memberCount == 3
-echo "consumer-ok ", total
+
+let writtenInput = openGzFast(written)
+let writtenPlain = writtenInput.readAll()
+discard writtenInput.finish()
+writtenInput.close()
+doAssert writtenPlain == "consumer-write-ok\n"
+
+echo "consumer-ok ", total, " writer-ok"
 """)
   let corpusDir = projectRoot / "tests" / "corpus"
   copyFile(corpusDir / "concat_3.gz", consumerDir / "sample.gz")
@@ -90,7 +102,7 @@ echo "consumer-ok ", total
   echo "[pkg] running consumer"
   r = run(quoteShell(consumerDir / "consumer"))
   doAssert r.exitCode == 0, r.output
-  doAssert "consumer-ok 52880" in r.output, r.output
+  doAssert "consumer-ok 52880 writer-ok" in r.output, r.output
 
   echo "[pkg] inspecting binary dependencies"
   when defined(macosx):

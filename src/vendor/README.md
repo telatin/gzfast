@@ -12,11 +12,12 @@ Nim's `{.compile.}` mechanism. There is no `-lz`, no `dynlib`, no
 * `zlib-1.3.2/` — source subset of the official zlib 1.3.2 release
   (`zlib-1.3.2.tar.gz`, SHA-256
   `bb329a0a2cd0274d05519d61c667c062e06990d72e125ee2dfa8de64f0119d16`).
-  All top-level C sources and headers are kept, including the
-  deflate-side files (`deflate.c`, `trees.c`, `compress.c`, `uncompr.c`)
-  which are compiled **only in gzfast's own test builds** to generate
-  fixtures. The production library compiles just the inflate subset:
-  `adler32.c crc32.c inffast.c inflate.c inftrees.c zutil.c`.
+  All top-level C sources and headers are kept. The production library
+  compiles the raw inflate/deflate subset used by the shim:
+  `adler32.c crc32.c deflate.c inffast.c inflate.c inftrees.c trees.c
+  zutil.c`. The gzip file API sources such as `gzread.c`, `gzwrite.c`,
+  and `gzlib.c` are kept for source completeness but are not compiled by
+  gzfast.
   Platform/build files from the tarball (`win32/`, `contrib/`,
   `CMakeLists.txt`, `configure`, …) are intentionally not vendored.
 * `gzfast_zlib_shim.h` / `gzfast_zlib_shim.c` — the only interface Nim

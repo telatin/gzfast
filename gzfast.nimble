@@ -1,8 +1,8 @@
 # Package
 
-version       = "0.1.1"
+version       = "0.2.0"
 author        = "gzfast contributors"
-description   = "Fast, verified, multithreaded gzip decompression with a bundled zlib (no system libraries required)"
+description   = "Fast, verified gzip I/O with a bundled zlib (no system libraries required)"
 license       = "MIT"
 srcDir        = "src"
 bin           = @["gzfast_cli"]
@@ -46,6 +46,7 @@ task pack, "Create a Nimble package archive in the project root":
 task test, "Run the complete normal test suite":
   for t in ["unit/test_zlib_api", "unit/test_header", "unit/test_footer",
             "unit/test_source", "unit/test_buffers", "unit/test_deflate_bitreader",
+            "unit/test_writer",
             "unit/test_deflate_huffman",
             "unit/test_deflate_structures",
             "unit/test_deflate_blockfinder",
@@ -68,6 +69,7 @@ task test, "Run the complete normal test suite":
 task testFast, "Run unit tests only":
   for t in ["unit/test_zlib_api", "unit/test_header", "unit/test_footer",
             "unit/test_source", "unit/test_buffers", "unit/test_deflate_bitreader",
+            "unit/test_writer",
             "unit/test_deflate_huffman",
             "unit/test_deflate_structures",
             "unit/test_deflate_blockfinder",
@@ -96,7 +98,8 @@ task testAsan, "Run high-risk suites under AddressSanitizer":
   when defined(linux):
     for t in ["unit/test_zlib_api", "unit/test_source", "unit/test_buffers",
               "unit/test_deflate_bitreader", "unit/test_deflate_huffman",
-              "unit/test_deflate_structures", "unit/test_marker_decode",
+              "unit/test_deflate_structures", "unit/test_writer",
+              "unit/test_marker_decode",
               "unit/test_marker_resolve", "unit/test_sequential",
               "integration/test_marker_path", "corruption/test_matrix",
               "concurrency/test_bounded_queue", "concurrency/test_workers",
@@ -111,7 +114,8 @@ task testUbsan, "Run high-risk suites under UndefinedBehaviorSanitizer":
   when defined(linux):
     for t in ["unit/test_zlib_api", "unit/test_source", "unit/test_buffers",
               "unit/test_deflate_bitreader", "unit/test_deflate_huffman",
-              "unit/test_deflate_structures", "unit/test_marker_decode",
+              "unit/test_deflate_structures", "unit/test_writer",
+              "unit/test_marker_decode",
               "unit/test_marker_resolve", "unit/test_sequential",
               "integration/test_marker_path", "corruption/test_matrix",
               "concurrency/test_bounded_queue", "concurrency/test_workers",

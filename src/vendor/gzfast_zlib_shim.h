@@ -36,6 +36,7 @@ extern "C" {
 #endif
 
 typedef struct gzfast_inflater gzfast_inflater;
+typedef struct gzfast_deflater gzfast_deflater;
 
 /* Flush modes accepted by gzfast_inflater_step (mirrors zlib). */
 #define GZFAST_Z_NO_FLUSH      0
@@ -132,6 +133,43 @@ GZFAST_SHIM_API uint32_t gzfast_crc32_combine(
 
 /* Version of the vendored zlib, for diagnostics. */
 GZFAST_SHIM_API const char* gzfast_zlib_version(void);
+
+/* Create a deflater in raw-DEFLATE mode (negative window bits).
+ * `level` is zlib's compression level 0..9. `strategy` is zlib's
+ * strategy value. Returns NULL on allocation or initialization failure. */
+GZFAST_SHIM_API gzfast_deflater* gzfast_deflater_create(
+    int level,
+    int strategy
+);
+
+/* Destroy a deflater. Safe to call with NULL. */
+GZFAST_SHIM_API void gzfast_deflater_destroy(gzfast_deflater* state);
+
+/* Perform one deflate step.
+ *
+ * On entry, *input / *input_length describe the available uncompressed
+ * bytes and *output / *output_length the available destination space.
+ * On return the pointers and lengths are advanced past the consumed
+ * input and produced output. `flush_mode` is one of GZFAST_Z_NO_FLUSH,
+ * GZFAST_Z_SYNC_FLUSH, or GZFAST_Z_FINISH.
+ *
+ * Returns a GZFAST_Z_* status code. */
+GZFAST_SHIM_API int gzfast_deflater_step(
+    gzfast_deflater* state,
+    const unsigned char** input,
+    size_t* input_length,
+    unsigned char** output,
+    size_t* output_length,
+    int flush_mode
+);
+
+GZFAST_SHIM_API uint64_t gzfast_deflater_total_in(
+    const gzfast_deflater* state
+);
+
+GZFAST_SHIM_API uint64_t gzfast_deflater_total_out(
+    const gzfast_deflater* state
+);
 
 #ifdef __cplusplus
 } /* extern "C" */
