@@ -216,6 +216,9 @@ Common commands:
 gzfast -dc --threads 8 reads.fastq.gz > reads.fastq
 gzfast --verify suspicious.gz
 gzfast input.gz
+gzfast -c input > input.gz
+gzfast -c -o input.gz input
+cat input | gzfast -c > input.gz
 ```
 
 Exit codes:
@@ -226,7 +229,7 @@ Exit codes:
 - `3`: I/O error
 - `4`: internal error
 
-Progress and statistics go to stderr, never decompressed stdout.
+Progress and statistics go to stderr, never data written to stdout.
 
 ## Internal Architecture Rules For Agents
 
@@ -277,6 +280,20 @@ Full release confidence can be expensive:
 nimble testRelease
 ```
 
+Build and run the deterministic writer benchmark when changing the writer,
+vendored deflater, buffering, or CLI compression path:
+
+```bash
+nimble benchWriter
+benchmarks/bench_writer --repeat 3 --warmup 1 > writer-bench.csv
+benchmarks/bench_writer --summary writer-bench.csv > writer-summary.csv
+```
+
+This measures levels 1, 6, and 9 over generic text, pseudo-random, and
+FASTQ-shaped data. It checks every compressed output by decoding it and
+comparing source size and CRC32. Release measurements should use
+`--require-pigz` so a missing `pigz -p1` baseline fails explicitly.
+
 If running inside a restricted sandbox, direct Nim cache output into the
 workspace:
 
@@ -318,4 +335,3 @@ doAssert input.readAll() == "hello\n"
 discard input.finish()
 doAssert writeReport.uncompressedBytes == 6
 ```
-

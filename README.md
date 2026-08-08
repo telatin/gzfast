@@ -38,7 +38,7 @@ discard input.finish()
   binary.
 * **Verified streaming.** Reaching EOF (or calling `finish()`)
   guarantees the *entire* compressed input was validated: gzip headers,
-  optional fields, DEFLATE syntax, and every member's CRC32 and ISIZE ???
+  optional fields, DEFLATE syntax, and every member's CRC32 and ISIZE,
   including every member of concatenated gzip and BGZF.
 * **Generic gzip writing.** `GzFastWriter` writes standard gzip streams
   incrementally with caller-owned buffers, maintaining CRC32 and ISIZE
@@ -176,29 +176,36 @@ gzfast -dc --threads 8 reads.fastq.gz | downstream-tool
 gzfast -dc --threads 8 --marker-path reads.fastq.gz > /dev/null
 gzfast --verify suspicious.gz
 gzfast big.gz            # writes ./big
+gzfast -c input > input.gz
+gzfast -c -o input.gz input
+cat input | gzfast -c > input.gz
 ```
 
 Exit codes: `0` success, `1` corrupt/truncated data, `2` usage error,
 `3` I/O error, `4` internal error. Progress and statistics always go to
-stderr, never into decompressed stdout. `--stats` includes the selected
-decode paths, peak worker count, wall/CPU time and decoded throughput.
+stderr, never into data written to stdout. `--stats` includes timing,
+throughput, and mode-specific decode or compression statistics.
 
-## Current milestone status
+## Release status
 
-Current release state: **0.1.0-alpha candidate**.
+Current development release: **0.2.0 release candidate**.
+
+Version 0.2.0 adds generic streaming gzip output, CLI compression, hardened
+writer lifecycle/error handling, and deterministic writer benchmarks. The
+reader API and its default path-selection behavior remain compatible with
+0.1.0.
 
 | Path | Status |
 |---|---|
-| Verified sequential decoding (headers, CRC32, ISIZE, multi-member, output limit) | ??? complete |
-| Public API (`openGzFast`, `decodeTo`, `decompressFile`, `openGzFastSequential`) + CLI | ??? complete |
-| Vendored, symbol-prefixed zlib with package-install validation | ??? complete |
-| Positional source, shared buffers, bounded queues, worker pool and ordered coordinator | ??? complete |
-| BGZF and concatenated-member parallelism | ??? complete |
-| Pure-Nim bit reader, Huffman/dynamic/stored structures and block finder | ??? complete |
-| Marker decoder and exact marker-free zlib handoff | ??? complete |
-| Marker resolution and ordinary single-member gzip parallel path | ??? complete |
-| Corruption, cancellation, large-stream, fuzz and sanitizer hardening | ??? complete |
-| Profile-driven scalar optimization, BGZF grouping and benchmark automation | ??? complete |
+| Verified sequential decoding (headers, CRC32, ISIZE, multi-member, output limit) | Complete |
+| Reader API (`openGzFast`, `decodeTo`, `decompressFile`, `openGzFastSequential`) | Complete |
+| Streaming writer API (`GzFastWriter`, reports, pointer and convenience writes) | Complete in 0.2.0 |
+| CLI decompression, verification, and compression workflows | Complete in 0.2.0 |
+| Vendored, symbol-prefixed inflate/deflate with package-install validation | Complete |
+| BGZF and concatenated-member reader parallelism | Complete |
+| Corruption, lifecycle, large-stream, fuzz and sanitizer hardening | Complete |
+| Reader and writer benchmark automation | Complete in 0.2.0 |
+| Ordinary single-member marker/window parallel reader | Experimental, opt-in |
 
 Path-based input selects the safest available route: BGZF, dense
 independent members, then the sequential zlib path. The rolling
@@ -260,8 +267,28 @@ nimble testPackage   # pack, clean-room install, consumer build, ldd/otool check
 nimble testRelease   # local pre-release validation
 nimble bench         # generated release benchmark matrix (CSV)
 nimble benchFastq    # build benchmarks/bench_fastq for real FASTQ.gz files
+nimble benchWriter   # build generic gzip writer benchmark harness
 nimble docs
 ```
+
+For writer measurements:
+
+```bash
+nimble benchWriter
+benchmarks/bench_writer --repeat 3 --warmup 1 > writer-bench.csv
+benchmarks/bench_writer --summary writer-bench.csv > writer-summary.csv
+```
+
+The writer harness generates deterministic 64 MiB generic text,
+pseudo-random, and FASTQ-shaped inputs. At compression levels 1, 6, and
+9 it compares the `GzFastWriter` API with `gzip` and, when installed,
+`pigz -p1`. Every output is decoded and checked against the source byte
+count and CRC32 outside the timed region. Raw CSV records wall time,
+gzfast CPU time, throughput, compressed size, ratio, and exit status;
+summary CSV adds variance and same-level speedups versus both external
+tools. Use `--require-pigz` for release runs that must include pigz.
+See [`benchmarks/WRITER.md`](benchmarks/WRITER.md) for methodology,
+expected invariants, and regression interpretation.
 
 For real FASTQ measurements:
 
