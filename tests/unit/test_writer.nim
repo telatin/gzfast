@@ -3,6 +3,7 @@
 import std/[os, streams, strutils, unittest]
 import gzfast
 import gzfast/private/zlib_api
+import gzfast/private/writer_accounting
 
 proc readGzip(path: string): string =
   let input = openGzFast(path, threads = 1)
@@ -169,3 +170,86 @@ suite "gzip writer":
     writer.close()
     expect IOError:
       discard writer.writeString("late")
+
+  test "writing after finish raises and repeated finish returns its report":
+    let path = getTempDir() / "gzfast_writer_after_finish.gz"
+    removeIfExists(path)
+    defer: removeIfExists(path)
+
+    let writer = openGzFastWriter(path)
+    discard writer.writeString("complete")
+    let report = writer.finish()
+
+    expect IOError:
+      discard writer.writeString("late")
+    check writer.finish() == report
+    writer.close()
+    check writer.finish() == report
+
+  test "invalid output path reports an output I/O error":
+    let missingParent = getTempDir() / "gzfast_missing_writer_parent"
+    let path = missingParent / "output.gz"
+    if dirExists(missingParent):
+      removeDir(missingParent)
+
+    var caught = false
+    try:
+      discard openGzFastWriter(path)
+    except GzFastError as e:
+      caught = true
+      check e.kind == geOutputIo
+    check caught
+    check not fileExists(path)
+
+  test "nil output file reports an output I/O error":
+    var caught = false
+    try:
+      discard openGzFastWriter(File(nil))
+    except GzFastError as e:
+      caught = true
+      check e.kind == geOutputIo
+    check caught
+
+  test "ISIZE accounting wraps modulo 2^32":
+    check gzipIsize(0xffff_ffff'u64) == 0xffff_ffff'u32
+    check gzipIsize(0x1_0000_0000'u64) == 0'u32
+    check gzipIsize(0x1_0000_0011'u64) == 17'u32
+    check gzipIsize(0xffff_ffff_ffff_ffff'u64) == 0xffff_ffff'u32
+
+  when defined(linux):
+    test "finish failure poisons the writer and close still cleans up":
+      var output: File
+      check open(output, "/dev/full", fmWrite)
+      let writer = openGzFastWriter(output, ownsOutput = true)
+      discard writer.writeString("finish must surface the flush failure")
+
+      var caught = false
+      try:
+        discard writer.finish()
+      except GzFastError as e:
+        caught = true
+        check e.kind == geOutputIo
+      check caught
+
+      expect GzFastError:
+        discard writer.writeString("late")
+      writer.close()
+      writer.close()
+
+    test "close propagates finish failure and remains idempotent":
+      var output: File
+      check open(output, "/dev/full", fmWrite)
+      let writer = openGzFastWriter(output, ownsOutput = true)
+      discard writer.writeString("close must surface the flush failure")
+
+      var caught = false
+      try:
+        writer.close()
+      except GzFastError as e:
+        caught = true
+        check e.kind == geOutputIo
+      check caught
+
+      writer.close()
+      expect GzFastError:
+        discard writer.writeString("late")

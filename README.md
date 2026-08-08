@@ -1,5 +1,7 @@
 # gzfast
 
+[![CI](https://github.com/telatin/gzfast/actions/workflows/ci.yml/badge.svg)](https://github.com/telatin/gzfast/actions/workflows/ci.yml)
+
 ![gzfast logo](docs/gzfast.svg)
 
 Fast, verified gzip I/O for Nim, with multithreaded decompression and

@@ -2,10 +2,13 @@
 
 import ./config, ./errors, ./report
 import ./private/zlib_api
+import ./private/writer_accounting
 
 const gzipHeader = [
   0x1f'u8, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff
 ]
+
+proc cFflush(output: File): cint {.importc: "fflush", header: "<stdio.h>".}
 
 type
   GzFastWriter* = ref object
@@ -55,10 +58,9 @@ proc checkedWrite(w: GzFastWriter; data: pointer; len: int) =
   w.compressedBytes += uint64(len)
 
 proc checkedFlush(w: GzFastWriter) =
-  try:
-    w.output.flushFile()
-  except CatchableError as e:
-    w.failWriter(geOutputIo, "output file flush failed: " & e.msg)
+  # Nim's flushFile discards fflush's status, including ENOSPC failures.
+  if cFflush(w.output) != 0:
+    w.failWriter(geOutputIo, "output file flush failed")
 
 proc deflateFailed(w: GzFastWriter; status: cint) =
   w.failWriter(geInternal, "deflate failed with status " & $int(status))
@@ -77,7 +79,7 @@ proc writeGzipHeader(w: GzFastWriter) =
 
 proc writeGzipTrailer(w: GzFastWriter) =
   w.writeLe32(w.crc)
-  w.writeLe32(uint32(w.uncompressedBytes and 0xffff_ffff'u64))
+  w.writeLe32(gzipIsize(w.uncompressedBytes))
 
 proc runDeflate(w: GzFastWriter; input: ptr byte; inputLen: csize_t;
                 flushMode: cint): cint =
@@ -237,7 +239,7 @@ proc finish*(w: GzFastWriter): GzipWriteReport =
       compressedBytes: w.compressedBytes,
       uncompressedBytes: w.uncompressedBytes,
       crc32: w.crc,
-      isize: uint32(w.uncompressedBytes and 0xffff_ffff'u64)
+      isize: gzipIsize(w.uncompressedBytes)
     )
     w.reportCache
   except CatchableError:
