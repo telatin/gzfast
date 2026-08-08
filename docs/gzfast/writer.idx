@@ -1,0 +1,12 @@
+nimTitle	writer	gzfast/writer.html	module src/gzfast/writer		0
+nim	GzFastWriter	gzfast/writer.html#GzFastWriter	type GzFastWriter		14
+nim	openGzFastWriter	gzfast/writer.html#openGzFastWriter,File	proc openGzFastWriter(output: File; config = defaultGzFastWriteConfig();\n                 ownsOutput = false): GzFastWriter		122
+nim	openGzFastWriter	gzfast/writer.html#openGzFastWriter,string	proc openGzFastWriter(path: string; config = defaultGzFastWriteConfig()): GzFastWriter		152
+nim	writeData	gzfast/writer.html#writeData,GzFastWriter,pointer,int	proc writeData(w: GzFastWriter; data: pointer; len: int): int		166
+nim	writeString	gzfast/writer.html#writeString,GzFastWriter,string	proc writeString(w: GzFastWriter; s: string): int		182
+nim	writeBytes	gzfast/writer.html#writeBytes,GzFastWriter,openArray[byte]	proc writeBytes(w: GzFastWriter; data: openArray[byte]): int		188
+nim	writeLine	gzfast/writer.html#writeLine,GzFastWriter,string	proc writeLine(w: GzFastWriter; s: string)		194
+nim	flush	gzfast/writer.html#flush,GzFastWriter	proc flush(w: GzFastWriter)		200
+nim	finish	gzfast/writer.html#finish,GzFastWriter	proc finish(w: GzFastWriter): GzipWriteReport		219
+nim	close	gzfast/writer.html#close,GzFastWriter	proc close(w: GzFastWriter)		252
+nimgrp	opengzfastwriter	gzfast/writer.html#openGzFastWriter-procs-all	proc		122

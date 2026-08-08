@@ -5,7 +5,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>src/gzfast/private/zlib_build</title>
+<title>src/gzfast/span</title>
 
 <!-- Google fonts -->
 <link href='https://fonts.googleapis.com/css?family=Lato:400,600,900' rel='stylesheet' type='text/css'/>
@@ -16,15 +16,15 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.4">
+<link rel="stylesheet" type="text/css" href="../nimdoc.out.css?v=2.2.4">
 
 <!-- JS -->
-<script type="text/javascript" src="../../dochack.js?v=2.2.4"></script>
+<script type="text/javascript" src="../dochack.js?v=2.2.4"></script>
 </head>
 <body>
   <div class="document" id="documentId">
     <div class="container">
-      <h1 class="title">src/gzfast/private/zlib_build</h1>
+      <h1 class="title">src/gzfast/span</h1>
       <div class="row">
   <div class="three columns">
     <div class="theme-select-wrapper">
@@ -37,7 +37,7 @@
     </div>
     <div id="global-links">
       <ul class="simple">
-        <li><a id="indexLink" href="../../theindex.html">Index</a></li>
+        <li><a id="indexLink" href="../theindex.html">Index</a></li>
       </ul>
     </div>
     <div id="searchInputDiv">
@@ -50,17 +50,46 @@
         <option value="type">Type</option>
       </select>
     </div>
-    
+    <ul class="simple simple-toc" id="toc-list">
+  <li>
+  <details open>
+    <summary><a class="reference reference-toplevel" href="#7" id="57">Types</a></summary>
+    <ul class="simple simple-toc-section">
+      <li><a class="reference" href="#DecodedSpan" title="DecodedSpan = object
+  data*: ptr UncheckedArray[byte]
+  len*: int">DecodedSpan</a></li>
+
+    </ul>
+  </details>
+</li>
+
+</ul>
+
   </div>
   <div class="nine columns" id="content">
     
     <div id="tocRoot"></div>
     
-    <p class="module-desc"><p>Private build integration for the vendored zlib 1.3.2.</p>
-<p>This is the <em>only</em> module that references the vendored C sources. It compiles them into the consuming application via <tt class="docutils literal"><span class="pre"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">compile</span><span class="Operator">.</span><span class="Punctuation">}</span></span></tt>; there is deliberately no <tt class="docutils literal"><span class="pre"><span class="Punctuation">{</span><span class="Operator">.</span><span class="Identifier">passL</span><span class="Punctuation">:</span> <span class="StringLit">&quot;-lz&quot;</span><span class="Operator">.</span><span class="Punctuation">}</span></span></tt> and no <tt class="docutils literal"><span class="pre"><span class="Identifier">dynlib</span></span></tt> anywhere in the project (see src/vendor/README.md).</p>
-<p>The vendor tree lives under src/ (not the repository root) because nimble installs the contents of srcDir at the package root; keeping the C sources inside srcDir makes the relative paths below resolve identically in the development checkout and in an installed package.</p>
-</p>
+    <p class="module-desc">Borrowed decoded-byte spans exposed by the public streaming API.</p>
+    <div class="section" id="7">
+  <h1><a class="toc-backref" href="#7">Types</a></h1>
+  <dl class="item">
+    <div id="DecodedSpan">
+  <dt><pre><a href="span.html#DecodedSpan"><span class="Identifier">DecodedSpan</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">data</span><span class="Operator">*</span><span class="Other">:</span> <span class="Keyword">ptr</span> <span class="Identifier">UncheckedArray</span><span class="Other">[</span><span class="Identifier">byte</span><span class="Other">]</span>
+  <span class="Identifier">len</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span></pre></dt>
+  <dd>
     
+    <p>View of currently buffered decoded output.</p>
+<p>The pointer is owned by the reader. It remains valid only until the next operation on that reader, and callers must consume at most <tt class="docutils literal"><span class="pre"><span class="Identifier">len</span></span></tt> bytes with <tt class="docutils literal"><span class="pre"><span class="Identifier">consumeDecoded</span></span></tt>.</p>
+
+    
+  </dd>
+</div>
+
+  </dl>
+</div>
+
   </div>
 </div>
 

@@ -1,0 +1,2 @@
+nimTitle	writer_accounting	gzfast/private/writer_accounting.html	module src/gzfast/private/writer_accounting		0
+nim	gzipIsize	gzfast/private/writer_accounting.html#gzipIsize,uint64	proc gzipIsize(uncompressedBytes: uint64): uint32		3

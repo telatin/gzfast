@@ -75,6 +75,10 @@
                                  ## parallelism remain enabled independently of this flag.
   enableMarkerPath*: bool    ## Maximum accepted combined size of optional gzip header fields.
   maxHeaderSize*: int">GzFastConfig</a></li>
+<li><a class="reference" href="#GzFastWriteConfig" title="GzFastWriteConfig = object
+  level*: int                ## Size of the reusable compressed-output staging buffer.
+  outputBufferSize*: int     ## zlib compression strategy. Zero is the default strategy.
+  strategy*: int">GzFastWriteConfig</a></li>
 
     </ul>
   </details>
@@ -87,8 +91,13 @@
   <li><a class="reference" href="#defaultGzFastConfig" title="defaultGzFastConfig(): GzFastConfig">defaultGzFastConfig(): GzFastConfig</a></li>
 
 </ul>
+<ul class="simple nested-toc-section">defaultGzFastWriteConfig
+  <li><a class="reference" href="#defaultGzFastWriteConfig" title="defaultGzFastWriteConfig(): GzFastWriteConfig">defaultGzFastWriteConfig(): GzFastWriteConfig</a></li>
+
+</ul>
 <ul class="simple nested-toc-section">validate
   <li><a class="reference" href="#validate%2CGzFastConfig" title="validate(config: GzFastConfig)">validate(config: GzFastConfig)</a></li>
+<li><a class="reference" href="#validate%2CGzFastWriteConfig" title="validate(config: GzFastWriteConfig)">validate(config: GzFastWriteConfig)</a></li>
 
 </ul>
 
@@ -137,6 +146,17 @@
     
   </dd>
 </div>
+<div id="GzFastWriteConfig">
+  <dt><pre><a href="config.html#GzFastWriteConfig"><span class="Identifier">GzFastWriteConfig</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">level</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>                <span class="Comment">## Size of the reusable compressed-output staging buffer.</span>
+  <span class="Identifier">outputBufferSize</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>     <span class="Comment">## zlib compression strategy. Zero is the default strategy.</span>
+  <span class="Identifier">strategy</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span></pre></dt>
+  <dd>
+    
+    zlib compression level. Zero stores input without compression.
+    
+  </dd>
+</div>
 
   </dl>
 </div>
@@ -146,6 +166,18 @@
     <div id="defaultGzFastConfig-procs-all">
   <div id="defaultGzFastConfig">
   <dt><pre><span class="Keyword">proc</span> <a href="#defaultGzFastConfig"><span class="Identifier">defaultGzFastConfig</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <a href="config.html#GzFastConfig"><span class="Identifier">GzFastConfig</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    
+    
+  </dd>
+</div>
+
+</div>
+<div id="defaultGzFastWriteConfig-procs-all">
+  <div id="defaultGzFastWriteConfig">
+  <dt><pre><span class="Keyword">proc</span> <a href="#defaultGzFastWriteConfig"><span class="Identifier">defaultGzFastWriteConfig</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <a href="config.html#GzFastWriteConfig"><span class="Identifier">GzFastWriteConfig</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -164,6 +196,15 @@
     
   </dd>
 </div>
+<div id="validate,GzFastWriteConfig">
+  <dt><pre><span class="Keyword">proc</span> <a href="#validate%2CGzFastWriteConfig"><span class="Identifier">validate</span></a><span class="Other">(</span><span class="Identifier">config</span><span class="Other">:</span> <a href="config.html#GzFastWriteConfig"><span class="Identifier">GzFastWriteConfig</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastConfigError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Raises GzFastConfigError on invalid writer values.
+    
+  </dd>
+</div>
 
 </div>
 
@@ -176,7 +217,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-08-07 12:12:02 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-08-08 17:11:15 UTC</small>
       </div>
     </div>
   </div>

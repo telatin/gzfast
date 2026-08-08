@@ -1,4 +1,8 @@
 nimTitle	config	gzfast/config.html	module src/gzfast/config		0
 nim	GzFastConfig	gzfast/config.html#GzFastConfig	object GzFastConfig		7
-nim	defaultGzFastConfig	gzfast/config.html#defaultGzFastConfig	proc defaultGzFastConfig(): GzFastConfig		36
-nim	validate	gzfast/config.html#validate,GzFastConfig	proc validate(config: GzFastConfig)		51
+nim	GzFastWriteConfig	gzfast/config.html#GzFastWriteConfig	object GzFastWriteConfig		36
+nim	defaultGzFastConfig	gzfast/config.html#defaultGzFastConfig	proc defaultGzFastConfig(): GzFastConfig		44
+nim	defaultGzFastWriteConfig	gzfast/config.html#defaultGzFastWriteConfig	proc defaultGzFastWriteConfig(): GzFastWriteConfig		59
+nim	validate	gzfast/config.html#validate,GzFastConfig	proc validate(config: GzFastConfig)		66
+nim	validate	gzfast/config.html#validate,GzFastWriteConfig	proc validate(config: GzFastWriteConfig)		89
+nimgrp	validate	gzfast/config.html#validate-procs-all	proc		66

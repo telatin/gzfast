@@ -8,3 +8,4 @@ nim	dpMixed	gzfast/report.html#dpMixed	DecodePath.dpMixed		4
 nim	DecodePath	gzfast/report.html#DecodePath	enum DecodePath		4
 nim	DecodeReport	gzfast/report.html#DecodeReport	object DecodeReport		12
 nim	DecoderStats	gzfast/report.html#DecoderStats	object DecoderStats		23
+nim	GzipWriteReport	gzfast/report.html#GzipWriteReport	object GzipWriteReport		33

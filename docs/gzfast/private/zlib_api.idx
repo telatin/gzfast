@@ -1,29 +1,40 @@
 nimTitle	zlib_api	gzfast/private/zlib_api.html	module src/gzfast/private/zlib_api		0
 nim	GzInflaterHandle	gzfast/private/zlib_api.html#GzInflaterHandle	type GzInflaterHandle		8
-nim	gzNoFlush	gzfast/private/zlib_api.html#gzNoFlush	const gzNoFlush		12
-nim	gzSyncFlush	gzfast/private/zlib_api.html#gzSyncFlush	const gzSyncFlush		13
-nim	gzFinish	gzfast/private/zlib_api.html#gzFinish	const gzFinish		14
-nim	gzBlock	gzfast/private/zlib_api.html#gzBlock	const gzBlock		15
-nim	gzTrees	gzfast/private/zlib_api.html#gzTrees	const gzTrees		16
-nim	gzOk	gzfast/private/zlib_api.html#gzOk	const gzOk		18
-nim	gzStreamEnd	gzfast/private/zlib_api.html#gzStreamEnd	const gzStreamEnd		19
-nim	gzNeedDict	gzfast/private/zlib_api.html#gzNeedDict	const gzNeedDict		20
-nim	gzStreamError	gzfast/private/zlib_api.html#gzStreamError	const gzStreamError		21
-nim	gzDataError	gzfast/private/zlib_api.html#gzDataError	const gzDataError		22
-nim	gzMemError	gzfast/private/zlib_api.html#gzMemError	const gzMemError		23
-nim	gzBufError	gzfast/private/zlib_api.html#gzBufError	const gzBufError		24
-nim	gzInflaterCreate	gzfast/private/zlib_api.html#gzInflaterCreate	proc gzInflaterCreate(): GzInflaterHandle		26
-nim	gzInflaterDestroy	gzfast/private/zlib_api.html#gzInflaterDestroy,GzInflaterHandle	proc gzInflaterDestroy(state: GzInflaterHandle)		29
-nim	gzInflaterReset	gzfast/private/zlib_api.html#gzInflaterReset,GzInflaterHandle	proc gzInflaterReset(state: GzInflaterHandle): cint		32
-nim	gzInflaterPrime	gzfast/private/zlib_api.html#gzInflaterPrime,GzInflaterHandle,cuint,cuint	proc gzInflaterPrime(state: GzInflaterHandle; bitCount, bitValue: cuint): cint		35
-nim	gzInflaterSetDictionary	gzfast/private/zlib_api.html#gzInflaterSetDictionary,GzInflaterHandle,ptr.byte,csize_t	proc gzInflaterSetDictionary(state: GzInflaterHandle; data: ptr byte; length: csize_t): cint		39
-nim	gzInflaterStep	gzfast/private/zlib_api.html#gzInflaterStep,GzInflaterHandle,ptr.ptr.byte,ptr.csize_t,ptr.ptr.byte,ptr.csize_t,cint	proc gzInflaterStep(state: GzInflaterHandle; input: ptr ptr byte;\n               inputLength: ptr csize_t; output: ptr ptr byte;\n               outputLength: ptr csize_t; flushMode: cint): cint		43
-nim	gzInflaterTotalIn	gzfast/private/zlib_api.html#gzInflaterTotalIn,GzInflaterHandle	proc gzInflaterTotalIn(state: GzInflaterHandle): uint64		49
-nim	gzInflaterTotalOut	gzfast/private/zlib_api.html#gzInflaterTotalOut,GzInflaterHandle	proc gzInflaterTotalOut(state: GzInflaterHandle): uint64		52
-nim	gzInflaterDataType	gzfast/private/zlib_api.html#gzInflaterDataType,GzInflaterHandle	proc gzInflaterDataType(state: GzInflaterHandle): cint		55
-nim	gzCrc32	gzfast/private/zlib_api.html#gzCrc32,uint32,ptr.byte,csize_t	proc gzCrc32(previous: uint32; data: ptr byte; length: csize_t): uint32		58
-nim	gzCrc32Combine	gzfast/private/zlib_api.html#gzCrc32Combine,uint32,uint32,uint64	proc gzCrc32Combine(first, second: uint32; secondLength: uint64): uint32		61
-nim	gzZlibVersion	gzfast/private/zlib_api.html#gzZlibVersion	proc gzZlibVersion(): cstring		64
-nim	crc32	gzfast/private/zlib_api.html#crc32,openArray[byte],uint32	proc crc32(data: openArray[byte]; previous: uint32 = 0): uint32		70
-nim	crc32	gzfast/private/zlib_api.html#crc32,string,uint32	proc crc32(data: string; previous: uint32 = 0): uint32		76
-nimgrp	crc32	gzfast/private/zlib_api.html#crc32-procs-all	proc		70
+nim	GzDeflaterHandle	gzfast/private/zlib_api.html#GzDeflaterHandle	type GzDeflaterHandle		10
+nim	gzNoFlush	gzfast/private/zlib_api.html#gzNoFlush	const gzNoFlush		14
+nim	gzSyncFlush	gzfast/private/zlib_api.html#gzSyncFlush	const gzSyncFlush		15
+nim	gzFinish	gzfast/private/zlib_api.html#gzFinish	const gzFinish		16
+nim	gzBlock	gzfast/private/zlib_api.html#gzBlock	const gzBlock		17
+nim	gzTrees	gzfast/private/zlib_api.html#gzTrees	const gzTrees		18
+nim	gzOk	gzfast/private/zlib_api.html#gzOk	const gzOk		20
+nim	gzStreamEnd	gzfast/private/zlib_api.html#gzStreamEnd	const gzStreamEnd		21
+nim	gzNeedDict	gzfast/private/zlib_api.html#gzNeedDict	const gzNeedDict		22
+nim	gzStreamError	gzfast/private/zlib_api.html#gzStreamError	const gzStreamError		23
+nim	gzDataError	gzfast/private/zlib_api.html#gzDataError	const gzDataError		24
+nim	gzMemError	gzfast/private/zlib_api.html#gzMemError	const gzMemError		25
+nim	gzBufError	gzfast/private/zlib_api.html#gzBufError	const gzBufError		26
+nim	gzDefaultStrategy	gzfast/private/zlib_api.html#gzDefaultStrategy	const gzDefaultStrategy		28
+nim	gzFiltered	gzfast/private/zlib_api.html#gzFiltered	const gzFiltered		29
+nim	gzHuffmanOnly	gzfast/private/zlib_api.html#gzHuffmanOnly	const gzHuffmanOnly		30
+nim	gzRle	gzfast/private/zlib_api.html#gzRle	const gzRle		31
+nim	gzFixed	gzfast/private/zlib_api.html#gzFixed	const gzFixed		32
+nim	gzInflaterCreate	gzfast/private/zlib_api.html#gzInflaterCreate	proc gzInflaterCreate(): GzInflaterHandle		34
+nim	gzInflaterDestroy	gzfast/private/zlib_api.html#gzInflaterDestroy,GzInflaterHandle	proc gzInflaterDestroy(state: GzInflaterHandle)		37
+nim	gzInflaterReset	gzfast/private/zlib_api.html#gzInflaterReset,GzInflaterHandle	proc gzInflaterReset(state: GzInflaterHandle): cint		40
+nim	gzInflaterPrime	gzfast/private/zlib_api.html#gzInflaterPrime,GzInflaterHandle,cuint,cuint	proc gzInflaterPrime(state: GzInflaterHandle; bitCount, bitValue: cuint): cint		43
+nim	gzInflaterSetDictionary	gzfast/private/zlib_api.html#gzInflaterSetDictionary,GzInflaterHandle,ptr.byte,csize_t	proc gzInflaterSetDictionary(state: GzInflaterHandle; data: ptr byte; length: csize_t): cint		47
+nim	gzInflaterStep	gzfast/private/zlib_api.html#gzInflaterStep,GzInflaterHandle,ptr.ptr.byte,ptr.csize_t,ptr.ptr.byte,ptr.csize_t,cint	proc gzInflaterStep(state: GzInflaterHandle; input: ptr ptr byte;\n               inputLength: ptr csize_t; output: ptr ptr byte;\n               outputLength: ptr csize_t; flushMode: cint): cint		51
+nim	gzInflaterTotalIn	gzfast/private/zlib_api.html#gzInflaterTotalIn,GzInflaterHandle	proc gzInflaterTotalIn(state: GzInflaterHandle): uint64		57
+nim	gzInflaterTotalOut	gzfast/private/zlib_api.html#gzInflaterTotalOut,GzInflaterHandle	proc gzInflaterTotalOut(state: GzInflaterHandle): uint64		60
+nim	gzInflaterDataType	gzfast/private/zlib_api.html#gzInflaterDataType,GzInflaterHandle	proc gzInflaterDataType(state: GzInflaterHandle): cint		63
+nim	gzCrc32	gzfast/private/zlib_api.html#gzCrc32,uint32,ptr.byte,csize_t	proc gzCrc32(previous: uint32; data: ptr byte; length: csize_t): uint32		66
+nim	gzCrc32Combine	gzfast/private/zlib_api.html#gzCrc32Combine,uint32,uint32,uint64	proc gzCrc32Combine(first, second: uint32; secondLength: uint64): uint32		69
+nim	gzZlibVersion	gzfast/private/zlib_api.html#gzZlibVersion	proc gzZlibVersion(): cstring		72
+nim	gzDeflaterCreate	gzfast/private/zlib_api.html#gzDeflaterCreate,cint,cint	proc gzDeflaterCreate(level, strategy: cint): GzDeflaterHandle		75
+nim	gzDeflaterDestroy	gzfast/private/zlib_api.html#gzDeflaterDestroy,GzDeflaterHandle	proc gzDeflaterDestroy(state: GzDeflaterHandle)		78
+nim	gzDeflaterStep	gzfast/private/zlib_api.html#gzDeflaterStep,GzDeflaterHandle,ptr.ptr.byte,ptr.csize_t,ptr.ptr.byte,ptr.csize_t,cint	proc gzDeflaterStep(state: GzDeflaterHandle; input: ptr ptr byte;\n               inputLength: ptr csize_t; output: ptr ptr byte;\n               outputLength: ptr csize_t; flushMode: cint): cint		81
+nim	gzDeflaterTotalIn	gzfast/private/zlib_api.html#gzDeflaterTotalIn,GzDeflaterHandle	proc gzDeflaterTotalIn(state: GzDeflaterHandle): uint64		87
+nim	gzDeflaterTotalOut	gzfast/private/zlib_api.html#gzDeflaterTotalOut,GzDeflaterHandle	proc gzDeflaterTotalOut(state: GzDeflaterHandle): uint64		90
+nim	crc32	gzfast/private/zlib_api.html#crc32,openArray[byte],uint32	proc crc32(data: openArray[byte]; previous: uint32 = 0): uint32		96
+nim	crc32	gzfast/private/zlib_api.html#crc32,string,uint32	proc crc32(data: string; previous: uint32 = 0): uint32		102
+nimgrp	crc32	gzfast/private/zlib_api.html#crc32-procs-all	proc		96

@@ -80,6 +80,10 @@
   <li><a class="reference" href="#close%2CSequentialDecoder" title="close(dec: var SequentialDecoder)">close(dec: var SequentialDecoder)</a></li>
 
 </ul>
+<ul class="simple nested-toc-section">consumeDecoded
+  <li><a class="reference" href="#consumeDecoded%2CSequentialDecoder%2Cint" title="consumeDecoded(dec: var SequentialDecoder; n: int)">consumeDecoded(dec: var SequentialDecoder; n: int)</a></li>
+
+</ul>
 <ul class="simple nested-toc-section">drainToFile
   <li><a class="reference" href="#drainToFile%2CSequentialDecoder%2CFile" title="drainToFile(dec: var SequentialDecoder; output: File)">drainToFile(dec: var SequentialDecoder; output: File)</a></li>
 
@@ -91,6 +95,10 @@
 </ul>
 <ul class="simple nested-toc-section">openSequentialDecoderAt
   <li><a class="reference" href="#openSequentialDecoderAt%2Cstring%2Cuint64%2CGzFastConfig" title="openSequentialDecoderAt(path: string; offset: uint64; config: GzFastConfig): SequentialDecoder">openSequentialDecoderAt(path: string; offset: uint64; config: GzFastConfig): SequentialDecoder</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">peekDecoded
+  <li><a class="reference" href="#peekDecoded%2CSequentialDecoder" title="peekDecoded(dec: var SequentialDecoder): DecodedSpan">peekDecoded(dec: var SequentialDecoder): DecodedSpan</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">readData
@@ -127,7 +135,7 @@
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
-    <a class="reference external" href="../config.html">../config</a>, <a class="reference external" href="../errors.html">../errors</a>, <a class="reference external" href="../report.html">../report</a>, <a class="reference external" href="../private/zlib_api.html">../private/zlib_api</a>, <a class="reference external" href="../gzip/header.html">../gzip/header</a>, <a class="reference external" href="../gzip/footer.html">../gzip/footer</a>
+    <a class="reference external" href="../config.html">../config</a>, <a class="reference external" href="../errors.html">../errors</a>, <a class="reference external" href="../report.html">../report</a>, <a class="reference external" href="../span.html">../span</a>, <a class="reference external" href="../private/zlib_api.html">../private/zlib_api</a>, <a class="reference external" href="../gzip/header.html">../gzip/header</a>, <a class="reference external" href="../gzip/footer.html">../gzip/footer</a>
   </dl>
 </div>
 <div class="section" id="7">
@@ -175,6 +183,18 @@
 </div>
 
 </div>
+<div id="consumeDecoded-procs-all">
+  <div id="consumeDecoded,SequentialDecoder,int">
+  <dt><pre><span class="Keyword">proc</span> <a href="#consumeDecoded%2CSequentialDecoder%2Cint"><span class="Identifier">consumeDecoded</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="sequential.html#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Advance by <tt class="docutils literal"><span class="pre"><span class="Identifier">n</span></span></tt> bytes from the span returned by <tt class="docutils literal"><span class="pre"><span class="Identifier">peekDecoded</span></span></tt>.
+    
+  </dd>
+</div>
+
+</div>
 <div id="drainToFile-procs-all">
   <div id="drainToFile,SequentialDecoder,File">
   <dt><pre><span class="Keyword">proc</span> <a href="#drainToFile%2CSequentialDecoder%2CFile"><span class="Identifier">drainToFile</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="sequential.html#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">;</span> <span class="Identifier">output</span><span class="Other">:</span> <span class="Identifier">File</span><span class="Other">)</span> {.
@@ -216,6 +236,18 @@
   <dd>
     
     Start at a verified gzip member boundary. Used after a specialised parallel path commits earlier independent members.
+    
+  </dd>
+</div>
+
+</div>
+<div id="peekDecoded-procs-all">
+  <div id="peekDecoded,SequentialDecoder">
+  <dt><pre><span class="Keyword">proc</span> <a href="#peekDecoded%2CSequentialDecoder"><span class="Identifier">peekDecoded</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="sequential.html#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../span.html#DecodedSpan"><span class="Identifier">DecodedSpan</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Return a borrowed view of the currently buffered decoded output.
     
   </dd>
 </div>
@@ -279,7 +311,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-08-07 12:12:03 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-08-08 17:11:15 UTC</small>
       </div>
     </div>
   </div>

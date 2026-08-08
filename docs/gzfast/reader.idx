@@ -1,8 +1,10 @@
 nimTitle	reader	gzfast/reader.html	module src/gzfast/reader		0
-nim	GzFastStream	gzfast/reader.html#GzFastStream	type GzFastStream		15
-nim	openGzFastStreamFromPath	gzfast/reader.html#openGzFastStreamFromPath,string,GzFastConfig	proc openGzFastStreamFromPath(path: string; config: GzFastConfig): GzFastStream		154
-nim	openGzFastStreamFromStream	gzfast/reader.html#openGzFastStreamFromStream,Stream,GzFastConfig	proc openGzFastStreamFromStream(input: Stream; config: GzFastConfig): GzFastStream		166
-nim	finish	gzfast/reader.html#finish,GzFastStream	proc finish(reader: GzFastStream): DecodeReport		170
-nim	drainToFile	gzfast/reader.html#drainToFile,GzFastStream,File,int	proc drainToFile(reader: GzFastStream; output: File; fallbackBufferSize: int): DecodeReport		189
-nim	cancel	gzfast/reader.html#cancel,GzFastStream	proc cancel(reader: GzFastStream)		213
-nim	stats	gzfast/reader.html#stats,GzFastStream	proc stats(reader: GzFastStream): DecoderStats		222
+nim	GzFastStream	gzfast/reader.html#GzFastStream	type GzFastStream		17
+nim	openGzFastStreamFromPath	gzfast/reader.html#openGzFastStreamFromPath,string,GzFastConfig	proc openGzFastStreamFromPath(path: string; config: GzFastConfig): GzFastStream		183
+nim	openGzFastStreamFromStream	gzfast/reader.html#openGzFastStreamFromStream,Stream,GzFastConfig	proc openGzFastStreamFromStream(input: Stream; config: GzFastConfig): GzFastStream		195
+nim	peekDecoded	gzfast/reader.html#peekDecoded,GzFastStream	proc peekDecoded(reader: GzFastStream): DecodedSpan		199
+nim	consumeDecoded	gzfast/reader.html#consumeDecoded,GzFastStream,int	proc consumeDecoded(reader: GzFastStream; n: int)		229
+nim	finish	gzfast/reader.html#finish,GzFastStream	proc finish(reader: GzFastStream): DecodeReport		238
+nim	drainToFile	gzfast/reader.html#drainToFile,GzFastStream,File,int	proc drainToFile(reader: GzFastStream; output: File; fallbackBufferSize: int): DecodeReport		256
+nim	cancel	gzfast/reader.html#cancel,GzFastStream	proc cancel(reader: GzFastStream)		280
+nim	stats	gzfast/reader.html#stats,GzFastStream	proc stats(reader: GzFastStream): DecoderStats		289
