@@ -14,11 +14,14 @@
 /benchmarks/generated/
 /benchmarks/bench_decode
 /benchmarks/bench_fastq
+/benchmarks/bench_writer
 /benchmarks/generate_corpus
 /fastq-bench.csv
 /fastq-summary.csv
 /fastq-bench-*.csv
 /fastq-summary-*.csv
+/writer-bench.csv
+/writer-summary.csv
 /benchmarks/*.csv
 
 # Generated example binaries
