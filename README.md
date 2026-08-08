@@ -1,5 +1,7 @@
 # gzfast
 
+![gzfast logo](docs/gzfast.svg)
+
 Fast, verified gzip I/O for Nim, with multithreaded decompression and
 **zero system library requirements**.
 
@@ -34,7 +36,7 @@ discard input.finish()
   binary.
 * **Verified streaming.** Reaching EOF (or calling `finish()`)
   guarantees the *entire* compressed input was validated: gzip headers,
-  optional fields, DEFLATE syntax, and every member's CRC32 and ISIZE —
+  optional fields, DEFLATE syntax, and every member's CRC32 and ISIZE ???
   including every member of concatenated gzip and BGZF.
 * **Generic gzip writing.** `GzFastWriter` writes standard gzip streams
   incrementally with caller-owned buffers, maintaining CRC32 and ISIZE
@@ -185,16 +187,16 @@ Current release state: **0.1.0-alpha candidate**.
 
 | Path | Status |
 |---|---|
-| Verified sequential decoding (headers, CRC32, ISIZE, multi-member, output limit) | ✅ complete |
-| Public API (`openGzFast`, `decodeTo`, `decompressFile`, `openGzFastSequential`) + CLI | ✅ complete |
-| Vendored, symbol-prefixed zlib with package-install validation | ✅ complete |
-| Positional source, shared buffers, bounded queues, worker pool and ordered coordinator | ✅ complete |
-| BGZF and concatenated-member parallelism | ✅ complete |
-| Pure-Nim bit reader, Huffman/dynamic/stored structures and block finder | ✅ complete |
-| Marker decoder and exact marker-free zlib handoff | ✅ complete |
-| Marker resolution and ordinary single-member gzip parallel path | ✅ complete |
-| Corruption, cancellation, large-stream, fuzz and sanitizer hardening | ✅ complete |
-| Profile-driven scalar optimization, BGZF grouping and benchmark automation | ✅ complete |
+| Verified sequential decoding (headers, CRC32, ISIZE, multi-member, output limit) | ??? complete |
+| Public API (`openGzFast`, `decodeTo`, `decompressFile`, `openGzFastSequential`) + CLI | ??? complete |
+| Vendored, symbol-prefixed zlib with package-install validation | ??? complete |
+| Positional source, shared buffers, bounded queues, worker pool and ordered coordinator | ??? complete |
+| BGZF and concatenated-member parallelism | ??? complete |
+| Pure-Nim bit reader, Huffman/dynamic/stored structures and block finder | ??? complete |
+| Marker decoder and exact marker-free zlib handoff | ??? complete |
+| Marker resolution and ordinary single-member gzip parallel path | ??? complete |
+| Corruption, cancellation, large-stream, fuzz and sanitizer hardening | ??? complete |
+| Profile-driven scalar optimization, BGZF grouping and benchmark automation | ??? complete |
 
 Path-based input selects the safest available route: BGZF, dense
 independent members, then the sequential zlib path. The rolling
