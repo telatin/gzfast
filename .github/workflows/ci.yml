@@ -22,7 +22,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install OpenSSL (Windows)
         if: runner.os == 'Windows'
-        run: choco install openssl --no-progress
+        run: choco install openssl --no-progress --version=1.1.1.2100
+      - name: Add OpenSSL to PATH (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          echo "C:\Program Files\OpenSSL-Win64\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
       - uses: iffy/install-nim@v5
         with:
           version: ${{ matrix.nim-version }}
@@ -49,7 +54,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install OpenSSL (Windows)
         if: runner.os == 'Windows'
-        run: choco install openssl --no-progress
+        run: choco install openssl --no-progress --version=1.1.1.2100
+      - name: Add OpenSSL to PATH (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          echo "C:\Program Files\OpenSSL-Win64\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
       - uses: iffy/install-nim@v5
         with:
           version: ${{ matrix.nim-version }}
