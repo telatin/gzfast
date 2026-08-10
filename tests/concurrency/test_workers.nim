@@ -2,6 +2,8 @@
 
 import std/[os, unittest]
 import gzfast/buffers
+import gzfast/config
+import gzfast/source
 import gzfast/scheduler/[bounded_queue, controller, coordinator, jobs]
 
 proc checkPayload(result: JobResult; expected: byte) =
@@ -175,3 +177,25 @@ suite "worker runtime":
     right.joinWorkers()
     check left.allocations().currentBytes == 0
     check right.allocations().currentBytes == 0
+
+  test "cancellation releases popped resolution job inputs":
+    # A resolution job popped just before cancellation carries owned
+    # markerInput/windowInput buffers; the queue drain never sees them.
+    let owner = openMemoryReadAtSource(newSeq[byte](64))
+    let runtime = initMarkerRuntime(owner, defaultGzFastConfig(),
+                                    workerCount = 1, queueCapacity = 4,
+                                    reorderCapacity = 4)
+    var markerInput = allocSharedBuffer(4, elementWidth = 2,
+      owner = boWorker, tracker = addr runtime.tracker)
+    let symbols = cast[ptr UncheckedArray[uint16]](markerInput.data)
+    for i in 0 ..< 4:
+      symbols[i] = uint16(ord('a') + i)
+    markerInput.setLength(4)
+    check runtime.submit(DecodeJob(ordinal: 0, kind: jkResolveMarkers,
+      markerInput: markerInput, symbolCount: 4, delayMs: 300)) == qsOk
+    sleep(50) # the worker pops the job and sleeps through the delay
+    runtime.cancelAndJoin()
+    let allocations = runtime.allocations()
+    check allocations.currentBytes == 0
+    check allocations.liveBuffers == 0
+    runtime.deinit()

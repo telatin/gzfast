@@ -374,6 +374,10 @@ proc workerMain(arg: WorkerThreadArg) {.thread.} =
       sleep(job.delayMs)
     var result: JobResult
     if arg.cancellation[].isCancelled():
+      # A popped resolution job carries owned input buffers; the queue
+      # drain only covers jobs that were never popped.
+      if not job.markerInput.data.isNil: job.markerInput.release()
+      if not job.windowInput.data.isNil: job.windowInput.release()
       result = failedMember(job, weCancelled, job.compressedStart)
     else:
       try:

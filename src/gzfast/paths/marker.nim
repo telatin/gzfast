@@ -245,6 +245,19 @@ proc startAuthoritativeReplay(decoder: MarkerPathDecoder) =
   decoder.paths.incl(dpSequential)
   decoder.paths.incl(dpMixed)
 
+proc fallbackConfig(decoder: MarkerPathDecoder): GzFastConfig =
+  ## Config for a sequential fallback that starts at a verified member
+  ## boundary: every byte it emits is additional output, so the limit is
+  ## reduced by what the marker path already emitted. (The authoritative
+  ## replay keeps the full limit instead: it re-decodes from byte 0 and
+  ## its own counter equals the total delivered to the consumer.)
+  result = decoder.config
+  if result.outputLimit.isSome:
+    let limit = result.outputLimit.get
+    result.outputLimit = some(
+      if decoder.totalOut >= limit: 0'u64
+      else: limit - decoder.totalOut)
+
 proc verifyFooter(decoder: MarkerPathDecoder) =
   let footerOffset = (decoder.currentBit + 7) shr 3
   var bytes: array[8, byte]
@@ -262,7 +275,7 @@ proc verifyFooter(decoder: MarkerPathDecoder) =
     decoder.done = true
   else:
     decoder.fallback = openSequentialDecoderAt(decoder.path, nextOffset,
-                                                decoder.config)
+                                                decoder.fallbackConfig())
     decoder.hasFallback = true
     decoder.paths.incl(dpSequential)
     decoder.paths.incl(dpMixed)
