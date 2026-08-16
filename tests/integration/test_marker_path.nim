@@ -208,3 +208,52 @@ suite "ordinary gzip marker path":
     except GzFastError as error:
       check error.kind == geOutputLimit
       check output.len <= 3000
+
+  test "output limit spans the marker to sequential member boundary":
+    # Member 0 decodes through the marker path; member 1 through the
+    # sequential fallback opened after the verified footer. The fallback
+    # limit must be reduced by the bytes the marker path already emitted.
+    # inFlightChunks = 2 keeps the member-parallel probe span shorter than
+    # member 0, so the file is not claimed by the member-parallel path.
+    let fixture = buildParallelMarkerFixture()
+    var secondRaw: TestBitWriter
+    secondRaw.addBits(1, 1)
+    secondRaw.addBits(0, 2)
+    secondRaw.alignByte()
+    let secondPlain = repeat('B', 1000)
+    secondRaw.addBits(uint32(secondPlain.len), 16)
+    secondRaw.addBits(uint32(not uint16(secondPlain.len)), 16)
+    for c in secondPlain:
+      secondRaw.addByte(byte(c))
+    let combined = fixture.gzip & gzipMember(secondRaw.bytes(), secondPlain)
+    let path = getTempDir() / "gzfast_marker_limit_members.gz"
+    writeFile(path, combined)
+    defer: removeFile(path)
+    let fullPlain = fixture.plain & secondPlain
+
+    var config = markerConfig(4)
+    config.inFlightChunks = 2
+    config.outputLimit = some(uint64(fixture.plain.len + 500))
+    let input = initGzFastDecoder(config).open(path)
+    defer: input.close()
+    var output: string
+    var buffer = newString(211)
+    try:
+      while true:
+        let count = input.readData(addr buffer[0], buffer.len)
+        if count == 0: break
+        output.add(buffer[0 ..< count])
+      check false
+    except GzFastError as error:
+      check error.kind == geOutputLimit
+      check output.len == fixture.plain.len + 500
+      check output == fullPlain[0 ..< output.len]
+
+    var exactConfig = markerConfig(4)
+    exactConfig.inFlightChunks = 2
+    exactConfig.outputLimit = some(uint64(fullPlain.len))
+    let exact = readEverything(path, exactConfig)
+    check exact.data == fullPlain
+    check exact.report.crcVerified
+    check dpMarkerWindow in exact.report.pathsUsed
+    check dpSequential in exact.report.pathsUsed

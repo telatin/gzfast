@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.2.2"
+version       = "0.3.0"
 author        = "gzfast contributors"
 description   = "Fast, verified gzip I/O with a bundled zlib (no system libraries required)"
 license       = "MIT"
