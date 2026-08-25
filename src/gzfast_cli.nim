@@ -4,7 +4,11 @@ import std/[monotimes, os, parseopt, streams, strutils, terminal, times]
 import ./gzfast
 
 const
-  version = "0.2.0"
+  # Nimble injects `-d:NimblePkgVersion=<version>` from the .nimble file when
+  # building through nimble, making that file the single source of truth. The
+  # default below is only used for direct `nim c` builds and should track the
+  # .nimble version.
+  version {.strdefine: "NimblePkgVersion".} = "0.3.0"
 
 const helpText = """
 gzfast — fast, verified gzip I/O (no system zlib required)

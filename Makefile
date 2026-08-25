@@ -1,4 +1,14 @@
 NIMBLE ?= nimble
+NIM ?= nim
+
+# Single source of truth for the version: the package's .nimble file.
+# Anchored to the `version = "..."` assignment so unrelated lines that
+# mention `version` (e.g. the pack task) cannot be picked up.
+VERSION := $(shell grep -E '^version[[:space:]]*=' gzfast.nimble | head -1 | grep -o '[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*')
+
+# Shared flags for direct `nim c` builds. Nimble already injects
+# NimblePkgVersion; passing it here makes direct compiles agree.
+NIMFLAGS ?= --mm:orc --threads:on -d:release -d:NimblePkgVersion=$(VERSION) -p:src --hints:off
 
 FASTQ_INPUTS ?= $(wildcard files/*.gz)
 FASTQ_THREADS ?= 1,4,8
@@ -45,14 +55,17 @@ CONTROL_WARMUP ?= 1
 CONTROL_CSV ?= fastq-bench-controls.csv
 CONTROL_SUMMARY_CSV ?= fastq-summary-controls.csv
 
-.PHONY: all build test bench bench-core bench-fastq bench-exhaustive bench-io bench-controls clean help
+.PHONY: all build version test bench bench-core bench-fastq bench-exhaustive bench-io bench-controls clean help
 
 all: build
 
 bench: build bench-core bench-fastq
 
 build:
-	$(NIMBLE) build -d:release
+	$(NIM) c $(NIMFLAGS) --nimcache:./nimcache/cli -o:./gzfast src/gzfast_cli.nim
+
+version:
+	@echo $(VERSION)
 
 test:
 	$(NIMBLE) test
@@ -112,7 +125,7 @@ bench-io: build
 	fi
 
 bench-controls: build
-	nim c -d:release --threads:on --mm:orc -p:src --hints:off \
+	$(NIM) c $(NIMFLAGS) \
 		-o:benchmarks/generate_corpus benchmarks/generate_corpus.nim
 	benchmarks/generate_corpus
 	$(NIMBLE) benchFastq
@@ -124,7 +137,8 @@ bench-controls: build
 	@echo "wrote $(CONTROL_SUMMARY_CSV)"
 
 help:
-	@echo "make              build optimized gzfast binary"
+	@echo "make              build optimized gzfast binary (version $(VERSION))"
+	@echo "make version      print the version read from gzfast.nimble"
 	@echo "make test         run normal, sanitizer, fuzz-smoke and package tests"
 	@echo "make bench        run generated checks plus practical real-file benchmark"
 	@echo "make bench-exhaustive"
