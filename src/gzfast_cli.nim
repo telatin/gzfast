@@ -19,9 +19,13 @@ Usage:
   gzfast -c [options] [FILE]
   gzfast --verify [options] FILE
 
+A FILE of "-", or an omitted FILE, means standard input. Reading gzip
+data from standard input requires -dc, --stdout, or --verify (there is
+no default output filename for a stream).
+
 Options:
   -d, --decompress       decompress (default)
-  -c, --compress         compress; read stdin when FILE is omitted
+  -c, --compress         compress; read stdin when FILE is "-" or omitted
       --stdout           write to standard output
   -o, --output PATH      write to PATH
   -t, --threads N        maximum worker threads (0 = automatic)
@@ -52,6 +56,7 @@ type
     verifyOnly: bool
     showStats: bool
     quiet: bool
+    fromStdin: bool
     config: GzFastConfig
 
 proc parseSize(s: string): uint64 =
@@ -99,12 +104,19 @@ proc parseArgs(): CliOptions =
     case p.kind
     of cmdEnd: break
     of cmdArgument:
-      if result.inputPath.len != 0:
+      if result.inputPath.len != 0 or result.fromStdin:
         raise newException(ValueError,
           "multiple input files given; expected exactly one")
       result.inputPath = p.key
     of cmdShortOption, cmdLongOption:
       case p.key
+      of "":
+        # std/parseopt reports a bare "-" as a short option with an empty
+        # key. Treat it as the explicit standard-input marker.
+        if result.fromStdin or result.inputPath.len != 0:
+          raise newException(ValueError,
+            "multiple input files given; expected exactly one")
+        result.fromStdin = true
       of "d", "decompress": result.decompressExplicit = true
       of "c": result.compress = true
       of "compress":
@@ -148,8 +160,21 @@ proc parseArgs(): CliOptions =
   if result.compress and result.toStdout and result.outputPath.len > 0:
     raise newException(ValueError,
       "--stdout and --output cannot be used together")
-  if result.inputPath.len == 0 and not result.compress:
-    raise newException(ValueError, "no input file given")
+  if result.compress:
+    # Compression already reads standard input when no path is given;
+    # an explicit "-" selects the same source.
+    if result.inputPath.len == 0:
+      result.fromStdin = true
+  else:
+    # Decompression. An omitted FILE, or "-", means standard input.
+    if result.inputPath.len == 0:
+      result.fromStdin = true
+    # A stream has no default output filename, so decompressing standard
+    # input requires an explicit sink: -dc, --stdout, or --verify.
+    if result.fromStdin and not (result.toStdout or result.verifyOnly):
+      raise newException(ValueError,
+        "reading gzip data from standard input requires -dc, --stdout, " &
+        "or --verify")
 
 proc defaultOutputPath(inputPath: string): string =
   if inputPath.endsWith(".gz"):
@@ -259,6 +284,41 @@ proc runCompression(opts: CliOptions): int =
     printWriteReport(report, elapsed, cpu)
   0
 
+when defined(windows):
+  proc c_setmode(fd, mode: cint): cint
+    {.importc: "_setmode", header: "<io.h>".}
+  proc c_fileno(f: File): cint {.importc: "_fileno", header: "<stdio.h>".}
+  const oBinary = 0x8000.cint # _O_BINARY
+
+proc setBinaryMode(f: File) =
+  ## Prevent CRLF translation on Windows so piped gzip streams are not
+  ## corrupted. A no-op on POSIX, where stdio is already binary-clean.
+  when defined(windows):
+    discard c_setmode(c_fileno(f), oBinary)
+  else:
+    discard f
+
+proc openStdinReader(opts: CliOptions): GzFastStream =
+  ## Decode standard input via the authoritative sequential backend.
+  ## Non-positional sources cannot use the BGZF/member/marker paths.
+  setBinaryMode(stdin)
+  let source = newFileStream(stdin)
+  if source.isNil:
+    raise newException(IOError, "cannot open standard input")
+  openGzFastSequential(source, opts.config)
+
+proc drainStdinToStdout(reader: GzFastStream): DecodeReport =
+  ## Pull decoded bytes and write them verbatim to stdout.
+  setBinaryMode(stdout)
+  var buf = newString(1 shl 20)
+  while true:
+    let n = reader.readData(addr buf[0], buf.len)
+    if n == 0:
+      break
+    if stdout.writeBuffer(addr buf[0], n) != n:
+      raise newException(IOError, "output write to stdout failed")
+  reader.finish()
+
 proc mapError(e: ref GzFastError): int =
   stderr.writeLine("gzfast: error: " & e.msg &
     " (compressed offset " & $e.compressedOffset &
@@ -286,13 +346,16 @@ proc main(): int =
     if opts.verifyOnly:
       let wallStart = getMonoTime()
       let cpuStart = cpuTime()
-      let reader = decoder.open(opts.inputPath)
+      let reader =
+        if opts.fromStdin: openStdinReader(opts)
+        else: decoder.open(opts.inputPath)
       let report = reader.finish()
       reader.close()
       let elapsed = (getMonoTime() - wallStart).inNanoseconds.float / 1e9
       let cpu = cpuTime() - cpuStart
       if not opts.quiet:
-        stderr.writeLine("gzfast: " & opts.inputPath & ": OK")
+        let label = if opts.fromStdin: "<stdin>" else: opts.inputPath
+        stderr.writeLine("gzfast: " & label & ": OK")
       if opts.showStats:
         printReport(report, elapsed, cpu)
       return 0
@@ -304,7 +367,15 @@ proc main(): int =
         return 2
       let wallStart = getMonoTime()
       let cpuStart = cpuTime()
-      let report = decoder.decodeTo(opts.inputPath, stdout)
+      let report =
+        if opts.fromStdin:
+          let reader = openStdinReader(opts)
+          try:
+            drainStdinToStdout(reader)
+          finally:
+            reader.close()
+        else:
+          decoder.decodeTo(opts.inputPath, stdout)
       let elapsed = (getMonoTime() - wallStart).inNanoseconds.float / 1e9
       let cpu = cpuTime() - cpuStart
       if opts.showStats:

@@ -226,6 +226,60 @@ suite "gzfast CLI":
     check output.len == int(f.length)
     check crc32(output) == f.crc32
 
+  test "-dc reads a .gz from standard input":
+    let f = fixtureByName("small_text.gz")
+    let (output, code) = runCliWithInput("-dc", readFixture(f.name))
+    check code == 0
+    check output.len == int(f.length)
+    check crc32(output) == f.crc32
+
+  test "-dc - reads standard input explicitly":
+    let f = fixtureByName("small_text.gz")
+    let (output, code) = runCliWithInput("-dc -", readFixture(f.name))
+    check code == 0
+    check output.len == int(f.length)
+    check crc32(output) == f.crc32
+
+  test "--stdout decompresses standard input":
+    let f = fixtureByName("small_text.gz")
+    let (output, code) = runCliWithInput("--stdout", readFixture(f.name))
+    check code == 0
+    check output.len == int(f.length)
+    check crc32(output) == f.crc32
+
+  test "concatenated members decode through -dc from stdin":
+    let f = fixtureByName("concat_3.gz")
+    let (output, code) = runCliWithInput("-dc", readFixture(f.name))
+    check code == 0
+    check output.len == int(f.length)
+    check crc32(output) == f.crc32
+
+  test "--verify succeeds on a valid stream from stdin":
+    let (_, code) = runCliWithInput("--verify", readFixture("fastq.gz"))
+    check code == 0
+
+  test "--verify - on a truncated stream from stdin gives exit 1":
+    let data = readFixture("small_text.gz")
+    let (_, code) = runCliWithInput("--verify -", data[0 ..< data.len - 5])
+    check code == 1
+
+  test "-dc on a corrupt stream from stdin gives exit 1":
+    var data = toBytes(readFixture("small_text.gz"))
+    data[^8] = data[^8] xor 0xFF # damage the stored CRC32
+    let (_, code) = runCliWithInput("-dc", toString(data))
+    check code == 1
+
+  test "standard input without an explicit sink is a usage error":
+    # Strict: reading a stream requires -dc, --stdout, or --verify.
+    let (_, codeDash) = runCliWithInput("-", readFixture("small_text.gz"))
+    check codeDash == 2
+    let (_, codeBare) = runCliWithInput("", readFixture("small_text.gz"))
+    check codeBare == 2
+
+  test "an explicit - together with a file path is rejected":
+    let (_, code) = runCli(" -dc - " & quoteShell(fixturePath("small_text.gz")))
+    check code == 2
+
   test "--version and --help":
     check runCli( " --version").exitCode == 0
     check runCli( " --help").exitCode == 0
