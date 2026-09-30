@@ -28,6 +28,8 @@ type
     expectedStart: uint64
     inFlight: int
     batchActive: bool
+    batchScheduled: bool
+    lastBatchStart: uint64
     planningDone: bool
     chainBroken: bool
     fallbackOffset: uint64
@@ -196,6 +198,15 @@ proc scheduleMemberBatch(decoder: ParallelMemberDecoder) =
     decoder.planningDone = true
     decoder.runtime.closeAdmission()
     return
+  # Every batch starts with the authoritative member, which is either
+  # accepted (advancing expectedStart), raised, or breaks the chain. A second
+  # batch from the same offset would redo identical work forever.
+  if decoder.batchScheduled and decoder.lastBatchStart == decoder.expectedStart:
+    raise newGzFastError(geInternal,
+      "parallel member batch rescheduled without progress",
+      decoder.expectedStart)
+  decoder.batchScheduled = true
+  decoder.lastBatchStart = decoder.expectedStart
   let jobs = planMemberBatch(decoder.runtime.source,
     decoder.expectedStart, decoder.scanEnd(decoder.expectedStart),
     decoder.config.maxHeaderSize, decoder.horizon, decoder.nextOrdinal)
@@ -239,6 +250,24 @@ proc raiseWorkerError(result: JobResult) =
     raise newGzFastError(geInternal, "parallel member worker failure", offset,
                          memberIndex)
 
+proc breakChain(decoder: ParallelMemberDecoder) =
+  ## Stop planning; prepareNext drains in-flight jobs, then falls back to
+  ## sequential decoding at expectedStart.
+  decoder.chainBroken = true
+  decoder.fallbackOffset = decoder.expectedStart
+  if not decoder.planningDone:
+    decoder.planningDone = true
+    decoder.runtime.closeAdmission()
+
+proc rejectChain(decoder: ParallelMemberDecoder; start: uint64) =
+  ## A result at or after expectedStart could not extend the chain. In
+  ## member mode a speculative job only needs a fresh batch from
+  ## expectedStart, where it is retried authoritatively (so corruption is
+  ## raised with its member index). A rejected authoritative job (output cap)
+  ## would fail identically on every retry, so fall back instead.
+  if decoder.mode == pmmBgzf or start == decoder.lastBatchStart:
+    decoder.breakChain()
+
 proc acceptResult(decoder: ParallelMemberDecoder;
                   incoming: var JobResult): bool =
   if incoming.status == jrsError:
@@ -251,8 +280,7 @@ proc acceptResult(decoder: ParallelMemberDecoder;
     return false # speculative failure is rejection, not file corruption
   if incoming.status != jrsOk:
     if incoming.compressedStart >= decoder.expectedStart:
-      decoder.chainBroken = true
-      decoder.fallbackOffset = decoder.expectedStart
+      decoder.rejectChain(incoming.compressedStart)
     if not incoming.output.data.isNil:
       incoming.output.release(boCoordinator)
     return false
@@ -261,8 +289,7 @@ proc acceptResult(decoder: ParallelMemberDecoder;
     return false # plausible header inside authoritative payload
   if incoming.compressedStart > decoder.expectedStart:
     incoming.output.release(boCoordinator)
-    decoder.chainBroken = true
-    decoder.fallbackOffset = decoder.expectedStart
+    decoder.rejectChain(incoming.compressedStart)
     return false
   if decoder.config.outputLimit.isSome and
      incoming.decodedLength > decoder.config.outputLimit.get -
@@ -285,7 +312,8 @@ proc prepareNext(decoder: ParallelMemberDecoder) =
         not decoder.hasFallback:
     if decoder.mode == pmmBgzf:
       decoder.scheduleBgzf()
-    elif decoder.inFlight == 0 and not decoder.planningDone:
+    elif decoder.inFlight == 0 and not decoder.planningDone and
+         not decoder.chainBroken:
       decoder.batchActive = false
       decoder.scheduleMemberBatch()
 

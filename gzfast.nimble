@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.3.0"
+version       = "0.3.1"
 author        = "gzfast contributors"
 description   = "Fast, verified gzip I/O with a bundled zlib (no system libraries required)"
 license       = "MIT"
@@ -65,6 +65,9 @@ task test, "Run the complete normal test suite":
             "concurrency/test_member_workers", "concurrency/test_public_stress"]:
     exec "nim c --mm:orc --threads:on -p:src --hints:off tests/" & t & ".nim"
     exec "nimcache/run_with_timeout 300000 tests/" & t
+  # Livelock regression: must fail fast rather than hang CI.
+  exec "nim c --mm:orc --threads:on -p:src --hints:off tests/integration/test_large_members.nim"
+  exec "nimcache/run_with_timeout 60000 tests/integration/test_large_members"
 
 task testFast, "Run unit tests only":
   for t in ["unit/test_zlib_api", "unit/test_header", "unit/test_footer",
