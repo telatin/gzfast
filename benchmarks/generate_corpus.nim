@@ -39,7 +39,8 @@ proc makePseudoRandom(targetBytes: int): string =
     result[i] = chr(int((state shr 24) and 0xFF'u32))
 
 when isMainModule:
-  let outputDir = currentSourcePath().parentDir() / "generated"
+  let outputDir = if paramCount() > 0: paramStr(1)
+                  else: currentSourcePath().parentDir() / "generated"
   createDir(outputDir)
   writeFile(outputDir / "marker-multiblock-64m.gz",
             buildRepeatedBlocksGzip(384, 174763))
