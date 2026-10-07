@@ -145,6 +145,12 @@ task fuzzSmoke, "Build fuzz harnesses and run the committed seed corpus":
 task testPackage, "Pack, install into a clean Nimble dir and compile a consumer":
   exec "nim c -r --mm:orc --hints:off tests/package/test_package.nim"
 
+task release, "Build an optimized stripped release binary with LTO":
+  exec "nim c -d:release --opt:speed -d:lto -d:strip " &
+       "--threads:on --mm:orc -p:src --hints:off " &
+       "-d:NimblePkgVersion=" & version & " " &
+       "--nimcache:nimcache/release -o:gzfast src/gzfast_cli.nim"
+
 task bench, "Run benchmarks":
   exec "nim e benchmarks/run_benchmarks.nims"
 
