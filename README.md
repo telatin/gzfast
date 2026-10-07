@@ -188,7 +188,12 @@ throughput, and mode-specific decode or compression statistics.
 
 ## Release status
 
-Current development release: **0.2.0 release candidate**.
+Current development release: ![GitHub Release](https://img.shields.io/github/v/release/telatin/gzfast)
+
+Versione 0.3.1 fixed a bug in parsing multiblock gz files
+
+Version 0.3 unified version management in the package and added support for STDIN.
+
 
 Version 0.2.0 adds generic streaming gzip output, CLI compression, hardened
 writer lifecycle/error handling, and deterministic writer benchmarks. The
