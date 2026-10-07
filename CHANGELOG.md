@@ -3,6 +3,28 @@
 All notable changes to this project are documented here. The format
 follows common changelog conventions; versions follow SemVer.
 
+## [0.3.1]
+
+### Fixed
+
+* Fix livelock decoding concatenated gzip members larger than
+  `maxSpeculativeOutput`. With automatic or explicit multi-threading, a
+  file with two or more members where any member decoded to more than
+  16 MiB (the default cap) re-scheduled the same rejected batch forever
+  instead of falling back to sequential decoding. Typical triggers were
+  `cat a.gz b.gz`, `gzip -c x >> y.gz`, SRA dumps and merged lanes.
+  Workaround for 0.3.0: `threads = 1`, or decode from a stream.
+* Breaking the parallel member chain now also closes planning, and
+  re-scheduling a batch from the same offset without progress raises
+  `geInternal` instead of spinning.
+
+### Added
+
+* `tests/integration/test_large_members`: generated multi-member FASTQ
+  fixtures (big, mixed, big-then-tiny, many-small) decoded with automatic
+  and 4 threads and through the sequential stream entry, under a
+  wall-clock guard.
+
 ## [0.2.0] 
 
 ### Added

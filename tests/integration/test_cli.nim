@@ -12,8 +12,10 @@ proc buildCli(): string =
     return cliPath
   let outPath = getTempDir() / "gzfast_cli_test_bin"
   let projectRoot = currentSourcePath().parentDir().parentDir().parentDir()
+  let cachePath = projectRoot / "nimcache" / "tasks" / "cli-integration" / "gzfast_cli"
   let (output, code) = execCmdEx("nim c --mm:orc --threads:on -d:release " &
-    "--hints:off -o:" & outPath & " " & projectRoot / "src" / "gzfast_cli.nim")
+    "--hints:off --forceBuild:on --nimcache:" & quoteShell(cachePath) &
+    " -o:" & quoteShell(outPath) & " " & quoteShell(projectRoot / "src" / "gzfast_cli.nim"))
   if code != 0:
     raise newException(AssertionDefect, "CLI build failed:\n" & output)
   cliPath = outPath
