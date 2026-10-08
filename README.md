@@ -360,6 +360,23 @@ speedup versus `gunzip`, speedup versus the best default gzfast run for
 that dataset and output mode, speedup versus `pigz` baselines when
 available, and marker/default same-thread wall-time ratios.
 
+Marker API rows also record the first transition reason/detail, the exact
+continuation status, submitted decode jobs, committed worker bytes, accepted
+exact-inflate bytes, bytes committed before the transition, replayed prefix
+bytes, fresh sequential fallback bytes, and the compressed checkpoint offset.
+`mfrMarkerFreeHandoff` is an intentional handoff, while `mfrFollowingMember`
+means the first member finished and remaining members use sequential decoding.
+`marker_replayed_bytes` counts only the duplicate prefix discarded during
+authoritative replay, not fresh fallback output or rejected speculative work.
+The summary preserves distinct reasons/statuses and reports the maximum of
+each counter across runs. Older CSVs remain readable, with unavailable marker
+diagnostics left blank. CLI `--stats` prints these diagnostics on a second
+stderr line when the marker path was admitted.
+
+After building the CLI and harness (`nimble release` and `nimble benchFastq`),
+run `python3 tests/helpers/check_bench_marker.py` to check raw CSV layout,
+legacy CSV compatibility, diagnostic aggregation, and incomplete schemas.
+
 See `ARCHITECTURE.md` for the design, `PROJECT.md` for the full
 implementation brief, `UPSTREAM.md` for pinned upstream references,
 `benchmarks/PROFILE.md` for measured optimization results, and
