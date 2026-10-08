@@ -15,7 +15,8 @@ proc gzipMember(raw: seq[byte]; plain: string): string =
   result.appendLe32(crc32(plain))
   result.appendLe32(uint32(plain.len))
 
-proc buildParallelMarkerFixture(): tuple[gzip, plain: string] =
+proc buildParallelMarkerFixture(tailLiterals = 0; exactTail = false):
+    tuple[gzip, plain: string] =
   var writer: TestBitWriter
   # Candidate 0.
   writer.addMinimalDynamicHeader(final = false)
@@ -32,11 +33,17 @@ proc buildParallelMarkerFixture(): tuple[gzip, plain: string] =
   # Candidate 2. The final fixed block immediately refers to predecessor.
   writer.addMinimalDynamicHeader(final = false)
   writer.addBits(0, 1)
-  writer.addFixedBlockHeader(final = true)
+  writer.addFixedBlockHeader(final = not exactTail)
   writer.addFixedSymbol(285) # length 258
   writer.addFixedDistance(0) # distance 1
+  for _ in 0 ..< tailLiterals: writer.addFixedSymbol(ord('A'))
   writer.addFixedSymbol(256)
-  result.plain = repeat('A', 4258)
+  result.plain = repeat('A', 4258 + tailLiterals)
+  if exactTail:
+    writer.addFixedBlockHeader(final = true)
+    writer.addFixedSymbol(ord('Z'))
+    writer.addFixedSymbol(256)
+    result.plain.add('Z')
   result.gzip = gzipMember(writer.bytes(), result.plain)
 
 proc readEverything(path: string; config: GzFastConfig):
@@ -69,6 +76,7 @@ suite "ordinary gzip marker path":
     check decoded.data == fixture.plain
     check decoded.report.pathsUsed == {dpSequential}
     check decoded.report.crcVerified
+    check decoded.report.markerDiagnostics == MarkerDiagnostics()
 
   test "rolling marker jobs resolve predecessor matches in order":
     let fixture = buildParallelMarkerFixture()
@@ -86,6 +94,13 @@ suite "ordinary gzip marker path":
       check parallel.report.memberCount == 1
       check parallel.report.crcVerified
       check parallel.report.peakWorkers >= 2
+      let marker = parallel.report.markerDiagnostics
+      check marker.decodeJobs > 0
+      check marker.committedBytes == uint64(fixture.plain.len)
+      check marker.exactBytes == 0
+      check marker.fallbackReason == mfrNone
+      check marker.replayedBytes == 0
+      check marker.fallbackBytes == 0
 
     config.threads = 1
     let sequential = readEverything(path, config)
@@ -106,6 +121,8 @@ suite "ordinary gzip marker path":
     check report.decompressedBytes == uint64(fixture.plain.len)
     check report.memberCount == 1
     check report.crcVerified
+    check report.markerDiagnostics.committedBytes == uint64(fixture.plain.len)
+    check report.markerDiagnostics.fallbackReason == mfrNone
 
   test "valid dynamic header bytes inside stored payload fall back safely":
     var fake: TestBitWriter
@@ -158,6 +175,62 @@ suite "ordinary gzip marker path":
     check dpMarkerWindow in decoded.report.pathsUsed
     check dpSequential in decoded.report.pathsUsed
     check dpMixed in decoded.report.pathsUsed
+    let marker = decoded.report.markerDiagnostics
+    check marker.fallbackReason == mfrBoundaryMismatch
+    check marker.exactStatus == "edsStreamEnd"
+    check marker.committedBytes == 0
+    check marker.exactBytes == uint64(plain.len)
+    check marker.bytesBeforeFallback == 0
+    check marker.replayedBytes == 0
+    check marker.fallbackBytes == 0
+
+  test "output cap diagnostics distinguish replay from fresh fallback output":
+    let fixture = buildParallelMarkerFixture(tailLiterals = 6000)
+    let path = getTempDir() / "gzfast_marker_replay_diagnostics.gz"
+    writeFile(path, fixture.gzip)
+    defer: removeFile(path)
+    var config = markerConfig(4)
+    config.inFlightChunks = 2
+    config.decodedChunkSize = 4096
+    config.maxSpeculativeOutput = 4096
+    let decoded = readEverything(path, config)
+    check decoded.data == fixture.plain
+    check decoded.report.crcVerified
+    let marker = decoded.report.markerDiagnostics
+    check marker.fallbackReason == mfrDecodeRejected
+    check marker.fallbackDetail == "mdsOutputLimit"
+    check marker.exactStatus == "edsOutputLimit"
+    check marker.committedBytes == 4000
+    check marker.bytesBeforeFallback == 4000
+    check marker.replayedBytes == 4000
+    check marker.fallbackBytes == uint64(fixture.plain.len - 4000)
+    check marker.exactBytes == 0
+    check marker.fallbackCompressedOffset > 10
+    check marker.committedBytes + marker.exactBytes + marker.fallbackBytes ==
+      decoded.report.decompressedBytes
+    let input = initGzFastDecoder(config).open(path)
+    defer: input.close()
+    check input.finish().markerDiagnostics == marker
+
+  test "marker-free handoff is distinct from a rejected decode":
+    let fixture = buildParallelMarkerFixture(tailLiterals = 40000, exactTail = true)
+    let path = getTempDir() / "gzfast_marker_handoff_diagnostics.gz"
+    writeFile(path, fixture.gzip)
+    defer: removeFile(path)
+    var config = markerConfig(4)
+    config.inFlightChunks = 2
+    let decoded = readEverything(path, config)
+    check decoded.data == fixture.plain
+    check decoded.report.crcVerified
+    let marker = decoded.report.markerDiagnostics
+    check marker.fallbackReason == mfrMarkerFreeHandoff
+    check marker.fallbackDetail == ""
+    check marker.exactStatus == "edsStreamEnd"
+    check marker.committedBytes == uint64(fixture.plain.len - 1)
+    check marker.exactBytes == 1
+    check marker.bytesBeforeFallback == marker.committedBytes
+    check marker.replayedBytes == 0
+    check marker.fallbackBytes == 0
 
   test "terminal footer corruption is authoritative":
     let fixture = buildParallelMarkerFixture()
@@ -257,3 +330,10 @@ suite "ordinary gzip marker path":
     check exact.report.crcVerified
     check dpMarkerWindow in exact.report.pathsUsed
     check dpSequential in exact.report.pathsUsed
+    let marker = exact.report.markerDiagnostics
+    check marker.fallbackReason == mfrFollowingMember
+    check marker.bytesBeforeFallback == uint64(fixture.plain.len)
+    check marker.replayedBytes == 0
+    check marker.fallbackBytes == uint64(secondPlain.len)
+    check marker.committedBytes + marker.exactBytes + marker.fallbackBytes ==
+      exact.report.decompressedBytes
