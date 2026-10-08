@@ -65,6 +65,8 @@ type
     peakWorkers: int
     peakBufferedBytes: uint64
     exitCode: int
+    hasMarkerDiagnostics: bool
+    markerDiagnostics: MarkerDiagnostics
 
   SummaryGroup = object
     dataset: string
@@ -85,6 +87,16 @@ type
     peakWorkers: int
     peakBufferedBytes: uint64
     failedRuns: int
+    hasMarkerDiagnostics: bool
+    markerDiagnostics: MarkerDiagnostics
+    markerFallbackReasons: seq[string]
+    markerFallbackDetails: seq[string]
+    markerExactStatuses: seq[string]
+
+const markerColumns = "marker_fallback_reason,marker_fallback_detail," &
+  "marker_exact_status,marker_decode_jobs,marker_committed_bytes," &
+  "marker_exact_bytes,marker_bytes_before_fallback,marker_replayed_bytes," &
+  "marker_fallback_bytes,marker_fallback_compressed_offset"
 
 proc usageNow(): UsageSample =
   when defined(posix):
@@ -115,6 +127,15 @@ proc csv(s: string): string =
     if c == '"': result.add("\"\"")
     else: result.add(c)
   result.add('"')
+
+proc markerCountersCsv(marker: MarkerDiagnostics): string =
+  &"{marker.decodeJobs},{marker.committedBytes},{marker.exactBytes}," &
+    &"{marker.bytesBeforeFallback},{marker.replayedBytes},{marker.fallbackBytes}," &
+    &"{marker.fallbackCompressedOffset}"
+
+proc markerCsv(marker: MarkerDiagnostics): string =
+  csv($marker.fallbackReason) & "," & csv(marker.fallbackDetail) & "," &
+    csv(marker.exactStatus) & "," & markerCountersCsv(marker)
 
 proc field(row: CsvRow; index: Table[string, int]; name: string): string =
   let column = index[name]
@@ -319,6 +340,11 @@ proc loadBenchRows(path: string): seq[BenchRow] =
   for name in required:
     if name notin index:
       raise newException(ValueError, "missing CSV column: " & name)
+  let hasMarkerColumns = "marker_fallback_reason" in index
+  if hasMarkerColumns:
+    for name in markerColumns.split(','):
+      if name notin index:
+        raise newException(ValueError, "missing CSV column: " & name)
 
   while parser.readRow():
     var row: BenchRow
@@ -369,6 +395,30 @@ proc loadBenchRows(path: string): seq[BenchRow] =
                        "peak_buffered_bytes")
     row.exitCode = parseIntField(field(parser.row, index, "exit_code"),
                                  "exit_code")
+    if hasMarkerColumns and field(parser.row, index, "marker_fallback_reason").len > 0:
+      row.hasMarkerDiagnostics = true
+      row.markerDiagnostics.fallbackReason = parseEnum[MarkerFallbackReason](
+        field(parser.row, index, "marker_fallback_reason"))
+      row.markerDiagnostics.fallbackDetail =
+        field(parser.row, index, "marker_fallback_detail")
+      row.markerDiagnostics.exactStatus =
+        field(parser.row, index, "marker_exact_status")
+      row.markerDiagnostics.decodeJobs = parseUint64Field(
+        field(parser.row, index, "marker_decode_jobs"), "marker_decode_jobs")
+      row.markerDiagnostics.committedBytes = parseUint64Field(
+        field(parser.row, index, "marker_committed_bytes"), "marker_committed_bytes")
+      row.markerDiagnostics.exactBytes = parseUint64Field(
+        field(parser.row, index, "marker_exact_bytes"), "marker_exact_bytes")
+      row.markerDiagnostics.bytesBeforeFallback = parseUint64Field(
+        field(parser.row, index, "marker_bytes_before_fallback"),
+        "marker_bytes_before_fallback")
+      row.markerDiagnostics.replayedBytes = parseUint64Field(
+        field(parser.row, index, "marker_replayed_bytes"), "marker_replayed_bytes")
+      row.markerDiagnostics.fallbackBytes = parseUint64Field(
+        field(parser.row, index, "marker_fallback_bytes"), "marker_fallback_bytes")
+      row.markerDiagnostics.fallbackCompressedOffset = parseUint64Field(
+        field(parser.row, index, "marker_fallback_compressed_offset"),
+        "marker_fallback_compressed_offset")
     result.add(row)
 
 proc summarizeCsv(path: string) =
@@ -408,6 +458,26 @@ proc summarizeCsv(path: string) =
       group.peakBufferedBytes = row.peakBufferedBytes
     if row.exitCode != 0:
       inc group.failedRuns
+    if row.hasMarkerDiagnostics:
+      group.hasMarkerDiagnostics = true
+      let marker = row.markerDiagnostics
+      group.markerFallbackReasons.addUnique($marker.fallbackReason)
+      group.markerFallbackDetails.addUnique(marker.fallbackDetail)
+      group.markerExactStatuses.addUnique(marker.exactStatus)
+      group.markerDiagnostics.decodeJobs =
+        max(group.markerDiagnostics.decodeJobs, marker.decodeJobs)
+      group.markerDiagnostics.committedBytes =
+        max(group.markerDiagnostics.committedBytes, marker.committedBytes)
+      group.markerDiagnostics.exactBytes =
+        max(group.markerDiagnostics.exactBytes, marker.exactBytes)
+      group.markerDiagnostics.bytesBeforeFallback =
+        max(group.markerDiagnostics.bytesBeforeFallback, marker.bytesBeforeFallback)
+      group.markerDiagnostics.replayedBytes =
+        max(group.markerDiagnostics.replayedBytes, marker.replayedBytes)
+      group.markerDiagnostics.fallbackBytes =
+        max(group.markerDiagnostics.fallbackBytes, marker.fallbackBytes)
+      group.markerDiagnostics.fallbackCompressedOffset = max(
+        group.markerDiagnostics.fallbackCompressedOffset, marker.fallbackCompressedOffset)
     groups[key] = group
 
   var summaries: seq[SummaryGroup]
@@ -455,7 +525,11 @@ proc summarizeCsv(path: string) =
        "mean_user_s,mean_system_s,mean_mib_s,peak_workers," &
        "peak_buffered_bytes,speedup_vs_gunzip,speedup_vs_pigz_t1," &
        "speedup_vs_same_thread_pigz,speedup_vs_best_pigz," &
-       "speedup_vs_best_default,marker_wall_ratio_vs_default"
+       "speedup_vs_best_default,marker_wall_ratio_vs_default," &
+       "marker_fallback_reasons,marker_fallback_details,marker_exact_statuses," &
+       "max_marker_decode_jobs,max_marker_committed_bytes,max_marker_exact_bytes," &
+       "max_marker_bytes_before_fallback,max_marker_replayed_bytes," &
+       "max_marker_fallback_bytes,max_marker_fallback_compressed_offset"
   for group in summaries:
     let avgWall = mean(group.wallValues)
     var speedupGunzip = ""
@@ -485,6 +559,13 @@ proc summarizeCsv(path: string) =
         markerRatio =
           fmtRatio(avgWall / defaultByDatasetModeThread[defaultKey])
 
+    let markerSummary =
+      if group.hasMarkerDiagnostics:
+        csv(joined(group.markerFallbackReasons)) & "," &
+          csv(joined(group.markerFallbackDetails)) & "," &
+          csv(joined(group.markerExactStatuses)) & "," &
+          markerCountersCsv(group.markerDiagnostics)
+      else: ",,,,,,,,,"
     echo &"{csv(group.dataset)},{group.workload},{group.mode}," &
          &"{group.compressedBytes},{group.decodedBytes},{group.members}," &
          &"{group.variant},{group.wallValues.len},{group.failedRuns}," &
@@ -496,7 +577,7 @@ proc summarizeCsv(path: string) =
          &"{fmtMaybe(group.systemValues)},{fmtMaybe(group.mibValues, 3)}," &
          &"{group.peakWorkers},{group.peakBufferedBytes}," &
          &"{speedupGunzip},{speedupPigzT1},{speedupSameThreadPigz}," &
-         &"{speedupBestPigz},{speedupBestDefault},{markerRatio}"
+         &"{speedupBestPigz},{speedupBestDefault},{markerRatio},{markerSummary}"
 
 proc parseThreads(value: string): seq[int] =
   for part in value.split(','):
@@ -682,14 +763,14 @@ proc throughput(bytes: uint64; wall: float): float =
 proc printHeader() =
   echo "dataset,workload,mode,compressed_bytes,variant,iteration,threads," &
        "marker_enabled,paths,decoded_bytes,members,wall_s,cpu_s,user_s," &
-       "system_s,mib_s,peak_workers,peak_buffered_bytes,crc32,exit_code"
+       "system_s,mib_s,peak_workers,peak_buffered_bytes,crc32,exit_code," & markerColumns
 
 proc printExternal(path, workload, mode: string; compressedBytes: uint64;
                    variant: string; iteration, threads: int; wall: float;
                    exitCode: int; paths = "external") =
   echo &"{csv(path.lastPathPart)},{workload},{mode},{compressedBytes}," &
        &"{variant},{iteration},{threads},false,{paths},0,0,{wall:.6f}," &
-       &",,,,0,0,0,{exitCode}"
+       &",,,,0,0,0,{exitCode},,,,,,,,,,"
 
 proc printGzfast(path, workload: string; compressedBytes: uint64;
                  variant: string;
@@ -703,7 +784,7 @@ proc printGzfast(path, workload: string; compressedBytes: uint64;
        &"{run.bytes},{run.report.memberCount},{run.wall:.6f}," &
        &"{cpuTotal:.6f},{run.cpu.user:.6f},{run.cpu.system:.6f}," &
        &"{throughput(run.bytes, run.wall):.3f},{run.report.peakWorkers}," &
-       &"{run.report.peakBufferedBytes},{run.crc},0"
+       &"{run.report.peakBufferedBytes},{run.crc},0," & markerCsv(run.report.markerDiagnostics)
 
 when isMainModule:
   var options: BenchOptions
