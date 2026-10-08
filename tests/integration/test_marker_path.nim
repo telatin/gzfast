@@ -15,20 +15,25 @@ proc gzipMember(raw: seq[byte]; plain: string): string =
   result.appendLe32(crc32(plain))
   result.appendLe32(uint32(plain.len))
 
-proc buildParallelMarkerFixture(tailLiterals = 0; exactTail = false):
+proc buildParallelMarkerFixture(tailLiterals = 0; exactTail = false;
+                                chunkLiterals = 2000; intermediateBlock = false):
     tuple[gzip, plain: string] =
   var writer: TestBitWriter
   # Candidate 0.
   writer.addMinimalDynamicHeader(final = false)
   writer.addBits(0, 1) # dynamic EOB
   writer.addFixedBlockHeader(final = false)
-  for _ in 0 ..< 2000: writer.addFixedSymbol(ord('A'))
+  for _ in 0 ..< chunkLiterals: writer.addFixedSymbol(ord('A'))
   writer.addFixedSymbol(256)
+  if intermediateBlock:
+    writer.addFixedBlockHeader(final = false)
+    for _ in 0 ..< 1000: writer.addFixedSymbol(ord('A'))
+    writer.addFixedSymbol(256)
   # Candidate 1, over one compressed grid later.
   writer.addMinimalDynamicHeader(final = false)
   writer.addBits(0, 1)
   writer.addFixedBlockHeader(final = false)
-  for _ in 0 ..< 2000: writer.addFixedSymbol(ord('A'))
+  for _ in 0 ..< chunkLiterals: writer.addFixedSymbol(ord('A'))
   writer.addFixedSymbol(256)
   # Candidate 2. The final fixed block immediately refers to predecessor.
   writer.addMinimalDynamicHeader(final = false)
@@ -38,7 +43,8 @@ proc buildParallelMarkerFixture(tailLiterals = 0; exactTail = false):
   writer.addFixedDistance(0) # distance 1
   for _ in 0 ..< tailLiterals: writer.addFixedSymbol(ord('A'))
   writer.addFixedSymbol(256)
-  result.plain = repeat('A', 4258 + tailLiterals)
+  result.plain = repeat('A', 2 * chunkLiterals + 258 + tailLiterals +
+    (if intermediateBlock: 1000 else: 0))
   if exactTail:
     writer.addFixedBlockHeader(final = true)
     writer.addFixedSymbol(ord('Z'))
@@ -177,6 +183,10 @@ suite "ordinary gzip marker path":
     check dpMixed in decoded.report.pathsUsed
     let marker = decoded.report.markerDiagnostics
     check marker.fallbackReason == mfrBoundaryMismatch
+    check "status=mdsBoundary;" in marker.fallbackDetail
+    check "expectedStartBit=80;actualStartBit=80;" in marker.fallbackDetail
+    check "expectedEndBit=" in marker.fallbackDetail
+    check "actualEndBit=" in marker.fallbackDetail
     check marker.exactStatus == "edsStreamEnd"
     check marker.committedBytes == 0
     check marker.exactBytes == uint64(plain.len)
@@ -231,6 +241,56 @@ suite "ordinary gzip marker path":
     check marker.bytesBeforeFallback == marker.committedBytes
     check marker.replayedBytes == 0
     check marker.fallbackBytes == 0
+
+  test "marker-free stop before a speculative candidate accepts authoritative prefix":
+    let fixture = buildParallelMarkerFixture(chunkLiterals = 40000,
+                                              intermediateBlock = true)
+    let path = getTempDir() / "gzfast_marker_early_handoff.gz"
+    writeFile(path, fixture.gzip)
+    defer: removeFile(path)
+    var config = markerConfig(4)
+    config.compressedGridSize = 32768
+    config.inFlightChunks = 2
+    let decoded = readEverything(path, config)
+    check decoded.data == fixture.plain
+    check decoded.report.crcVerified
+    let marker = decoded.report.markerDiagnostics
+    check marker.fallbackReason == mfrMarkerFreeHandoff
+    check marker.committedBytes == 40000
+    check marker.exactBytes == uint64(fixture.plain.len - 40000)
+    check marker.exactStatus == "edsStreamEnd"
+    check marker.replayedBytes == 0
+    check marker.fallbackBytes == 0
+
+    let input = initGzFastDecoder(config).open(path)
+    check input.finish().markerDiagnostics == marker
+    input.close()
+
+    config.decodedChunkSize = 4096
+    config.maxSpeculativeOutput = 41000
+    let replay = readEverything(path, config)
+    check replay.data == fixture.plain
+    check replay.report.crcVerified
+    let replayMarker = replay.report.markerDiagnostics
+    check replayMarker.fallbackReason == mfrMarkerFreeHandoff
+    check replayMarker.exactStatus == "edsOutputLimit"
+    check replayMarker.committedBytes == 40000
+    check replayMarker.replayedBytes == 40000
+    check replayMarker.fallbackBytes == uint64(fixture.plain.len - 40000)
+
+    config.outputLimit = some(uint64(fixture.plain.len - 1))
+    expect GzFastError:
+      discard readEverything(path, config)
+
+    config.outputLimit = none(uint64)
+    var corrupt = fixture.gzip
+    corrupt[^8] = char(byte(corrupt[^8]) xor 0x80)
+    writeFile(path, corrupt)
+    try:
+      discard readEverything(path, config)
+      check false
+    except GzFastError as error:
+      check error.kind == geChecksumMismatch
 
   test "terminal footer corruption is authoritative":
     let fixture = buildParallelMarkerFixture()

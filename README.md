@@ -366,6 +366,10 @@ exact-inflate bytes, bytes committed before the transition, replayed prefix
 bytes, fresh sequential fallback bytes, and the compressed checkpoint offset.
 `mfrMarkerFreeHandoff` is an intentional handoff, while `mfrFollowingMember`
 means the first member finished and remaining members use sequential decoding.
+Boundary-mismatch details include the worker status and expected/actual start
+and end bit positions. A marker-free stop before the next speculative candidate
+can be accepted from the current authoritative position; ordinary mismatches
+and overshoots remain rejected.
 `marker_replayed_bytes` counts only the duplicate prefix discarded during
 authoritative replay, not fresh fallback output or rejected speculative work.
 The summary preserves distinct reasons/statuses and reports the maximum of

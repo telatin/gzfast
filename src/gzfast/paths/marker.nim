@@ -307,9 +307,19 @@ proc prepareResolutionJob(decoder: MarkerPathDecoder;
       else: $incoming.error.kind)
     if not incoming.output.data.isNil: incoming.output.release(boCoordinator)
     return false
+  # A marker-free worker can stop before the speculative candidate. Its
+  # prefix is authoritative only when chained from the committed position;
+  # remaining speculative jobs will be discarded at the exact handoff.
+  let earlyHandoff = incoming.handoffReady and
+    incoming.endBit > incoming.startBit and incoming.endBit < expectedEnd
   if incoming.startBit != decoder.currentBit or
-      (not terminal and incoming.endBit != expectedEnd):
-    decoder.noteFallback(mfrBoundaryMismatch)
+      (not terminal and incoming.endBit != expectedEnd and not earlyHandoff):
+    decoder.noteFallback(mfrBoundaryMismatch,
+      "status=" & $MarkerDecodeStatus(incoming.markerStatus) &
+      ";expectedStartBit=" & $decoder.currentBit &
+      ";actualStartBit=" & $incoming.startBit &
+      ";expectedEndBit=" & $expectedEnd &
+      ";actualEndBit=" & $incoming.endBit)
     if not incoming.output.data.isNil: incoming.output.release(boCoordinator)
     return false
   var marked = MarkerBuffer(storage: incoming.output,
