@@ -370,6 +370,12 @@ Boundary-mismatch details include the worker status and expected/actual start
 and end bit positions. A marker-free stop before the next speculative candidate
 can be accepted from the current authoritative position; ordinary mismatches
 and overshoots remain rejected.
+Marker-free handoffs resume bounded sequential inflate at that checkpoint,
+with the resolved history, accumulated CRC and member length. They do not
+buffer the complete remainder or replay the committed prefix. The resumed
+member's output counts as exact-inflate bytes; following members count as
+fresh sequential fallback bytes. The global output limit still covers all
+prefix, continuation and following-member output.
 `marker_replayed_bytes` counts only the duplicate prefix discarded during
 authoritative replay, not fresh fallback output or rejected speculative work.
 The summary preserves distinct reasons/statuses and reports the maximum of

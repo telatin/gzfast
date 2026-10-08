@@ -52,6 +52,8 @@ type
     totalOut: uint64
     memberCount: uint64
     peakBuffered: uint64
+    continuingMember: bool
+    checkpointBytes: uint64
 
 proc currentOffset(dec: SequentialDecoder): uint64 =
   ## Absolute compressed offset of the next unconsumed byte.
@@ -121,6 +123,44 @@ proc close*(dec: var SequentialDecoder) =
      not dec.src.f.isNil:
     dec.src.f.close()
     dec.src.f = nil
+
+proc openSequentialDecoderAtCheckpoint*(path: string; startBit: uint64;
+    dictionary: openArray[byte]; memberCrc: uint32;
+    memberBytes, totalOut, memberCount: uint64;
+    config: GzFastConfig): SequentialDecoder =
+  ## Resume an authoritative raw-DEFLATE block boundary. Prefix counters
+  ## seed verification and limits, but prefix bytes are never emitted again.
+  if dictionary.len > 32768 or memberBytes > totalOut:
+    raise newGzFastError(geInternal, "invalid DEFLATE checkpoint")
+  if config.outputLimit.isSome and totalOut > config.outputLimit.get:
+    raise newGzFastError(geOutputLimit, "checkpoint exceeds outputLimit")
+  result = openSequentialDecoderAt(path, startBit shr 3, config)
+  try:
+    let skippedBits = int(startBit and 7)
+    if skippedBits != 0:
+      var containingByte: array[1, byte]
+      if result.src.f.readBytes(containingByte, 0, 1) != 1:
+        raise newGzFastError(geTruncatedInput, "truncated DEFLATE checkpoint",
+                             startBit shr 3, memberCount)
+      if gzInflaterPrime(result.inflater, cuint(8 - skippedBits),
+          cuint(containingByte[0] shr skippedBits)) != gzOk:
+        raise newGzFastError(geInternal, "inflate prime failed")
+      inc result.baseOffset
+    if dictionary.len > 0 and gzInflaterSetDictionary(result.inflater,
+        cast[ptr byte](unsafeAddr dictionary[0]), csize_t(dictionary.len)) != gzOk:
+      raise newGzFastError(geInternal, "inflate dictionary failed")
+    result.state = smInflate
+    result.crc = memberCrc
+    result.memberLen = memberBytes
+    result.totalOut = totalOut
+    result.memberCount = memberCount
+    result.continuingMember = true
+  except CatchableError:
+    result.close()
+    raise
+
+proc checkpointProgress*(dec: SequentialDecoder): tuple[bytes: uint64; complete: bool] =
+  (dec.checkpointBytes, not dec.continuingMember)
 
 proc refill(dec: var SequentialDecoder): bool =
   ## Ensure at least one compressed byte is buffered. False at EOF.
@@ -228,6 +268,8 @@ proc inflateSome(dec: var SequentialDecoder) =
                         produced.csize_t)
       dec.memberLen += produced.uint64
       dec.totalOut += produced.uint64
+      if dec.continuingMember:
+        dec.checkpointBytes += produced.uint64
       dec.outLen += produced
 
     case ret
@@ -284,6 +326,7 @@ proc parseMemberFooter(dec: var SequentialDecoder) =
       ", stored " & $f.isize & ")",
       footerOffset, dec.memberCount)
   inc dec.memberCount
+  dec.continuingMember = false
   dec.state = smHeader
 
 proc fillOutput(dec: var SequentialDecoder) {.inline.} =

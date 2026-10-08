@@ -266,21 +266,37 @@ suite "ordinary gzip marker path":
     check input.finish().markerDiagnostics == marker
     input.close()
 
+    for _ in 0 ..< 5:
+      let partial = initGzFastDecoder(config).open(path)
+      var first: char
+      check partial.readData(addr first, 1) == 1
+      check not partial.atEnd()
+      check partial.stats().bufferedBytes >= 39999
+      partial.close()
+      partial.close()
+
     config.decodedChunkSize = 4096
     config.maxSpeculativeOutput = 41000
-    let replay = readEverything(path, config)
-    check replay.data == fixture.plain
-    check replay.report.crcVerified
-    let replayMarker = replay.report.markerDiagnostics
-    check replayMarker.fallbackReason == mfrMarkerFreeHandoff
-    check replayMarker.exactStatus == "edsOutputLimit"
-    check replayMarker.committedBytes == 40000
-    check replayMarker.replayedBytes == 40000
-    check replayMarker.fallbackBytes == uint64(fixture.plain.len - 40000)
+    let continued = readEverything(path, config)
+    check continued.data == fixture.plain
+    check continued.report.crcVerified
+    let continuedMarker = continued.report.markerDiagnostics
+    check continuedMarker.fallbackReason == mfrMarkerFreeHandoff
+    check continuedMarker.exactStatus == "edsStreamEnd"
+    check continuedMarker.committedBytes == 40000
+    check continuedMarker.replayedBytes == 0
+    check continuedMarker.fallbackBytes == 0
+    check continuedMarker.exactBytes == uint64(fixture.plain.len - 40000)
+
+    config.outputLimit = some(uint64(fixture.plain.len))
+    check readEverything(path, config).data == fixture.plain
 
     config.outputLimit = some(uint64(fixture.plain.len - 1))
-    expect GzFastError:
+    try:
       discard readEverything(path, config)
+      check false
+    except GzFastError as error:
+      check error.kind == geOutputLimit
 
     config.outputLimit = none(uint64)
     var corrupt = fixture.gzip
@@ -291,6 +307,65 @@ suite "ordinary gzip marker path":
       check false
     except GzFastError as error:
       check error.kind == geChecksumMismatch
+
+  test "streaming checkpoint tails stay bounded as logical output doubles":
+    var peaks: seq[uint64]
+    for tailLiterals in [300000, 600000]:
+      let fixture = buildParallelMarkerFixture(chunkLiterals = 40000,
+        intermediateBlock = true, tailLiterals = tailLiterals)
+      let path = getTempDir() / "gzfast_marker_large_checkpoint.gz"
+      writeFile(path, fixture.gzip)
+      defer: removeFile(path)
+      var config = markerConfig(4)
+      config.compressedGridSize = 32768
+      config.inFlightChunks = 2
+      config.inputPageSize = 4096
+      config.decodedChunkSize = 4096
+      config.maxSpeculativeOutput = 41000
+      let decoded = readEverything(path, config)
+      check decoded.data == fixture.plain
+      check decoded.report.crcVerified
+      check decoded.report.markerDiagnostics.committedBytes == 40000
+      check decoded.report.markerDiagnostics.exactBytes == uint64(fixture.plain.len - 40000)
+      check decoded.report.markerDiagnostics.replayedBytes == 0
+      check decoded.report.peakBufferedBytes < 512'u64 * 1024
+      peaks.add(decoded.report.peakBufferedBytes)
+    check peaks[1] <= peaks[0] + 8192
+
+  test "checkpoint continuation verifies following members under the global limit":
+    let fixture = buildParallelMarkerFixture(chunkLiterals = 40000,
+                                              intermediateBlock = true)
+    var secondRaw: TestBitWriter
+    secondRaw.addFixedBlockHeader(final = true)
+    let secondPlain = repeat('B', 1000)
+    for c in secondPlain: secondRaw.addFixedSymbol(ord(c))
+    secondRaw.addFixedSymbol(256)
+    let path = getTempDir() / "gzfast_marker_checkpoint_members.gz"
+    let combined = fixture.gzip & gzipMember(secondRaw.bytes(), secondPlain)
+    writeFile(path, combined)
+    defer: removeFile(path)
+    var config = markerConfig(4)
+    config.compressedGridSize = 32768
+    config.inFlightChunks = 2
+    config.outputLimit = some(uint64(fixture.plain.len + secondPlain.len))
+    let decoded = readEverything(path, config)
+    check decoded.data == fixture.plain & secondPlain
+    check decoded.report.crcVerified
+    check decoded.report.memberCount == 2
+    check decoded.report.markerDiagnostics.fallbackReason == mfrMarkerFreeHandoff
+    check decoded.report.markerDiagnostics.exactBytes == uint64(fixture.plain.len - 40000)
+    check decoded.report.markerDiagnostics.fallbackBytes == uint64(secondPlain.len)
+    check decoded.report.markerDiagnostics.replayedBytes == 0
+    config.outputLimit = some(uint64(fixture.plain.len + 500))
+    try:
+      discard readEverything(path, config)
+      check false
+    except GzFastError as error:
+      check error.kind == geOutputLimit
+    config.outputLimit = none(uint64)
+    writeFile(path, combined[0 ..< combined.len - 3])
+    expect GzFastError:
+      discard readEverything(path, config)
 
   test "terminal footer corruption is authoritative":
     let fixture = buildParallelMarkerFixture()

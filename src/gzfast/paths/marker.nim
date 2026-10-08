@@ -37,6 +37,7 @@ type
     fallback: SequentialDecoder
     hasFallback: bool
     fallbackReplaysMember: bool
+    fallbackContinuesMember: bool
     paths: set[DecodePath]
     diagnostics: MarkerDiagnostics
     done: bool
@@ -272,6 +273,19 @@ proc fallbackConfig(decoder: MarkerPathDecoder): GzFastConfig =
       if decoder.totalOut >= limit: 0'u64
       else: limit - decoder.totalOut)
 
+proc startCheckpointContinuation(decoder: MarkerPathDecoder) =
+  decoder.fallback = openSequentialDecoderAtCheckpoint(decoder.path,
+    decoder.currentBit, decoder.window.asOpenArray, decoder.memberCrc,
+    decoder.memberBytes, decoder.totalOut, decoder.memberCount, decoder.config)
+  decoder.hasFallback = true
+  decoder.fallbackContinuesMember = true
+  decoder.paths.incl(dpSequential)
+  decoder.paths.incl(dpMixed)
+  var buffered = decoder.fallback.report().peakBufferedBytes
+  for i in decoder.pendingIndex ..< decoder.pending.len:
+    buffered += uint64(decoder.pending[i].byteCapacity)
+  decoder.peakBuffered = max(decoder.peakBuffered, buffered)
+
 proc verifyFooter(decoder: MarkerPathDecoder) =
   let footerOffset = (decoder.currentBit + 7) shr 3
   var bytes: array[8, byte]
@@ -442,8 +456,7 @@ proc prepareBatch(decoder: MarkerPathDecoder) =
       if handoffReady:
         decoder.noteFallback(mfrMarkerFreeHandoff)
         decoder.stopRuntime(cancel = false)
-        if not decoder.exactToStreamEnd(): decoder.startAuthoritativeReplay()
-        else: decoder.verifyFooter()
+        decoder.startCheckpointContinuation()
         break
   decoder.peakBuffered = max(decoder.peakBuffered,
     uint64(max(decoder.resolutionTracker.snapshot().peakBytes, 0)))
@@ -473,8 +486,8 @@ proc readData*(decoder: MarkerPathDecoder; destination: pointer;
     decoder.prepareBatch()
 
 proc atEnd*(decoder: MarkerPathDecoder): bool =
-  if decoder.hasFallback: return decoder.fallback.atEnd()
   if decoder.pendingIndex < decoder.pending.len: return false
+  if decoder.hasFallback: return decoder.fallback.atEnd()
   if not decoder.done: decoder.prepareBatch()
   decoder.done and decoder.pendingIndex >= decoder.pending.len
 
@@ -503,16 +516,24 @@ proc report*(decoder: MarkerPathDecoder): DecodeReport =
   var diagnostics = decoder.diagnostics
   if decoder.hasFallback:
     let tail = decoder.fallback.report()
+    let includesPrefix = decoder.fallbackReplaysMember or decoder.fallbackContinuesMember
+    let progress = decoder.fallback.checkpointProgress()
+    if decoder.fallbackContinuesMember:
+      diagnostics.exactBytes += progress.bytes
+      diagnostics.exactStatus =
+        if progress.complete: "edsStreamEnd" else: "edsBoundary"
     diagnostics.fallbackBytes =
-      if decoder.fallbackReplaysMember:
+      if decoder.fallbackContinuesMember:
+        tail.decompressedBytes - decoder.totalOut - progress.bytes
+      elif decoder.fallbackReplaysMember:
         tail.decompressedBytes - diagnostics.replayedBytes
       else: tail.decompressedBytes
     DecodeReport(compressedBytes: tail.compressedBytes,
       decompressedBytes:
-        if decoder.fallbackReplaysMember: tail.decompressedBytes
+        if includesPrefix: tail.decompressedBytes
         else: decoder.totalOut + tail.decompressedBytes,
       memberCount:
-        if decoder.fallbackReplaysMember: tail.memberCount
+        if includesPrefix: tail.memberCount
         else: decoder.memberCount + tail.memberCount,
       pathsUsed: decoder.paths, crcVerified: tail.crcVerified,
       peakWorkers: max(decoder.peakWorkers, tail.peakWorkers),
@@ -529,15 +550,20 @@ proc report*(decoder: MarkerPathDecoder): DecodeReport =
 proc statsSnapshot*(decoder: MarkerPathDecoder): DecoderStats =
   if decoder.hasFallback:
     let tail = decoder.fallback.statsSnapshot()
+    let includesPrefix = decoder.fallbackReplaysMember or decoder.fallbackContinuesMember
+    var buffered = tail.bufferedBytes
+    for i in decoder.pendingIndex ..< decoder.pending.len:
+      buffered += uint64(decoder.pending[i].length -
+        (if i == decoder.pendingIndex: decoder.pendingPos else: 0))
     DecoderStats(compressedBytes: tail.compressedBytes,
       decompressedBytes:
-        if decoder.fallbackReplaysMember: tail.decompressedBytes
+        if includesPrefix: tail.decompressedBytes
         else: decoder.totalOut + tail.decompressedBytes,
       memberCount:
-        if decoder.fallbackReplaysMember: tail.memberCount
+        if includesPrefix: tail.memberCount
         else: decoder.memberCount + tail.memberCount,
       activeWorkers: tail.activeWorkers,
-      bufferedBytes: tail.bufferedBytes,
+      bufferedBytes: buffered,
       finished: tail.finished)
   else:
     DecoderStats(compressedBytes: decoder.currentBit shr 3,

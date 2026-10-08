@@ -1,10 +1,32 @@
 ## Milestone 2 acceptance tests: the authoritative sequential decoder.
 
-import std/[unittest, streams, options]
+import std/[unittest, streams, options, os, strutils]
 import gzfast/config, gzfast/errors, gzfast/report
 import gzfast/paths/sequential
 import gzfast/private/zlib_api
 import ../helpers/fixtures
+import ../helpers/deflate_bits
+
+proc checkpointFixture(prefixLength, matches: int):
+    tuple[data, prefix, suffix: string; startBit: uint64] =
+  var raw: TestBitWriter
+  result.prefix = repeat(char(200), prefixLength)
+  result.suffix = repeat(char(200), matches * 258)
+  raw.addFixedBlockHeader(final = false)
+  for c in result.prefix: raw.addFixedSymbol(ord(c))
+  raw.addFixedSymbol(256)
+  result.startBit = 80'u64 + uint64(raw.bitLength())
+  raw.addFixedBlockHeader(final = true)
+  for _ in 0 ..< matches:
+    raw.addFixedSymbol(285)
+    raw.addFixedDistance(0)
+  raw.addFixedSymbol(256)
+  result.data = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff"
+  for value in raw.bytes(): result.data.add(char(value))
+  for value in [crc32(result.prefix & result.suffix),
+                uint32(result.prefix.len + result.suffix.len)]:
+    for shift in [0, 8, 16, 24]:
+      result.data.add(char((value shr shift) and 0xff))
 
 proc decodeAll(path: string; config = defaultGzFastConfig();
                readSize = 65536): tuple[crc: uint32, total: uint64,
@@ -57,6 +79,97 @@ suite "sequential decoder: valid corpus":
       total += n.uint64
     check total == 2880'u64
     check crc == fixtureByName("small_text.gz").crc32
+
+suite "sequential decoder: authoritative checkpoints":
+  test "all bit alignments preserve dictionary, CRC and counters with tiny buffers":
+    var alignments: set[0 .. 7]
+    for prefixLength in 1 .. 8:
+      let fixture = checkpointFixture(prefixLength, 1000)
+      alignments.incl(int(fixture.startBit and 7))
+      let path = getTempDir() / "gzfast_checkpoint_alignment.gz"
+      writeFile(path, fixture.data)
+      defer: removeFile(path)
+      var config = defaultGzFastConfig()
+      config.inputPageSize = 1
+      config.decodedChunkSize = 4096
+      config.outputLimit = some(uint64(fixture.prefix.len + fixture.suffix.len))
+      var decoder = openSequentialDecoderAtCheckpoint(path, fixture.startBit,
+        toBytes(fixture.prefix), crc32(fixture.prefix), uint64(fixture.prefix.len),
+        uint64(fixture.prefix.len), 0, config)
+      defer: decoder.close()
+      var output: string
+      var buffer = newString(317)
+      while true:
+        let count = decoder.readData(addr buffer[0], buffer.len)
+        if count == 0: break
+        output.add(buffer[0 ..< count])
+      check output == fixture.suffix
+      let report = decoder.report()
+      check report.crcVerified
+      check report.memberCount == 1
+      check report.decompressedBytes == uint64(fixture.prefix.len + fixture.suffix.len)
+      check report.compressedBytes == uint64(fixture.data.len)
+      check report.peakBufferedBytes < 8192
+      check decoder.checkpointProgress() == (uint64(fixture.suffix.len), true)
+    check alignments == {0 .. 7}
+
+  test "following members are verified and excluded from checkpoint byte count":
+    let fixture = checkpointFixture(3, 100)
+    let path = getTempDir() / "gzfast_checkpoint_members.gz"
+    writeFile(path, fixture.data & readFixture("small_text.gz"))
+    defer: removeFile(path)
+    var decoder = openSequentialDecoderAtCheckpoint(path, fixture.startBit,
+      toBytes(fixture.prefix), crc32(fixture.prefix), uint64(fixture.prefix.len),
+      uint64(fixture.prefix.len), 0, defaultGzFastConfig())
+    defer: decoder.close()
+    var output: string
+    var buffer = newString(211)
+    while true:
+      let count = decoder.readData(addr buffer[0], buffer.len)
+      if count == 0: break
+      output.add(buffer[0 ..< count])
+    check output.len == fixture.suffix.len + 2880
+    check output[0 ..< fixture.suffix.len] == fixture.suffix
+    check decoder.report().crcVerified
+    check decoder.report().memberCount == 2
+    check decoder.checkpointProgress() == (uint64(fixture.suffix.len), true)
+
+  test "an empty continuation verifies with its output allowance already exhausted":
+    let fixture = checkpointFixture(3, 0)
+    let path = getTempDir() / "gzfast_checkpoint_empty_tail.gz"
+    writeFile(path, fixture.data & readFixture("empty.gz"))
+    defer: removeFile(path)
+    var config = defaultGzFastConfig()
+    config.outputLimit = some(uint64(fixture.prefix.len))
+    var decoder = openSequentialDecoderAtCheckpoint(path, fixture.startBit,
+      toBytes(fixture.prefix), crc32(fixture.prefix), uint64(fixture.prefix.len),
+      uint64(fixture.prefix.len), 0, config)
+    defer: decoder.close()
+    decoder.verifyRemaining()
+    check decoder.report().crcVerified
+    check decoder.report().memberCount == 2
+    check decoder.checkpointProgress() == (0'u64, true)
+
+  test "corrupt checkpoint footer and truncated tail remain authoritative errors":
+    let fixture = checkpointFixture(1, 100)
+    let path = getTempDir() / "gzfast_checkpoint_corrupt.gz"
+    defer: removeFile(path)
+    for mode in 0 .. 2:
+      var data = fixture.data
+      if mode == 0: data[^8] = char(byte(data[^8]) xor 0x80)
+      elif mode == 1: data[^4] = char(byte(data[^4]) xor 0x80)
+      else: data.setLen(data.len - 10)
+      writeFile(path, data)
+      var decoder = openSequentialDecoderAtCheckpoint(path, fixture.startBit,
+        toBytes(fixture.prefix), crc32(fixture.prefix), uint64(fixture.prefix.len),
+        uint64(fixture.prefix.len), 0, defaultGzFastConfig())
+      defer: decoder.close()
+      try:
+        decoder.verifyRemaining()
+        check false
+      except GzFastError as error:
+        check error.kind == (if mode == 0: geChecksumMismatch
+          elif mode == 1: geSizeMismatch else: geTruncatedInput)
 
 suite "sequential decoder: corruption handling":
   test "truncation at every byte of small fixtures always errors":
