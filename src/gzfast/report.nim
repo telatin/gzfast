@@ -9,6 +9,33 @@ type
     dpMarkerWindow
     dpMixed
 
+  MarkerFallbackReason* = enum
+    mfrNone
+    mfrDecodeResultUnavailable
+    mfrDecodeRejected
+    mfrBoundaryMismatch
+    mfrUnresolvedHistory
+    mfrResolutionSubmitFailed
+    mfrResolutionResultUnavailable
+    mfrResolutionFailed
+    mfrMarkerFreeHandoff
+    mfrFollowingMember
+
+  MarkerDiagnostics* = object
+    ## Counters cover an admitted marker path, not unsuccessful open probes.
+    ## Committed bytes count resolved worker output. Exact bytes count the
+    ## accepted prefix/continuation; rejected speculative output is excluded.
+    decodeJobs*: uint64
+    committedBytes*: uint64
+    exactBytes*: uint64
+    bytesBeforeFallback*: uint64
+    replayedBytes*: uint64 ## already committed bytes discarded during replay
+    fallbackBytes*: uint64 ## fresh sequential output, excluding replay
+    fallbackCompressedOffset*: uint64
+    fallbackReason*: MarkerFallbackReason ## first transition out of marker work
+    fallbackDetail*: string ## worker status or unresolved-history status
+    exactStatus*: string ## exact continuation outcome; empty if not attempted
+
   DecodeReport* = object
     ## Deterministic summary of a completed decode. Contains no timing
     ## values, so reports are comparable for equality in tests.
@@ -19,6 +46,7 @@ type
     crcVerified*: bool
     peakWorkers*: int
     peakBufferedBytes*: uint64
+    markerDiagnostics*: MarkerDiagnostics
 
   DecoderStats* = object
     ## Approximate point-in-time snapshot; values may be slightly stale

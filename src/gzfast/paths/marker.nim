@@ -38,6 +38,7 @@ type
     hasFallback: bool
     fallbackReplaysMember: bool
     paths: set[DecodePath]
+    diagnostics: MarkerDiagnostics
     done: bool
     closed: bool
 
@@ -130,6 +131,7 @@ proc tryOpenMarkerPath*(path: string; config: GzFastConfig): MarkerPathDecoder =
       result.window = advanceWindow(result.window,
         bytes.toOpenArray(0, prefix.output.length - 1))
     result.account(prefix.output)
+    result.diagnostics.exactBytes += uint64(prefix.output.length)
     result.pending.add(prefix.output)
     prefix.output = SharedBuffer()
     result.currentBit = candidate.startBit
@@ -213,6 +215,7 @@ proc exactToStreamEnd(decoder: MarkerPathDecoder): bool =
       inflateExactFromBoundary(decoder.sourceOwner.view, decoder.currentBit,
         decoder.window.asOpenArray, remaining,
         tracker = addr decoder.resolutionTracker)
+  decoder.diagnostics.exactStatus = $exact.status
   if exact.status != edsStreamEnd:
     exact.release()
     return false
@@ -221,8 +224,18 @@ proc exactToStreamEnd(decoder: MarkerPathDecoder): bool =
     let bytes = cast[ptr UncheckedArray[byte]](exact.output.data)
     decoder.window = advanceWindow(decoder.window,
       bytes.toOpenArray(0, exact.output.length - 1))
+  let exactBytes = uint64(exact.output.length)
   decoder.addPending(exact.output, boWorker)
+  decoder.diagnostics.exactBytes += exactBytes
   true
+
+proc noteFallback(decoder: MarkerPathDecoder; reason: MarkerFallbackReason;
+                  detail = "") =
+  if decoder.diagnostics.fallbackReason != mfrNone: return
+  decoder.diagnostics.fallbackReason = reason
+  decoder.diagnostics.fallbackDetail = detail
+  decoder.diagnostics.bytesBeforeFallback = decoder.totalOut
+  decoder.diagnostics.fallbackCompressedOffset = decoder.currentBit shr 3
 
 proc startAuthoritativeReplay(decoder: MarkerPathDecoder) =
   ## Re-decode the member from its real gzip header, discard the already
@@ -239,6 +252,7 @@ proc startAuthoritativeReplay(decoder: MarkerPathDecoder) =
       raise newGzFastError(geInternal,
         "authoritative replay ended before committed marker prefix")
     remaining -= uint64(count)
+    decoder.diagnostics.replayedBytes += uint64(count)
   decoder.fallback = replay
   decoder.hasFallback = true
   decoder.fallbackReplaysMember = true
@@ -274,6 +288,7 @@ proc verifyFooter(decoder: MarkerPathDecoder) =
   if nextOffset == decoder.sourceOwner.view.size:
     decoder.done = true
   else:
+    decoder.noteFallback(mfrFollowingMember)
     decoder.fallback = openSequentialDecoderAt(decoder.path, nextOffset,
                                                 decoder.fallbackConfig())
     decoder.hasFallback = true
@@ -286,14 +301,23 @@ proc prepareResolutionJob(decoder: MarkerPathDecoder;
                           tracker: ptr AllocationTracker;
                           job: var DecodeJob;
                           nextWindow: var ResolvedWindow): bool =
-  if incoming.status != jrsOk or incoming.startBit != decoder.currentBit or
-     (not terminal and incoming.endBit != expectedEnd):
+  if incoming.status != jrsOk:
+    decoder.noteFallback(mfrDecodeRejected,
+      if incoming.status == jrsRejected: $MarkerDecodeStatus(incoming.markerStatus)
+      else: $incoming.error.kind)
+    if not incoming.output.data.isNil: incoming.output.release(boCoordinator)
+    return false
+  if incoming.startBit != decoder.currentBit or
+      (not terminal and incoming.endBit != expectedEnd):
+    decoder.noteFallback(mfrBoundaryMismatch)
     if not incoming.output.data.isNil: incoming.output.release(boCoordinator)
     return false
   var marked = MarkerBuffer(storage: incoming.output,
     count: int(incoming.decodedLength), markerCount: incoming.markerCount)
   incoming.output = SharedBuffer()
-  if windowAfter(decoder.window, marked, nextWindow) != mrsOk:
+  let windowStatus = windowAfter(decoder.window, marked, nextWindow)
+  if windowStatus != mrsOk:
+    decoder.noteFallback(mfrUnresolvedHistory, $windowStatus)
     marked.release(boCoordinator)
     return false
   var windowInput: SharedBuffer
@@ -347,9 +371,11 @@ proc prepareBatch(decoder: MarkerPathDecoder) =
         compressedStart: starts[i] shr 3)
       if runtime.submit(job) != qsOk:
         raise newGzFastError(geInternal, "failed to schedule marker job")
+      inc decoder.diagnostics.decodeJobs
     for i in 0 ..< jobCount:
       var decoded: JobResult
       if runtime.nextOrdered(decoded) != rnsOk:
+        decoder.noteFallback(mfrDecodeResultUnavailable)
         decoder.stopRuntime(cancel = true)
         if not decoder.exactToStreamEnd():
           decoder.startAuthoritativeReplay()
@@ -367,6 +393,7 @@ proc prepareBatch(decoder: MarkerPathDecoder) =
           ordinalBase + uint64(i * 2 + 1), addr runtime.tracker,
           resolutionJob, nextWindow) or
          runtime.submit(resolutionJob) != qsOk:
+        decoder.noteFallback(mfrResolutionSubmitFailed)
         if not resolutionJob.markerInput.data.isNil:
           resolutionJob.markerInput.release()
         if not resolutionJob.windowInput.data.isNil:
@@ -380,7 +407,12 @@ proc prepareBatch(decoder: MarkerPathDecoder) =
           decoder.verifyFooter()
         break
       var resolved: JobResult
-      if runtime.nextOrdered(resolved) != rnsOk or resolved.status != jrsOk:
+      let resolutionStatus = runtime.nextOrdered(resolved)
+      if resolutionStatus != rnsOk or resolved.status != jrsOk:
+        if resolutionStatus != rnsOk:
+          decoder.noteFallback(mfrResolutionResultUnavailable)
+        else:
+          decoder.noteFallback(mfrResolutionFailed, $resolved.error.kind)
         if not resolved.output.data.isNil: resolved.output.release(boCoordinator)
         decoder.stopRuntime(cancel = true)
         if not decoder.exactToStreamEnd(): decoder.startAuthoritativeReplay()
@@ -390,12 +422,15 @@ proc prepareBatch(decoder: MarkerPathDecoder) =
         break
       decoder.window = nextWindow
       decoder.currentBit = decodedEnd
+      let committedBytes = uint64(resolved.output.length)
       decoder.addPending(resolved.output, boCoordinator)
+      decoder.diagnostics.committedBytes += committedBytes
       if streamEnd:
         decoder.stopRuntime(cancel = false)
         decoder.verifyFooter()
         break
       if handoffReady:
+        decoder.noteFallback(mfrMarkerFreeHandoff)
         decoder.stopRuntime(cancel = false)
         if not decoder.exactToStreamEnd(): decoder.startAuthoritativeReplay()
         else: decoder.verifyFooter()
@@ -455,8 +490,13 @@ proc close*(decoder: MarkerPathDecoder) =
   decoder.sourceOwner.close()
 
 proc report*(decoder: MarkerPathDecoder): DecodeReport =
+  var diagnostics = decoder.diagnostics
   if decoder.hasFallback:
     let tail = decoder.fallback.report()
+    diagnostics.fallbackBytes =
+      if decoder.fallbackReplaysMember:
+        tail.decompressedBytes - diagnostics.replayedBytes
+      else: tail.decompressedBytes
     DecodeReport(compressedBytes: tail.compressedBytes,
       decompressedBytes:
         if decoder.fallbackReplaysMember: tail.decompressedBytes
@@ -466,13 +506,15 @@ proc report*(decoder: MarkerPathDecoder): DecodeReport =
         else: decoder.memberCount + tail.memberCount,
       pathsUsed: decoder.paths, crcVerified: tail.crcVerified,
       peakWorkers: max(decoder.peakWorkers, tail.peakWorkers),
-      peakBufferedBytes: max(decoder.peakBuffered, tail.peakBufferedBytes))
+      peakBufferedBytes: max(decoder.peakBuffered, tail.peakBufferedBytes),
+      markerDiagnostics: diagnostics)
   else:
     DecodeReport(compressedBytes: decoder.sourceOwner.view.size,
       decompressedBytes: decoder.totalOut, memberCount: decoder.memberCount,
       pathsUsed: decoder.paths, crcVerified: decoder.done,
       peakWorkers: decoder.peakWorkers,
-      peakBufferedBytes: decoder.peakBuffered)
+      peakBufferedBytes: decoder.peakBuffered,
+      markerDiagnostics: diagnostics)
 
 proc statsSnapshot*(decoder: MarkerPathDecoder): DecoderStats =
   if decoder.hasFallback:
