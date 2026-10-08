@@ -44,6 +44,7 @@ export GzFastConfig, GzFastWriteConfig
 export defaultGzFastConfig, defaultGzFastWriteConfig, validate
 export GzFastError, GzFastErrorKind, GzFastConfigError
 export DecodePath, DecodeReport, DecoderStats, GzipWriteReport
+export MarkerFallbackReason, MarkerDiagnostics
 export DecodedSpan
 export GzFastStream, finish, cancel, stats, peekDecoded, consumeDecoded
 export GzFastWriter

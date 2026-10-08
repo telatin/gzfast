@@ -213,6 +213,18 @@ proc printReport(report: DecodeReport; elapsedSeconds, cpuSeconds: float) =
     " cpu=" & cpuSeconds.formatSeconds & "s" &
     " throughput=" & report.throughputMiB(elapsedSeconds).formatSeconds &
     "MiB/s")
+  let marker = report.markerDiagnostics
+  if dpMarkerWindow in report.pathsUsed:
+    stderr.writeLine("gzfast: markerFallback=" & $marker.fallbackReason &
+      " markerDetail=" & marker.fallbackDetail &
+      " markerExactStatus=" & marker.exactStatus &
+      " markerDecodeJobs=" & $marker.decodeJobs &
+      " markerCommitted=" & $marker.committedBytes & "B" &
+      " markerExact=" & $marker.exactBytes & "B" &
+      " markerBeforeFallback=" & $marker.bytesBeforeFallback & "B" &
+      " markerReplayed=" & $marker.replayedBytes & "B" &
+      " markerFallbackOutput=" & $marker.fallbackBytes & "B" &
+      " markerFallbackOffset=" & $marker.fallbackCompressedOffset & "B")
 
 proc printWriteReport(report: GzipWriteReport;
                       elapsedSeconds, cpuSeconds: float) =
