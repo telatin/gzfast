@@ -192,6 +192,38 @@ suite "marker-free exact handoff":
     check decoded.hasFinalWindow
     for value in decoded.finalWindow: check value == byte('B')
 
+  test "assigned chunks ignore marker-free windows until their boundary":
+    var writer: TestBitWriter
+    writer.addFixedBlockHeader(final = false)
+    for _ in 0 ..< DeflateWindowSize: writer.addFixedSymbol(ord('A'))
+    writer.addFixedSymbol(256)
+    let earlyEnd = uint64(writer.bitLength())
+    writer.addFixedBlockHeader(final = false)
+    writer.addFixedSymbol(ord('B'))
+    writer.addFixedSymbol(256)
+    let assignedEnd = uint64(writer.bitLength())
+    writer.addFixedBlockHeader(final = true)
+    writer.addFixedSymbol(256)
+    let owner = openMemoryReadAtSource(writer.bytes())
+    defer: owner.close()
+    var early = decodeMarkerChunk(owner.view, 0, assignedEnd,
+      DeflateWindowSize + 16, newMarkerDecoderWorkspace())
+    defer: early.output.release()
+    check early.status == mdsMarkerFreeBoundary
+    check early.endBit == earlyEnd
+    var assigned = decodeMarkerChunk(owner.view, 0, assignedEnd,
+      DeflateWindowSize + 16, newMarkerDecoderWorkspace(),
+      allowMarkerFreeHandoff = false)
+    defer: assigned.output.release()
+    check assigned.status == mdsBoundary
+    check assigned.endBit == assignedEnd
+    check assigned.output.count == DeflateWindowSize + 1
+    var capped = decodeMarkerChunk(owner.view, 0, assignedEnd,
+      DeflateWindowSize, newMarkerDecoderWorkspace(),
+      allowMarkerFreeHandoff = false)
+    defer: capped.output.release()
+    check capped.status == mdsOutputLimit
+
   test "marker in final window blocks handoff":
     let raw = buildUnknownMatch()
     let owner = openMemoryReadAtSource(raw)

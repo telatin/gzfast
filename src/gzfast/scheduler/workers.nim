@@ -284,9 +284,12 @@ proc processMarker(job: DecodeJob; arg: WorkerThreadArg;
     result.status = jrsError
     result.error.kind = weInvalidJob
     return
+  # Only the terminal job has no assigned successor boundary. Earlier
+  # jobs must reach their stop so the coordinator can commit the chain.
   var decoded = decodeMarkerChunk(arg.source, job.startBit, job.stopBit,
     arg.maxMemberOutput, workspace, arg.tracker,
-    min(arg.inputPageSize, BitReaderPageCapacity))
+    min(arg.inputPageSize, BitReaderPageCapacity),
+    allowMarkerFreeHandoff = job.stopBit == high(uint64))
   result.endBit = decoded.endBit
   result.markerCount = decoded.output.markerCount
   result.markerStatus = int32(ord(decoded.status))

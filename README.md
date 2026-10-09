@@ -367,9 +367,10 @@ bytes, fresh sequential fallback bytes, and the compressed checkpoint offset.
 `mfrMarkerFreeHandoff` is an intentional handoff, while `mfrFollowingMember`
 means the first member finished and remaining members use sequential decoding.
 Boundary-mismatch details include the worker status and expected/actual start
-and end bit positions. A marker-free stop before the next speculative candidate
-can be accepted from the current authoritative position; ordinary mismatches
-and overshoots remain rejected.
+and end bit positions. Non-terminal workers continue through marker-free
+windows to their assigned candidate boundary, within the speculative output
+cap. Only terminal workers can hand off early to sequential continuation.
+Ordinary mismatches and overshoots remain rejected.
 Marker-free handoffs resume bounded sequential inflate at that checkpoint,
 with the resolved history, accumulated CRC and member length. They do not
 buffer the complete remainder or replay the committed prefix. The resumed

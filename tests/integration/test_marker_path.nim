@@ -16,7 +16,8 @@ proc gzipMember(raw: seq[byte]; plain: string): string =
   result.appendLe32(uint32(plain.len))
 
 proc buildParallelMarkerFixture(tailLiterals = 0; exactTail = false;
-                                chunkLiterals = 2000; intermediateBlock = false):
+                                chunkLiterals = 2000; intermediateBlock = false;
+                                exactTailLiterals = 1):
     tuple[gzip, plain: string] =
   var writer: TestBitWriter
   # Candidate 0.
@@ -47,9 +48,9 @@ proc buildParallelMarkerFixture(tailLiterals = 0; exactTail = false;
     (if intermediateBlock: 1000 else: 0))
   if exactTail:
     writer.addFixedBlockHeader(final = true)
-    writer.addFixedSymbol(ord('Z'))
+    for _ in 0 ..< exactTailLiterals: writer.addFixedSymbol(ord('Z'))
     writer.addFixedSymbol(256)
-    result.plain.add('Z')
+    result.plain.add(repeat('Z', exactTailLiterals))
   result.gzip = gzipMember(writer.bytes(), result.plain)
 
 proc readEverything(path: string; config: GzFastConfig):
@@ -242,7 +243,7 @@ suite "ordinary gzip marker path":
     check marker.replayedBytes == 0
     check marker.fallbackBytes == 0
 
-  test "marker-free stop before a speculative candidate accepts authoritative prefix":
+  test "non-terminal workers reach assigned boundaries past marker-free windows":
     let fixture = buildParallelMarkerFixture(chunkLiterals = 40000,
                                               intermediateBlock = true)
     let path = getTempDir() / "gzfast_marker_early_handoff.gz"
@@ -255,10 +256,11 @@ suite "ordinary gzip marker path":
     check decoded.data == fixture.plain
     check decoded.report.crcVerified
     let marker = decoded.report.markerDiagnostics
-    check marker.fallbackReason == mfrMarkerFreeHandoff
-    check marker.committedBytes == 40000
-    check marker.exactBytes == uint64(fixture.plain.len - 40000)
-    check marker.exactStatus == "edsStreamEnd"
+    check marker.fallbackReason == mfrNone
+    check marker.committedBytes == uint64(fixture.plain.len)
+    check marker.exactBytes == 0
+    check marker.exactStatus == ""
+    check decoded.report.pathsUsed == {dpMarkerWindow}
     check marker.replayedBytes == 0
     check marker.fallbackBytes == 0
 
@@ -281,12 +283,12 @@ suite "ordinary gzip marker path":
     check continued.data == fixture.plain
     check continued.report.crcVerified
     let continuedMarker = continued.report.markerDiagnostics
-    check continuedMarker.fallbackReason == mfrMarkerFreeHandoff
-    check continuedMarker.exactStatus == "edsStreamEnd"
-    check continuedMarker.committedBytes == 40000
+    check continuedMarker.fallbackReason == mfrNone
+    check continuedMarker.exactStatus == ""
+    check continuedMarker.committedBytes == uint64(fixture.plain.len)
     check continuedMarker.replayedBytes == 0
     check continuedMarker.fallbackBytes == 0
-    check continuedMarker.exactBytes == uint64(fixture.plain.len - 40000)
+    check continuedMarker.exactBytes == 0
 
     config.outputLimit = some(uint64(fixture.plain.len))
     check readEverything(path, config).data == fixture.plain
@@ -311,13 +313,12 @@ suite "ordinary gzip marker path":
   test "streaming checkpoint tails stay bounded as logical output doubles":
     var peaks: seq[uint64]
     for tailLiterals in [300000, 600000]:
-      let fixture = buildParallelMarkerFixture(chunkLiterals = 40000,
-        intermediateBlock = true, tailLiterals = tailLiterals)
+      let fixture = buildParallelMarkerFixture(tailLiterals = 40000,
+        exactTail = true, exactTailLiterals = tailLiterals)
       let path = getTempDir() / "gzfast_marker_large_checkpoint.gz"
       writeFile(path, fixture.gzip)
       defer: removeFile(path)
       var config = markerConfig(4)
-      config.compressedGridSize = 32768
       config.inFlightChunks = 2
       config.inputPageSize = 4096
       config.decodedChunkSize = 4096
@@ -325,16 +326,16 @@ suite "ordinary gzip marker path":
       let decoded = readEverything(path, config)
       check decoded.data == fixture.plain
       check decoded.report.crcVerified
-      check decoded.report.markerDiagnostics.committedBytes == 40000
-      check decoded.report.markerDiagnostics.exactBytes == uint64(fixture.plain.len - 40000)
+      check decoded.report.markerDiagnostics.committedBytes == 44258
+      check decoded.report.markerDiagnostics.exactBytes == uint64(tailLiterals)
       check decoded.report.markerDiagnostics.replayedBytes == 0
       check decoded.report.peakBufferedBytes < 512'u64 * 1024
       peaks.add(decoded.report.peakBufferedBytes)
     check peaks[1] <= peaks[0] + 8192
 
   test "checkpoint continuation verifies following members under the global limit":
-    let fixture = buildParallelMarkerFixture(chunkLiterals = 40000,
-                                              intermediateBlock = true)
+    let fixture = buildParallelMarkerFixture(tailLiterals = 40000,
+      exactTail = true, exactTailLiterals = 50000)
     var secondRaw: TestBitWriter
     secondRaw.addFixedBlockHeader(final = true)
     let secondPlain = repeat('B', 1000)
@@ -345,7 +346,6 @@ suite "ordinary gzip marker path":
     writeFile(path, combined)
     defer: removeFile(path)
     var config = markerConfig(4)
-    config.compressedGridSize = 32768
     config.inFlightChunks = 2
     config.outputLimit = some(uint64(fixture.plain.len + secondPlain.len))
     let decoded = readEverything(path, config)
@@ -353,7 +353,7 @@ suite "ordinary gzip marker path":
     check decoded.report.crcVerified
     check decoded.report.memberCount == 2
     check decoded.report.markerDiagnostics.fallbackReason == mfrMarkerFreeHandoff
-    check decoded.report.markerDiagnostics.exactBytes == uint64(fixture.plain.len - 40000)
+    check decoded.report.markerDiagnostics.exactBytes == 50000
     check decoded.report.markerDiagnostics.fallbackBytes == uint64(secondPlain.len)
     check decoded.report.markerDiagnostics.replayedBytes == 0
     config.outputLimit = some(uint64(fixture.plain.len + 500))

@@ -235,9 +235,10 @@ proc decodeMarkerChunk*(source: ReadAtSource; startBit, estimatedStopBit: uint64
                         maximumSymbols: int;
                         workspace: MarkerDecoderWorkspace;
                         tracker: ptr AllocationTracker = nil;
-                        pageSize = BitReaderPageCapacity): MarkerDecodeResult =
+                        pageSize = BitReaderPageCapacity;
+                        allowMarkerFreeHandoff = true): MarkerDecodeResult =
   ## Decode complete blocks until BFINAL, the first boundary at/after the
-  ## estimated stop, or a boundary with a marker-free active window.
+  ## estimated stop, or (when enabled) a marker-free active window.
   result.startBit = startBit
   result.output = initMarkerBuffer(maximumSymbols, tracker)
   if workspace.isNil:
@@ -285,7 +286,7 @@ proc decodeMarkerChunk*(source: ReadAtSource; startBit, estimatedStopBit: uint64
     if result.endBit >= estimatedStopBit:
       result.status = mdsBoundary
       return
-    if result.output.markerFreeWindow(result.finalWindow):
+    if allowMarkerFreeHandoff and result.output.markerFreeWindow(result.finalWindow):
       result.hasFinalWindow = true
       result.status = mdsMarkerFreeBoundary
       return
