@@ -16,13 +16,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.4">
+<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.12">
 
 <!-- JS -->
-<script type="text/javascript" src="../../dochack.js?v=2.2.4"></script>
+<script type="text/javascript" src="../../dochack.js?v=2.2.12"></script>
 </head>
 <body>
   <div class="document" id="documentId">
+    <input type="checkbox" id="nav-toggle" hidden>
+    <label for="nav-toggle" id="nav-burger">&#9776;</label>
+    <label for="nav-toggle" id="nav-overlay"></label>
     <div class="container">
       <h1 class="title">src/gzfast/deflate/marker_resolve</h1>
       <div class="row">
@@ -126,7 +129,7 @@
   <h1><a class="toc-backref" href="#7">Types</a></h1>
   <dl class="item">
     <div id="MarkerResolveStatus">
-  <dt><pre><a href="marker_resolve.html#MarkerResolveStatus"><span class="Identifier">MarkerResolveStatus</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <dt><pre><a href="#MarkerResolveStatus"><span class="Identifier">MarkerResolveStatus</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
   <span class="Identifier">mrsOk</span><span class="Other">,</span> <span class="Identifier">mrsInvalidSymbol</span><span class="Other">,</span> <span class="Identifier">mrsWindowTooSmall</span><span class="Other">,</span> <span class="Identifier">mrsAllocationFailure</span></pre></dt>
   <dd>
     
@@ -135,7 +138,7 @@
   </dd>
 </div>
 <div id="ResolvedWindow">
-  <dt><pre><a href="marker_resolve.html#ResolvedWindow"><span class="Identifier">ResolvedWindow</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <dt><pre><a href="#ResolvedWindow"><span class="Identifier">ResolvedWindow</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">bytes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">DeflateWindowSize</span><span class="Other">,</span> <span class="Identifier">byte</span><span class="Other">]</span>
   <span class="Identifier">length</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span></pre></dt>
   <dd>
@@ -152,7 +155,7 @@
   <dl class="item">
     <div id="advanceWindow-procs-all">
   <div id="advanceWindow,ResolvedWindow,openArray[byte]">
-  <dt><pre><span class="Keyword">proc</span> <a href="#advanceWindow%2CResolvedWindow%2CopenArray%5Bbyte%5D"><span class="Identifier">advanceWindow</span></a><span class="Other">(</span><span class="Identifier">predecessor</span><span class="Other">:</span> <a href="marker_resolve.html#ResolvedWindow"><span class="Identifier">ResolvedWindow</span></a><span class="Other">;</span> <span class="Identifier">decoded</span><span class="Other">:</span> <span class="Identifier">openArray</span><span class="Other">[</span><span class="Identifier">byte</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="marker_resolve.html#ResolvedWindow"><span class="Identifier">ResolvedWindow</span></a> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#advanceWindow%2CResolvedWindow%2CopenArray%5Bbyte%5D"><span class="Identifier">advanceWindow</span></a><span class="Other">(</span><span class="Identifier">predecessor</span><span class="Other">:</span> <a href="#ResolvedWindow"><span class="Identifier">ResolvedWindow</span></a><span class="Other">;</span> <span class="Identifier">decoded</span><span class="Other">:</span> <span class="Identifier">openArray</span><span class="Other">[</span><span class="Identifier">byte</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="#ResolvedWindow"><span class="Identifier">ResolvedWindow</span></a> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -164,7 +167,7 @@
 </div>
 <div id="initResolvedWindow-procs-all">
   <div id="initResolvedWindow,openArray[byte]">
-  <dt><pre><span class="Keyword">proc</span> <a href="#initResolvedWindow%2CopenArray%5Bbyte%5D"><span class="Identifier">initResolvedWindow</span></a><span class="Other">(</span><span class="Identifier">data</span><span class="Other">:</span> <span class="Identifier">openArray</span><span class="Other">[</span><span class="Identifier">byte</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="marker_resolve.html#ResolvedWindow"><span class="Identifier">ResolvedWindow</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#initResolvedWindow%2CopenArray%5Bbyte%5D"><span class="Identifier">initResolvedWindow</span></a><span class="Other">(</span><span class="Identifier">data</span><span class="Other">:</span> <span class="Identifier">openArray</span><span class="Other">[</span><span class="Identifier">byte</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="#ResolvedWindow"><span class="Identifier">ResolvedWindow</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -176,9 +179,9 @@
 </div>
 <div id="resolveMarkers-procs-all">
   <div id="resolveMarkers,MarkerBuffer,ResolvedWindow,SharedBuffer,ptr.AllocationTracker">
-  <dt><pre><span class="Keyword">proc</span> <a href="#resolveMarkers%2CMarkerBuffer%2CResolvedWindow%2CSharedBuffer%2Cptr.AllocationTracker"><span class="Identifier">resolveMarkers</span></a><span class="Other">(</span><span class="Identifier">marked</span><span class="Other">:</span> <a href="marker_decode.html#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a><span class="Other">;</span> <span class="Identifier">predecessor</span><span class="Other">:</span> <a href="marker_resolve.html#ResolvedWindow"><span class="Identifier">ResolvedWindow</span></a><span class="Other">;</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#resolveMarkers%2CMarkerBuffer%2CResolvedWindow%2CSharedBuffer%2Cptr.AllocationTracker"><span class="Identifier">resolveMarkers</span></a><span class="Other">(</span><span class="Identifier">marked</span><span class="Other">:</span> <a href="marker_decode.html#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a><span class="Other">;</span> <span class="Identifier">predecessor</span><span class="Other">:</span> <a href="#ResolvedWindow"><span class="Identifier">ResolvedWindow</span></a><span class="Other">;</span>
                     <span class="Identifier">output</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="../buffers.html#SharedBuffer"><span class="Identifier">SharedBuffer</span></a><span class="Other">;</span>
-                    <span class="Identifier">tracker</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="../buffers.html#AllocationTracker"><span class="Identifier">AllocationTracker</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="marker_resolve.html#MarkerResolveStatus"><span class="Identifier">MarkerResolveStatus</span></a> {.
+                    <span class="Identifier">tracker</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="../buffers.html#AllocationTracker"><span class="Identifier">AllocationTracker</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="#MarkerResolveStatus"><span class="Identifier">MarkerResolveStatus</span></a> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -190,8 +193,8 @@
 </div>
 <div id="windowAfter-procs-all">
   <div id="windowAfter,ResolvedWindow,MarkerBuffer,ResolvedWindow">
-  <dt><pre><span class="Keyword">proc</span> <a href="#windowAfter%2CResolvedWindow%2CMarkerBuffer%2CResolvedWindow"><span class="Identifier">windowAfter</span></a><span class="Other">(</span><span class="Identifier">predecessor</span><span class="Other">:</span> <a href="marker_resolve.html#ResolvedWindow"><span class="Identifier">ResolvedWindow</span></a><span class="Other">;</span> <span class="Identifier">marked</span><span class="Other">:</span> <a href="marker_decode.html#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a><span class="Other">;</span>
-                 <span class="Identifier">outWindow</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="marker_resolve.html#ResolvedWindow"><span class="Identifier">ResolvedWindow</span></a><span class="Other">)</span><span class="Other">:</span> <a href="marker_resolve.html#MarkerResolveStatus"><span class="Identifier">MarkerResolveStatus</span></a> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#windowAfter%2CResolvedWindow%2CMarkerBuffer%2CResolvedWindow"><span class="Identifier">windowAfter</span></a><span class="Other">(</span><span class="Identifier">predecessor</span><span class="Other">:</span> <a href="#ResolvedWindow"><span class="Identifier">ResolvedWindow</span></a><span class="Other">;</span> <span class="Identifier">marked</span><span class="Other">:</span> <a href="marker_decode.html#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a><span class="Other">;</span>
+                 <span class="Identifier">outWindow</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#ResolvedWindow"><span class="Identifier">ResolvedWindow</span></a><span class="Other">)</span><span class="Other">:</span> <a href="#MarkerResolveStatus"><span class="Identifier">MarkerResolveStatus</span></a> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -209,7 +212,7 @@
   <dl class="item">
     <div id="asOpenArray-templates-all">
   <div id="asOpenArray.t,ResolvedWindow">
-  <dt><pre><span class="Keyword">template</span> <a href="#asOpenArray.t%2CResolvedWindow"><span class="Identifier">asOpenArray</span></a><span class="Other">(</span><span class="Identifier">window</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="marker_resolve.html#ResolvedWindow"><span class="Identifier">ResolvedWindow</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">untyped</span></pre></dt>
+  <dt><pre><span class="Keyword">template</span> <a href="#asOpenArray.t%2CResolvedWindow"><span class="Identifier">asOpenArray</span></a><span class="Other">(</span><span class="Identifier">window</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#ResolvedWindow"><span class="Identifier">ResolvedWindow</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">untyped</span></pre></dt>
   <dd>
     
     
@@ -228,7 +231,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-08-08 17:11:15 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-10-10 19:55:33 UTC</small>
       </div>
     </div>
   </div>

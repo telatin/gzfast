@@ -16,13 +16,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.4">
+<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.12">
 
 <!-- JS -->
-<script type="text/javascript" src="../../dochack.js?v=2.2.4"></script>
+<script type="text/javascript" src="../../dochack.js?v=2.2.12"></script>
 </head>
 <body>
   <div class="document" id="documentId">
+    <input type="checkbox" id="nav-toggle" hidden>
+    <label for="nav-toggle" id="nav-burger">&#9776;</label>
+    <label for="nav-toggle" id="nav-overlay"></label>
     <div class="container">
       <h1 class="title">src/gzfast/gzip/header</h1>
       <div class="row">
@@ -59,15 +62,7 @@
   bgzfBlockSize*: int        ## BSIZE + 1 when a BC subfield was present, else 0
   headerSize*: int           ## total header bytes consumed
   hasText*: bool">GzipHeaderInfo</a></li>
-<li><a class="reference" href="#GzipHeaderParser" title="GzipHeaderParser = object
-  ## bytes fed so far
-  ## running CRC32 of bytes before FHCRC
-  ## accumulated FHCRC value
-  ## low 16 bits of the CRC at FHCRC start
-  ## FEXTRA bytes left
-  ## current subfield payload bytes left
-  ## current subfield is &quot;BC&quot;
-  ## BGZF BSIZE+1, or 0 when no BC subfield seen">GzipHeaderParser</a></li>
+<li><a class="reference" href="#GzipHeaderParser" title="GzipHeaderParser = object">GzipHeaderParser</a></li>
 <li><a class="reference" href="#HeaderFeedKind" title="HeaderFeedKind = enum
   hfNeedMore,               ## feed another byte
   hfDone,                   ## header complete and valid
@@ -117,7 +112,7 @@
   <h1><a class="toc-backref" href="#7">Types</a></h1>
   <dl class="item">
     <div id="GzipHeaderInfo">
-  <dt><pre><a href="header.html#GzipHeaderInfo"><span class="Identifier">GzipHeaderInfo</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <dt><pre><a href="#GzipHeaderInfo"><span class="Identifier">GzipHeaderInfo</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">bgzfBlockSize</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>        <span class="Comment">## BSIZE + 1 when a BC subfield was present, else 0</span>
   <span class="Identifier">headerSize</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>           <span class="Comment">## total header bytes consumed</span>
   <span class="Identifier">hasText</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span></pre></dt>
@@ -128,15 +123,7 @@
   </dd>
 </div>
 <div id="GzipHeaderParser">
-  <dt><pre><a href="header.html#GzipHeaderParser"><span class="Identifier">GzipHeaderParser</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Comment">## bytes fed so far</span>
-  <span class="Comment">## running CRC32 of bytes before FHCRC</span>
-  <span class="Comment">## accumulated FHCRC value</span>
-  <span class="Comment">## low 16 bits of the CRC at FHCRC start</span>
-  <span class="Comment">## FEXTRA bytes left</span>
-  <span class="Comment">## current subfield payload bytes left</span>
-  <span class="Comment">## current subfield is &quot;BC&quot;</span>
-  <span class="Comment">## BGZF BSIZE+1, or 0 when no BC subfield seen</span></pre></dt>
+  <dt><pre><a href="#GzipHeaderParser"><span class="Identifier">GzipHeaderParser</span></a> <span class="Other">=</span> <span class="Keyword">object</span></pre></dt>
   <dd>
     
     Feed bytes one at a time with <tt class="docutils literal"><span class="pre"><span class="Identifier">feed</span></span></tt>. All header bytes are also checksummed incrementally so FHCRC can be verified.
@@ -144,7 +131,7 @@
   </dd>
 </div>
 <div id="HeaderFeedKind">
-  <dt><pre><a href="header.html#HeaderFeedKind"><span class="Identifier">HeaderFeedKind</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <dt><pre><a href="#HeaderFeedKind"><span class="Identifier">HeaderFeedKind</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
   <span class="Identifier">hfNeedMore</span><span class="Other">,</span>               <span class="Comment">## feed another byte</span>
   <span class="Identifier">hfDone</span><span class="Other">,</span>                   <span class="Comment">## header complete and valid</span>
   <span class="Identifier">hfError</span>                    <span class="Comment">## invalid header; msg explains</span></pre></dt>
@@ -155,8 +142,8 @@
   </dd>
 </div>
 <div id="HeaderFeedResult">
-  <dt><pre><a href="header.html#HeaderFeedResult"><span class="Identifier">HeaderFeedResult</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Keyword">case</span> <span class="Identifier">kind</span><span class="Operator">*</span><span class="Other">:</span> <a href="header.html#HeaderFeedKind"><span class="Identifier">HeaderFeedKind</span></a>
+  <dt><pre><a href="#HeaderFeedResult"><span class="Identifier">HeaderFeedResult</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Keyword">case</span> <span class="Identifier">kind</span><span class="Operator">*</span><span class="Other">:</span> <a href="#HeaderFeedKind"><span class="Identifier">HeaderFeedKind</span></a>
   <span class="Keyword">of</span> <span class="Identifier">hfDone</span><span class="Other">:</span>
     <span class="Keyword">nil</span>
   <span class="Keyword">of</span> <span class="Identifier">hfNeedMore</span><span class="Other">:</span>
@@ -177,7 +164,7 @@
   <dl class="item">
     <div id="feed-procs-all">
   <div id="feed,GzipHeaderParser,byte,uint32">
-  <dt><pre><span class="Keyword">proc</span> <a href="#feed%2CGzipHeaderParser%2Cbyte%2Cuint32"><span class="Identifier">feed</span></a><span class="Other">(</span><span class="Identifier">p</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="header.html#GzipHeaderParser"><span class="Identifier">GzipHeaderParser</span></a><span class="Other">;</span> <span class="Identifier">b</span><span class="Other">:</span> <span class="Identifier">byte</span><span class="Other">;</span> <span class="Identifier">crcOfByte</span><span class="Other">:</span> <span class="Identifier">uint32</span><span class="Other">)</span><span class="Other">:</span> <a href="header.html#HeaderFeedResult"><span class="Identifier">HeaderFeedResult</span></a> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#feed%2CGzipHeaderParser%2Cbyte%2Cuint32"><span class="Identifier">feed</span></a><span class="Other">(</span><span class="Identifier">p</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#GzipHeaderParser"><span class="Identifier">GzipHeaderParser</span></a><span class="Other">;</span> <span class="Identifier">b</span><span class="Other">:</span> <span class="Identifier">byte</span><span class="Other">;</span> <span class="Identifier">crcOfByte</span><span class="Other">:</span> <span class="Identifier">uint32</span><span class="Other">)</span><span class="Other">:</span> <a href="#HeaderFeedResult"><span class="Identifier">HeaderFeedResult</span></a> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -189,7 +176,7 @@
 </div>
 <div id="info-procs-all">
   <div id="info,GzipHeaderParser">
-  <dt><pre><span class="Keyword">proc</span> <a href="#info%2CGzipHeaderParser"><span class="Identifier">info</span></a><span class="Other">(</span><span class="Identifier">p</span><span class="Other">:</span> <a href="header.html#GzipHeaderParser"><span class="Identifier">GzipHeaderParser</span></a><span class="Other">)</span><span class="Other">:</span> <a href="header.html#GzipHeaderInfo"><span class="Identifier">GzipHeaderInfo</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#info%2CGzipHeaderParser"><span class="Identifier">info</span></a><span class="Other">(</span><span class="Identifier">p</span><span class="Other">:</span> <a href="#GzipHeaderParser"><span class="Identifier">GzipHeaderParser</span></a><span class="Other">)</span><span class="Other">:</span> <a href="#GzipHeaderInfo"><span class="Identifier">GzipHeaderInfo</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -201,7 +188,7 @@
 </div>
 <div id="initGzipHeaderParser-procs-all">
   <div id="initGzipHeaderParser">
-  <dt><pre><span class="Keyword">proc</span> <a href="#initGzipHeaderParser"><span class="Identifier">initGzipHeaderParser</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <a href="header.html#GzipHeaderParser"><span class="Identifier">GzipHeaderParser</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#initGzipHeaderParser"><span class="Identifier">initGzipHeaderParser</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <a href="#GzipHeaderParser"><span class="Identifier">GzipHeaderParser</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -221,7 +208,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-08-08 17:11:15 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-10-10 19:55:33 UTC</small>
       </div>
     </div>
   </div>

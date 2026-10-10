@@ -16,13 +16,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.4">
+<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.12">
 
 <!-- JS -->
-<script type="text/javascript" src="../../dochack.js?v=2.2.4"></script>
+<script type="text/javascript" src="../../dochack.js?v=2.2.12"></script>
 </head>
 <body>
   <div class="document" id="documentId">
+    <input type="checkbox" id="nav-toggle" hidden>
+    <label for="nav-toggle" id="nav-burger">&#9776;</label>
+    <label for="nav-toggle" id="nav-overlay"></label>
     <div class="container">
       <h1 class="title">src/gzfast/deflate/marker_decode</h1>
       <div class="row">
@@ -112,10 +115,12 @@
   <li><a class="reference" href="#decodeMarkerChunk%2CReadAtSource%2Cuint64%2Cuint64%2Cint%2CMarkerDecoderWorkspace%2Cptr.AllocationTracker" title="decodeMarkerChunk(source: ReadAtSource; startBit, estimatedStopBit: uint64;
                   maximumSymbols: int; workspace: MarkerDecoderWorkspace;
                   tracker: ptr AllocationTracker = nil;
-                  pageSize = BitReaderPageCapacity): MarkerDecodeResult">decodeMarkerChunk(source: ReadAtSource; startBit, estimatedStopBit: uint64;
+                  pageSize = BitReaderPageCapacity;
+                  allowMarkerFreeHandoff = true): MarkerDecodeResult">decodeMarkerChunk(source: ReadAtSource; startBit, estimatedStopBit: uint64;
                   maximumSymbols: int; workspace: MarkerDecoderWorkspace;
                   tracker: ptr AllocationTracker = nil;
-                  pageSize = BitReaderPageCapacity): MarkerDecodeResult</a></li>
+                  pageSize = BitReaderPageCapacity;
+                  allowMarkerFreeHandoff = true): MarkerDecodeResult</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">initMarkerBuffer
@@ -177,7 +182,7 @@
   <h1><a class="toc-backref" href="#7">Types</a></h1>
   <dl class="item">
     <div id="MarkerBuffer">
-  <dt><pre><a href="marker_decode.html#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <dt><pre><a href="#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">storage</span><span class="Operator">*</span><span class="Other">:</span> <a href="../buffers.html#SharedBuffer"><span class="Identifier">SharedBuffer</span></a>
   <span class="Identifier">count</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">markerCount</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
@@ -189,11 +194,11 @@
   </dd>
 </div>
 <div id="MarkerDecodeResult">
-  <dt><pre><a href="marker_decode.html#MarkerDecodeResult"><span class="Identifier">MarkerDecodeResult</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">status</span><span class="Operator">*</span><span class="Other">:</span> <a href="marker_decode.html#MarkerDecodeStatus"><span class="Identifier">MarkerDecodeStatus</span></a>
+  <dt><pre><a href="#MarkerDecodeResult"><span class="Identifier">MarkerDecodeResult</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">status</span><span class="Operator">*</span><span class="Other">:</span> <a href="#MarkerDecodeStatus"><span class="Identifier">MarkerDecodeStatus</span></a>
   <span class="Identifier">startBit</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint64</span>
   <span class="Identifier">endBit</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint64</span>
-  <span class="Identifier">output</span><span class="Operator">*</span><span class="Other">:</span> <a href="marker_decode.html#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a>
+  <span class="Identifier">output</span><span class="Operator">*</span><span class="Other">:</span> <a href="#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a>
   <span class="Identifier">finalWindow</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">DeflateWindowSize</span><span class="Other">,</span> <span class="Identifier">byte</span><span class="Other">]</span>
   <span class="Identifier">hasFinalWindow</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span></pre></dt>
   <dd>
@@ -203,7 +208,7 @@
   </dd>
 </div>
 <div id="MarkerDecoderWorkspace">
-  <dt><pre><a href="marker_decode.html#MarkerDecoderWorkspace"><span class="Identifier">MarkerDecoderWorkspace</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
+  <dt><pre><a href="#MarkerDecoderWorkspace"><span class="Identifier">MarkerDecoderWorkspace</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span>
   <span class="Identifier">dynamic</span><span class="Operator">*</span><span class="Other">:</span> <a href="dynamic_header.html#DynamicHeaderWorkspace"><span class="Identifier">DynamicHeaderWorkspace</span></a>
   <span class="Identifier">fixedLiteral</span><span class="Operator">*</span><span class="Other">:</span> <a href="huffman.html#HuffmanTable"><span class="Identifier">HuffmanTable</span></a>
   <span class="Identifier">fixedDistance</span><span class="Operator">*</span><span class="Other">:</span> <a href="huffman.html#HuffmanTable"><span class="Identifier">HuffmanTable</span></a></pre></dt>
@@ -214,7 +219,7 @@
   </dd>
 </div>
 <div id="MarkerDecodeStatus">
-  <dt><pre><a href="marker_decode.html#MarkerDecodeStatus"><span class="Identifier">MarkerDecodeStatus</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <dt><pre><a href="#MarkerDecodeStatus"><span class="Identifier">MarkerDecodeStatus</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
   <span class="Identifier">mdsBoundary</span><span class="Other">,</span> <span class="Identifier">mdsStreamEnd</span><span class="Other">,</span> <span class="Identifier">mdsMarkerFreeBoundary</span><span class="Other">,</span> <span class="Identifier">mdsUnexpectedEof</span><span class="Other">,</span>
   <span class="Identifier">mdsInvalidBlockType</span><span class="Other">,</span> <span class="Identifier">mdsInvalidStoredLength</span><span class="Other">,</span> <span class="Identifier">mdsInvalidDynamicHeader</span><span class="Other">,</span>
   <span class="Identifier">mdsInvalidSymbol</span><span class="Other">,</span> <span class="Identifier">mdsInvalidDistance</span><span class="Other">,</span> <span class="Identifier">mdsOutputLimit</span></pre></dt>
@@ -231,7 +236,7 @@
   <h1><a class="toc-backref" href="#10">Consts</a></h1>
   <dl class="item">
     <div id="DeflateWindowSize">
-  <dt><pre><a href="marker_decode.html#DeflateWindowSize"><span class="Identifier">DeflateWindowSize</span></a> <span class="Other">=</span> <span class="DecNumber">32768</span></pre></dt>
+  <dt><pre><a href="#DeflateWindowSize"><span class="Identifier">DeflateWindowSize</span></a> <span class="Other">=</span> <span class="DecNumber">32768</span></pre></dt>
   <dd>
     
     
@@ -239,7 +244,7 @@
   </dd>
 </div>
 <div id="MarkerBase">
-  <dt><pre><a href="marker_decode.html#MarkerBase"><span class="Identifier">MarkerBase</span></a> <span class="Other">=</span> <span class="DecNumber">32768'u16</span></pre></dt>
+  <dt><pre><a href="#MarkerBase"><span class="Identifier">MarkerBase</span></a> <span class="Other">=</span> <span class="DecNumber">32768'u16</span></pre></dt>
   <dd>
     
     
@@ -254,7 +259,7 @@
   <dl class="item">
     <div id="appendLiteral-procs-all">
   <div id="appendLiteral,MarkerBuffer,byte">
-  <dt><pre><span class="Keyword">proc</span> <a href="#appendLiteral%2CMarkerBuffer%2Cbyte"><span class="Identifier">appendLiteral</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="marker_decode.html#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a><span class="Other">;</span> <span class="Identifier">value</span><span class="Other">:</span> <span class="Identifier">byte</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#appendLiteral%2CMarkerBuffer%2Cbyte"><span class="Identifier">appendLiteral</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a><span class="Other">;</span> <span class="Identifier">value</span><span class="Other">:</span> <span class="Identifier">byte</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -266,7 +271,7 @@
 </div>
 <div id="copyMatch-procs-all">
   <div id="copyMatch,MarkerBuffer,int,int">
-  <dt><pre><span class="Keyword">proc</span> <a href="#copyMatch%2CMarkerBuffer%2Cint%2Cint"><span class="Identifier">copyMatch</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="marker_decode.html#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a><span class="Other">;</span> <span class="Identifier">distance</span><span class="Other">,</span> <span class="Identifier">length</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#copyMatch%2CMarkerBuffer%2Cint%2Cint"><span class="Identifier">copyMatch</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a><span class="Other">;</span> <span class="Identifier">distance</span><span class="Other">,</span> <span class="Identifier">length</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -278,7 +283,7 @@
 </div>
 <div id="copyMatchScalar-procs-all">
   <div id="copyMatchScalar,MarkerBuffer,int,int">
-  <dt><pre><span class="Keyword">proc</span> <a href="#copyMatchScalar%2CMarkerBuffer%2Cint%2Cint"><span class="Identifier">copyMatchScalar</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="marker_decode.html#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a><span class="Other">;</span> <span class="Identifier">distance</span><span class="Other">,</span> <span class="Identifier">length</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#copyMatchScalar%2CMarkerBuffer%2Cint%2Cint"><span class="Identifier">copyMatchScalar</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a><span class="Other">;</span> <span class="Identifier">distance</span><span class="Other">,</span> <span class="Identifier">length</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -291,13 +296,14 @@
 <div id="decodeMarkerChunk-procs-all">
   <div id="decodeMarkerChunk,ReadAtSource,uint64,uint64,int,MarkerDecoderWorkspace,ptr.AllocationTracker">
   <dt><pre><span class="Keyword">proc</span> <a href="#decodeMarkerChunk%2CReadAtSource%2Cuint64%2Cuint64%2Cint%2CMarkerDecoderWorkspace%2Cptr.AllocationTracker"><span class="Identifier">decodeMarkerChunk</span></a><span class="Other">(</span><span class="Identifier">source</span><span class="Other">:</span> <a href="../source.html#ReadAtSource"><span class="Identifier">ReadAtSource</span></a><span class="Other">;</span> <span class="Identifier">startBit</span><span class="Other">,</span> <span class="Identifier">estimatedStopBit</span><span class="Other">:</span> <span class="Identifier">uint64</span><span class="Other">;</span>
-                       <span class="Identifier">maximumSymbols</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">workspace</span><span class="Other">:</span> <a href="marker_decode.html#MarkerDecoderWorkspace"><span class="Identifier">MarkerDecoderWorkspace</span></a><span class="Other">;</span>
+                       <span class="Identifier">maximumSymbols</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">workspace</span><span class="Other">:</span> <a href="#MarkerDecoderWorkspace"><span class="Identifier">MarkerDecoderWorkspace</span></a><span class="Other">;</span>
                        <span class="Identifier">tracker</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="../buffers.html#AllocationTracker"><span class="Identifier">AllocationTracker</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span>
-                       <span class="Identifier">pageSize</span> <span class="Other">=</span> <span class="Identifier">BitReaderPageCapacity</span><span class="Other">)</span><span class="Other">:</span> <a href="marker_decode.html#MarkerDecodeResult"><span class="Identifier">MarkerDecodeResult</span></a> {.
+                       <span class="Identifier">pageSize</span> <span class="Other">=</span> <span class="Identifier">BitReaderPageCapacity</span><span class="Other">;</span>
+                       <span class="Identifier">allowMarkerFreeHandoff</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <a href="#MarkerDecodeResult"><span class="Identifier">MarkerDecodeResult</span></a> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Decode complete blocks until BFINAL, the first boundary at/after the estimated stop, or a boundary with a marker-free active window.
+    Decode complete blocks until BFINAL, the first boundary at/after the estimated stop, or (when enabled) a marker-free active window.
     
   </dd>
 </div>
@@ -305,7 +311,7 @@
 </div>
 <div id="initMarkerBuffer-procs-all">
   <div id="initMarkerBuffer,int,ptr.AllocationTracker">
-  <dt><pre><span class="Keyword">proc</span> <a href="#initMarkerBuffer%2Cint%2Cptr.AllocationTracker"><span class="Identifier">initMarkerBuffer</span></a><span class="Other">(</span><span class="Identifier">maximumSymbols</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">tracker</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="../buffers.html#AllocationTracker"><span class="Identifier">AllocationTracker</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="marker_decode.html#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#initMarkerBuffer%2Cint%2Cptr.AllocationTracker"><span class="Identifier">initMarkerBuffer</span></a><span class="Other">(</span><span class="Identifier">maximumSymbols</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">tracker</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="../buffers.html#AllocationTracker"><span class="Identifier">AllocationTracker</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -339,7 +345,7 @@
 </div>
 <div id="markerFreeWindow-procs-all">
   <div id="markerFreeWindow,MarkerBuffer,array[DeflateWindowSize,byte]">
-  <dt><pre><span class="Keyword">proc</span> <a href="#markerFreeWindow%2CMarkerBuffer%2Carray%5BDeflateWindowSize%2Cbyte%5D"><span class="Identifier">markerFreeWindow</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <a href="marker_decode.html#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a><span class="Other">;</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#markerFreeWindow%2CMarkerBuffer%2Carray%5BDeflateWindowSize%2Cbyte%5D"><span class="Identifier">markerFreeWindow</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <a href="#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a><span class="Other">;</span>
                       <span class="Identifier">window</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">array</span><span class="Other">[</span><span class="Identifier">DeflateWindowSize</span><span class="Other">,</span> <span class="Identifier">byte</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
@@ -363,7 +369,7 @@
 </div>
 <div id="newMarkerDecoderWorkspace-procs-all">
   <div id="newMarkerDecoderWorkspace">
-  <dt><pre><span class="Keyword">proc</span> <a href="#newMarkerDecoderWorkspace"><span class="Identifier">newMarkerDecoderWorkspace</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <a href="marker_decode.html#MarkerDecoderWorkspace"><span class="Identifier">MarkerDecoderWorkspace</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#newMarkerDecoderWorkspace"><span class="Identifier">newMarkerDecoderWorkspace</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <a href="#MarkerDecoderWorkspace"><span class="Identifier">MarkerDecoderWorkspace</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -375,7 +381,7 @@
 </div>
 <div id="release-procs-all">
   <div id="release,MarkerBuffer">
-  <dt><pre><span class="Keyword">proc</span> <a href="#release%2CMarkerBuffer"><span class="Identifier">release</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="marker_decode.html#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a><span class="Other">;</span> <span class="Identifier">expected</span> <span class="Other">=</span> <span class="Identifier">boWorker</span><span class="Other">)</span> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#release%2CMarkerBuffer"><span class="Identifier">release</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a><span class="Other">;</span> <span class="Identifier">expected</span> <span class="Other">=</span> <span class="Identifier">boWorker</span><span class="Other">)</span> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -387,7 +393,7 @@
 </div>
 <div id="symbolAt-procs-all">
   <div id="symbolAt,MarkerBuffer,int">
-  <dt><pre><span class="Keyword">proc</span> <a href="#symbolAt%2CMarkerBuffer%2Cint"><span class="Identifier">symbolAt</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <a href="marker_decode.html#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a><span class="Other">;</span> <span class="Identifier">index</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">uint16</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#symbolAt%2CMarkerBuffer%2Cint"><span class="Identifier">symbolAt</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <a href="#MarkerBuffer"><span class="Identifier">MarkerBuffer</span></a><span class="Other">;</span> <span class="Identifier">index</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">uint16</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -407,7 +413,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-08-08 17:11:15 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-10-10 19:55:33 UTC</small>
       </div>
     </div>
   </div>

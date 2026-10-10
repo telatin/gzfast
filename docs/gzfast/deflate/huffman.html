@@ -16,13 +16,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.4">
+<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.12">
 
 <!-- JS -->
-<script type="text/javascript" src="../../dochack.js?v=2.2.4"></script>
+<script type="text/javascript" src="../../dochack.js?v=2.2.12"></script>
 </head>
 <body>
   <div class="document" id="documentId">
+    <input type="checkbox" id="nav-toggle" hidden>
+    <label for="nav-toggle" id="nav-burger">&#9776;</label>
+    <label for="nav-toggle" id="nav-overlay"></label>
     <div class="container">
       <h1 class="title">src/gzfast/deflate/huffman</h1>
       <div class="row">
@@ -131,7 +134,7 @@
   <h1><a class="toc-backref" href="#7">Types</a></h1>
   <dl class="item">
     <div id="HuffmanBuildStatus">
-  <dt><pre><a href="huffman.html#HuffmanBuildStatus"><span class="Identifier">HuffmanBuildStatus</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <dt><pre><a href="#HuffmanBuildStatus"><span class="Identifier">HuffmanBuildStatus</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
   <span class="Identifier">hbsOk</span><span class="Other">,</span> <span class="Identifier">hbsEmpty</span><span class="Other">,</span> <span class="Identifier">hbsLengthTooLong</span><span class="Other">,</span> <span class="Identifier">hbsSymbolTooLarge</span><span class="Other">,</span> <span class="Identifier">hbsOversubscribed</span><span class="Other">,</span>
   <span class="Identifier">hbsIncomplete</span><span class="Other">,</span> <span class="Identifier">hbsCollision</span></pre></dt>
   <dd>
@@ -141,7 +144,7 @@
   </dd>
 </div>
 <div id="HuffmanTable">
-  <dt><pre><a href="huffman.html#HuffmanTable"><span class="Identifier">HuffmanTable</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <dt><pre><a href="#HuffmanTable"><span class="Identifier">HuffmanTable</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">maximumLength</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint8</span>
   <span class="Identifier">symbolCount</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint16</span></pre></dt>
   <dd>
@@ -157,7 +160,7 @@
   <h1><a class="toc-backref" href="#10">Consts</a></h1>
   <dl class="item">
     <div id="HuffmanTableSize">
-  <dt><pre><a href="huffman.html#HuffmanTableSize"><span class="Identifier">HuffmanTableSize</span></a> <span class="Other">=</span> <span class="DecNumber">32768</span></pre></dt>
+  <dt><pre><a href="#HuffmanTableSize"><span class="Identifier">HuffmanTableSize</span></a> <span class="Other">=</span> <span class="DecNumber">32768</span></pre></dt>
   <dd>
     
     
@@ -165,7 +168,7 @@
   </dd>
 </div>
 <div id="InvalidHuffmanEntry">
-  <dt><pre><a href="huffman.html#InvalidHuffmanEntry"><span class="Identifier">InvalidHuffmanEntry</span></a> <span class="Other">=</span> <span class="DecNumber">65535'u16</span></pre></dt>
+  <dt><pre><a href="#InvalidHuffmanEntry"><span class="Identifier">InvalidHuffmanEntry</span></a> <span class="Other">=</span> <span class="DecNumber">65535'u16</span></pre></dt>
   <dd>
     
     
@@ -180,7 +183,7 @@
   <dl class="item">
     <div id="buildFixedTrees-procs-all">
   <div id="buildFixedTrees,HuffmanTable,HuffmanTable">
-  <dt><pre><span class="Keyword">proc</span> <a href="#buildFixedTrees%2CHuffmanTable%2CHuffmanTable"><span class="Identifier">buildFixedTrees</span></a><span class="Other">(</span><span class="Identifier">literal</span><span class="Other">,</span> <span class="Identifier">distance</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="huffman.html#HuffmanTable"><span class="Identifier">HuffmanTable</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#buildFixedTrees%2CHuffmanTable%2CHuffmanTable"><span class="Identifier">buildFixedTrees</span></a><span class="Other">(</span><span class="Identifier">literal</span><span class="Other">,</span> <span class="Identifier">distance</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#HuffmanTable"><span class="Identifier">HuffmanTable</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -192,8 +195,8 @@
 </div>
 <div id="buildHuffman-procs-all">
   <div id="buildHuffman,HuffmanTable,openArray[uint8]">
-  <dt><pre><span class="Keyword">proc</span> <a href="#buildHuffman%2CHuffmanTable%2CopenArray%5Buint8%5D"><span class="Identifier">buildHuffman</span></a><span class="Other">(</span><span class="Identifier">table</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="huffman.html#HuffmanTable"><span class="Identifier">HuffmanTable</span></a><span class="Other">;</span> <span class="Identifier">lengths</span><span class="Other">:</span> <span class="Identifier">openArray</span><span class="Other">[</span><span class="Identifier">uint8</span><span class="Other">]</span><span class="Other">;</span>
-                  <span class="Identifier">allowEmpty</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="huffman.html#HuffmanBuildStatus"><span class="Identifier">HuffmanBuildStatus</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#buildHuffman%2CHuffmanTable%2CopenArray%5Buint8%5D"><span class="Identifier">buildHuffman</span></a><span class="Other">(</span><span class="Identifier">table</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#HuffmanTable"><span class="Identifier">HuffmanTable</span></a><span class="Other">;</span> <span class="Identifier">lengths</span><span class="Other">:</span> <span class="Identifier">openArray</span><span class="Other">[</span><span class="Identifier">uint8</span><span class="Other">]</span><span class="Other">;</span>
+                  <span class="Identifier">allowEmpty</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="#HuffmanBuildStatus"><span class="Identifier">HuffmanBuildStatus</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -241,7 +244,7 @@
 </div>
 <div id="tryDecode-procs-all">
   <div id="tryDecode,HuffmanTable,BitReader,uint16">
-  <dt><pre><span class="Keyword">proc</span> <a href="#tryDecode%2CHuffmanTable%2CBitReader%2Cuint16"><span class="Identifier">tryDecode</span></a><span class="Other">(</span><span class="Identifier">table</span><span class="Other">:</span> <a href="huffman.html#HuffmanTable"><span class="Identifier">HuffmanTable</span></a><span class="Other">;</span> <span class="Identifier">reader</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="bitreader.html#BitReader"><span class="Identifier">BitReader</span></a><span class="Other">;</span> <span class="Identifier">symbol</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">uint16</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#tryDecode%2CHuffmanTable%2CBitReader%2Cuint16"><span class="Identifier">tryDecode</span></a><span class="Other">(</span><span class="Identifier">table</span><span class="Other">:</span> <a href="#HuffmanTable"><span class="Identifier">HuffmanTable</span></a><span class="Other">;</span> <span class="Identifier">reader</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="bitreader.html#BitReader"><span class="Identifier">BitReader</span></a><span class="Other">;</span> <span class="Identifier">symbol</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">uint16</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -261,7 +264,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-08-08 17:11:15 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-10-10 19:55:33 UTC</small>
       </div>
     </div>
   </div>

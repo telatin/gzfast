@@ -16,13 +16,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../nimdoc.out.css?v=2.2.4">
+<link rel="stylesheet" type="text/css" href="../nimdoc.out.css?v=2.2.12">
 
 <!-- JS -->
-<script type="text/javascript" src="../dochack.js?v=2.2.4"></script>
+<script type="text/javascript" src="../dochack.js?v=2.2.12"></script>
 </head>
 <body>
   <div class="document" id="documentId">
+    <input type="checkbox" id="nav-toggle" hidden>
+    <label for="nav-toggle" id="nav-burger">&#9776;</label>
+    <label for="nav-toggle" id="nav-overlay"></label>
     <div class="container">
       <h1 class="title">src/gzfast/buffers</h1>
       <div class="row">
@@ -149,7 +152,7 @@
   <h1><a class="toc-backref" href="#7">Types</a></h1>
   <dl class="item">
     <div id="AllocationSnapshot">
-  <dt><pre><a href="buffers.html#AllocationSnapshot"><span class="Identifier">AllocationSnapshot</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <dt><pre><a href="#AllocationSnapshot"><span class="Identifier">AllocationSnapshot</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">currentBytes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int64</span>
   <span class="Identifier">peakBytes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int64</span>
   <span class="Identifier">liveBuffers</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
@@ -161,7 +164,7 @@
   </dd>
 </div>
 <div id="AllocationTracker">
-  <dt><pre><a href="buffers.html#AllocationTracker"><span class="Identifier">AllocationTracker</span></a> <span class="Other">=</span> <span class="Keyword">object</span></pre></dt>
+  <dt><pre><a href="#AllocationTracker"><span class="Identifier">AllocationTracker</span></a> <span class="Other">=</span> <span class="Keyword">object</span></pre></dt>
   <dd>
     
     
@@ -169,7 +172,7 @@
   </dd>
 </div>
 <div id="BufferOwner">
-  <dt><pre><a href="buffers.html#BufferOwner"><span class="Identifier">BufferOwner</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <dt><pre><a href="#BufferOwner"><span class="Identifier">BufferOwner</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
   <span class="Identifier">boNone</span><span class="Other">,</span> <span class="Identifier">boWorker</span><span class="Other">,</span> <span class="Identifier">boResultQueue</span><span class="Other">,</span> <span class="Identifier">boCoordinator</span><span class="Other">,</span> <span class="Identifier">boOutputQueue</span><span class="Other">,</span> <span class="Identifier">boReader</span></pre></dt>
   <dd>
     
@@ -178,12 +181,12 @@
   </dd>
 </div>
 <div id="SharedBuffer">
-  <dt><pre><a href="buffers.html#SharedBuffer"><span class="Identifier">SharedBuffer</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <dt><pre><a href="#SharedBuffer"><span class="Identifier">SharedBuffer</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">data</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">pointer</span>
   <span class="Identifier">length</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">capacity</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">elementWidth</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
-  <span class="Identifier">owner</span><span class="Operator">*</span><span class="Other">:</span> <a href="buffers.html#BufferOwner"><span class="Identifier">BufferOwner</span></a></pre></dt>
+  <span class="Identifier">owner</span><span class="Operator">*</span><span class="Other">:</span> <a href="#BufferOwner"><span class="Identifier">BufferOwner</span></a></pre></dt>
   <dd>
     
     
@@ -199,7 +202,7 @@
     <div id="allocSharedBuffer-procs-all">
   <div id="allocSharedBuffer,int,int,ptr.AllocationTracker">
   <dt><pre><span class="Keyword">proc</span> <a href="#allocSharedBuffer%2Cint%2Cint%2Cptr.AllocationTracker"><span class="Identifier">allocSharedBuffer</span></a><span class="Other">(</span><span class="Identifier">capacity</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">elementWidth</span> <span class="Other">=</span> <span class="DecNumber">1</span><span class="Other">;</span> <span class="Identifier">owner</span> <span class="Other">=</span> <span class="Identifier">boWorker</span><span class="Other">;</span>
-                       <span class="Identifier">tracker</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="buffers.html#AllocationTracker"><span class="Identifier">AllocationTracker</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span> <span class="Identifier">zeroed</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="buffers.html#SharedBuffer"><span class="Identifier">SharedBuffer</span></a> {.
+                       <span class="Identifier">tracker</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="#AllocationTracker"><span class="Identifier">AllocationTracker</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span> <span class="Identifier">zeroed</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="#SharedBuffer"><span class="Identifier">SharedBuffer</span></a> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -211,7 +214,7 @@
 </div>
 <div id="byteAt-procs-all">
   <div id="byteAt,SharedBuffer,int">
-  <dt><pre><span class="Keyword">proc</span> <a href="#byteAt%2CSharedBuffer%2Cint"><span class="Identifier">byteAt</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <a href="buffers.html#SharedBuffer"><span class="Identifier">SharedBuffer</span></a><span class="Other">;</span> <span class="Identifier">index</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">ptr</span> <span class="Identifier">byte</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#byteAt%2CSharedBuffer%2Cint"><span class="Identifier">byteAt</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <a href="#SharedBuffer"><span class="Identifier">SharedBuffer</span></a><span class="Other">;</span> <span class="Identifier">index</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">ptr</span> <span class="Identifier">byte</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -223,7 +226,7 @@
 </div>
 <div id="byteCapacity-procs-all">
   <div id="byteCapacity,SharedBuffer">
-  <dt><pre><span class="Keyword">proc</span> <a href="#byteCapacity%2CSharedBuffer"><span class="Identifier">byteCapacity</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <a href="buffers.html#SharedBuffer"><span class="Identifier">SharedBuffer</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#byteCapacity%2CSharedBuffer"><span class="Identifier">byteCapacity</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <a href="#SharedBuffer"><span class="Identifier">SharedBuffer</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     
@@ -234,7 +237,7 @@
 </div>
 <div id="initAllocationTracker-procs-all">
   <div id="initAllocationTracker,AllocationTracker">
-  <dt><pre><span class="Keyword">proc</span> <a href="#initAllocationTracker%2CAllocationTracker"><span class="Identifier">initAllocationTracker</span></a><span class="Other">(</span><span class="Identifier">tracker</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="buffers.html#AllocationTracker"><span class="Identifier">AllocationTracker</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#initAllocationTracker%2CAllocationTracker"><span class="Identifier">initAllocationTracker</span></a><span class="Other">(</span><span class="Identifier">tracker</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#AllocationTracker"><span class="Identifier">AllocationTracker</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -246,7 +249,7 @@
 </div>
 <div id="release-procs-all">
   <div id="release,SharedBuffer">
-  <dt><pre><span class="Keyword">proc</span> <a href="#release%2CSharedBuffer"><span class="Identifier">release</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="buffers.html#SharedBuffer"><span class="Identifier">SharedBuffer</span></a><span class="Other">;</span> <span class="Identifier">expected</span> <span class="Other">=</span> <span class="Identifier">boNone</span><span class="Other">)</span> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#release%2CSharedBuffer"><span class="Identifier">release</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#SharedBuffer"><span class="Identifier">SharedBuffer</span></a><span class="Other">;</span> <span class="Identifier">expected</span> <span class="Other">=</span> <span class="Identifier">boNone</span><span class="Other">)</span> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -258,7 +261,7 @@
 </div>
 <div id="reserve-procs-all">
   <div id="reserve,SharedBuffer,int">
-  <dt><pre><span class="Keyword">proc</span> <a href="#reserve%2CSharedBuffer%2Cint"><span class="Identifier">reserve</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="buffers.html#SharedBuffer"><span class="Identifier">SharedBuffer</span></a><span class="Other">;</span> <span class="Identifier">minimumCapacity</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#reserve%2CSharedBuffer%2Cint"><span class="Identifier">reserve</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#SharedBuffer"><span class="Identifier">SharedBuffer</span></a><span class="Other">;</span> <span class="Identifier">minimumCapacity</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span>
              <span class="Identifier">maximumCapacity</span> <span class="Other">=</span> <span class="Identifier">high</span><span class="Other">(</span><span class="Identifier">int</span><span class="Other">)</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
@@ -271,7 +274,7 @@
 </div>
 <div id="setLength-procs-all">
   <div id="setLength,SharedBuffer,int">
-  <dt><pre><span class="Keyword">proc</span> <a href="#setLength%2CSharedBuffer%2Cint"><span class="Identifier">setLength</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="buffers.html#SharedBuffer"><span class="Identifier">SharedBuffer</span></a><span class="Other">;</span> <span class="Identifier">length</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#setLength%2CSharedBuffer%2Cint"><span class="Identifier">setLength</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#SharedBuffer"><span class="Identifier">SharedBuffer</span></a><span class="Other">;</span> <span class="Identifier">length</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -283,7 +286,7 @@
 </div>
 <div id="snapshot-procs-all">
   <div id="snapshot,AllocationTracker">
-  <dt><pre><span class="Keyword">proc</span> <a href="#snapshot%2CAllocationTracker"><span class="Identifier">snapshot</span></a><span class="Other">(</span><span class="Identifier">tracker</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="buffers.html#AllocationTracker"><span class="Identifier">AllocationTracker</span></a><span class="Other">)</span><span class="Other">:</span> <a href="buffers.html#AllocationSnapshot"><span class="Identifier">AllocationSnapshot</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#snapshot%2CAllocationTracker"><span class="Identifier">snapshot</span></a><span class="Other">(</span><span class="Identifier">tracker</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#AllocationTracker"><span class="Identifier">AllocationTracker</span></a><span class="Other">)</span><span class="Other">:</span> <a href="#AllocationSnapshot"><span class="Identifier">AllocationSnapshot</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -295,7 +298,7 @@
 </div>
 <div id="take-procs-all">
   <div id="take,SharedBuffer,BufferOwner,BufferOwner">
-  <dt><pre><span class="Keyword">proc</span> <a href="#take%2CSharedBuffer%2CBufferOwner%2CBufferOwner"><span class="Identifier">take</span></a><span class="Other">(</span><span class="Identifier">source</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="buffers.html#SharedBuffer"><span class="Identifier">SharedBuffer</span></a><span class="Other">;</span> <span class="Identifier">expected</span><span class="Other">:</span> <a href="buffers.html#BufferOwner"><span class="Identifier">BufferOwner</span></a><span class="Other">;</span> <span class="Identifier">next</span><span class="Other">:</span> <a href="buffers.html#BufferOwner"><span class="Identifier">BufferOwner</span></a><span class="Other">)</span><span class="Other">:</span> <a href="buffers.html#SharedBuffer"><span class="Identifier">SharedBuffer</span></a> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#take%2CSharedBuffer%2CBufferOwner%2CBufferOwner"><span class="Identifier">take</span></a><span class="Other">(</span><span class="Identifier">source</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#SharedBuffer"><span class="Identifier">SharedBuffer</span></a><span class="Other">;</span> <span class="Identifier">expected</span><span class="Other">:</span> <a href="#BufferOwner"><span class="Identifier">BufferOwner</span></a><span class="Other">;</span> <span class="Identifier">next</span><span class="Other">:</span> <a href="#BufferOwner"><span class="Identifier">BufferOwner</span></a><span class="Other">)</span><span class="Other">:</span> <a href="#SharedBuffer"><span class="Identifier">SharedBuffer</span></a> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -307,7 +310,7 @@
 </div>
 <div id="transfer-procs-all">
   <div id="transfer,SharedBuffer,BufferOwner,BufferOwner">
-  <dt><pre><span class="Keyword">proc</span> <a href="#transfer%2CSharedBuffer%2CBufferOwner%2CBufferOwner"><span class="Identifier">transfer</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="buffers.html#SharedBuffer"><span class="Identifier">SharedBuffer</span></a><span class="Other">;</span> <span class="Identifier">expected</span><span class="Other">,</span> <span class="Identifier">next</span><span class="Other">:</span> <a href="buffers.html#BufferOwner"><span class="Identifier">BufferOwner</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#transfer%2CSharedBuffer%2CBufferOwner%2CBufferOwner"><span class="Identifier">transfer</span></a><span class="Other">(</span><span class="Identifier">buffer</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#SharedBuffer"><span class="Identifier">SharedBuffer</span></a><span class="Other">;</span> <span class="Identifier">expected</span><span class="Other">,</span> <span class="Identifier">next</span><span class="Other">:</span> <a href="#BufferOwner"><span class="Identifier">BufferOwner</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -327,7 +330,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-08-08 17:11:15 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-10-10 19:55:33 UTC</small>
       </div>
     </div>
   </div>

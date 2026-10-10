@@ -16,13 +16,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.4">
+<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.12">
 
 <!-- JS -->
-<script type="text/javascript" src="../../dochack.js?v=2.2.4"></script>
+<script type="text/javascript" src="../../dochack.js?v=2.2.12"></script>
 </head>
 <body>
   <div class="document" id="documentId">
+    <input type="checkbox" id="nav-toggle" hidden>
+    <label for="nav-toggle" id="nav-burger">&#9776;</label>
+    <label for="nav-toggle" id="nav-overlay"></label>
     <div class="container">
       <h1 class="title">src/gzfast/scheduler/bounded_queue</h1>
       <div class="row">
@@ -146,7 +149,7 @@
   <h1><a class="toc-backref" href="#7">Types</a></h1>
   <dl class="item">
     <div id="BoundedQueue">
-  <dt><pre><a href="bounded_queue.html#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span> <span class="Other">=</span> <span class="Keyword">object</span></pre></dt>
+  <dt><pre><a href="#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span> <span class="Other">=</span> <span class="Keyword">object</span></pre></dt>
   <dd>
     
     
@@ -154,7 +157,7 @@
   </dd>
 </div>
 <div id="CancellationToken">
-  <dt><pre><a href="bounded_queue.html#CancellationToken"><span class="Identifier">CancellationToken</span></a> <span class="Other">=</span> <span class="Keyword">object</span></pre></dt>
+  <dt><pre><a href="#CancellationToken"><span class="Identifier">CancellationToken</span></a> <span class="Other">=</span> <span class="Keyword">object</span></pre></dt>
   <dd>
     
     
@@ -162,7 +165,7 @@
   </dd>
 </div>
 <div id="QueueStatus">
-  <dt><pre><a href="bounded_queue.html#QueueStatus"><span class="Identifier">QueueStatus</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <dt><pre><a href="#QueueStatus"><span class="Identifier">QueueStatus</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
   <span class="Identifier">qsOk</span><span class="Other">,</span> <span class="Identifier">qsClosed</span><span class="Other">,</span> <span class="Identifier">qsCancelled</span><span class="Other">,</span> <span class="Identifier">qsEmpty</span><span class="Other">,</span> <span class="Identifier">qsFull</span></pre></dt>
   <dd>
     
@@ -178,7 +181,7 @@
   <dl class="item">
     <div id="capacity-procs-all">
   <div id="capacity,BoundedQueue[T]">
-  <dt><pre><span class="Keyword">proc</span> <a href="#capacity%2CBoundedQueue%5BT%5D"><span class="Identifier">capacity</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <a href="bounded_queue.html#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span></pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#capacity%2CBoundedQueue%5BT%5D"><span class="Identifier">capacity</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <a href="#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span></pre></dt>
   <dd>
     
     
@@ -189,7 +192,7 @@
 </div>
 <div id="close-procs-all">
   <div id="close,BoundedQueue[T]">
-  <dt><pre><span class="Keyword">proc</span> <a href="#close%2CBoundedQueue%5BT%5D"><span class="Identifier">close</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="bounded_queue.html#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span></pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#close%2CBoundedQueue%5BT%5D"><span class="Identifier">close</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span></pre></dt>
   <dd>
     
     Stop admission and wake blocked producers/consumers. Idempotent.
@@ -200,7 +203,7 @@
 </div>
 <div id="deinitBoundedQueue-procs-all">
   <div id="deinitBoundedQueue,BoundedQueue[T]">
-  <dt><pre><span class="Keyword">proc</span> <a href="#deinitBoundedQueue%2CBoundedQueue%5BT%5D"><span class="Identifier">deinitBoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="bounded_queue.html#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span></pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#deinitBoundedQueue%2CBoundedQueue%5BT%5D"><span class="Identifier">deinitBoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span></pre></dt>
   <dd>
     
     Caller must stop all users and drain owned payloads first.
@@ -211,7 +214,7 @@
 </div>
 <div id="initBoundedQueue-procs-all">
   <div id="initBoundedQueue,BoundedQueue[T],int">
-  <dt><pre><span class="Keyword">proc</span> <a href="#initBoundedQueue%2CBoundedQueue%5BT%5D%2Cint"><span class="Identifier">initBoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="bounded_queue.html#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">capacity</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span></pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#initBoundedQueue%2CBoundedQueue%5BT%5D%2Cint"><span class="Identifier">initBoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">capacity</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span></pre></dt>
   <dd>
     
     
@@ -222,7 +225,7 @@
 </div>
 <div id="initCancellationToken-procs-all">
   <div id="initCancellationToken,CancellationToken">
-  <dt><pre><span class="Keyword">proc</span> <a href="#initCancellationToken%2CCancellationToken"><span class="Identifier">initCancellationToken</span></a><span class="Other">(</span><span class="Identifier">token</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="bounded_queue.html#CancellationToken"><span class="Identifier">CancellationToken</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#initCancellationToken%2CCancellationToken"><span class="Identifier">initCancellationToken</span></a><span class="Other">(</span><span class="Identifier">token</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#CancellationToken"><span class="Identifier">CancellationToken</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -234,7 +237,7 @@
 </div>
 <div id="isCancelled-procs-all">
   <div id="isCancelled,CancellationToken">
-  <dt><pre><span class="Keyword">proc</span> <a href="#isCancelled%2CCancellationToken"><span class="Identifier">isCancelled</span></a><span class="Other">(</span><span class="Identifier">token</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="bounded_queue.html#CancellationToken"><span class="Identifier">CancellationToken</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#isCancelled%2CCancellationToken"><span class="Identifier">isCancelled</span></a><span class="Other">(</span><span class="Identifier">token</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#CancellationToken"><span class="Identifier">CancellationToken</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -246,7 +249,7 @@
 </div>
 <div id="isClosed-procs-all">
   <div id="isClosed,BoundedQueue[T]">
-  <dt><pre><span class="Keyword">proc</span> <a href="#isClosed%2CBoundedQueue%5BT%5D"><span class="Identifier">isClosed</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="bounded_queue.html#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span></pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#isClosed%2CBoundedQueue%5BT%5D"><span class="Identifier">isClosed</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span></pre></dt>
   <dd>
     
     
@@ -257,7 +260,7 @@
 </div>
 <div id="len-procs-all">
   <div id="len,BoundedQueue[T]">
-  <dt><pre><span class="Keyword">proc</span> <a href="#len%2CBoundedQueue%5BT%5D"><span class="Identifier">len</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="bounded_queue.html#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span></pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#len%2CBoundedQueue%5BT%5D"><span class="Identifier">len</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span></pre></dt>
   <dd>
     
     
@@ -268,8 +271,8 @@
 </div>
 <div id="pop-procs-all">
   <div id="pop,BoundedQueue[T],T,ptr.CancellationToken">
-  <dt><pre><span class="Keyword">proc</span> <a href="#pop%2CBoundedQueue%5BT%5D%2CT%2Cptr.CancellationToken"><span class="Identifier">pop</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="bounded_queue.html#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">item</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">T</span><span class="Other">;</span>
-            <span class="Identifier">cancellation</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="bounded_queue.html#CancellationToken"><span class="Identifier">CancellationToken</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="bounded_queue.html#QueueStatus"><span class="Identifier">QueueStatus</span></a></pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#pop%2CBoundedQueue%5BT%5D%2CT%2Cptr.CancellationToken"><span class="Identifier">pop</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">item</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">T</span><span class="Other">;</span>
+            <span class="Identifier">cancellation</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="#CancellationToken"><span class="Identifier">CancellationToken</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="#QueueStatus"><span class="Identifier">QueueStatus</span></a></pre></dt>
   <dd>
     
     
@@ -280,8 +283,8 @@
 </div>
 <div id="push-procs-all">
   <div id="push,BoundedQueue[T],T,ptr.CancellationToken">
-  <dt><pre><span class="Keyword">proc</span> <a href="#push%2CBoundedQueue%5BT%5D%2CT%2Cptr.CancellationToken"><span class="Identifier">push</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="bounded_queue.html#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">item</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">;</span>
-             <span class="Identifier">cancellation</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="bounded_queue.html#CancellationToken"><span class="Identifier">CancellationToken</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="bounded_queue.html#QueueStatus"><span class="Identifier">QueueStatus</span></a></pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#push%2CBoundedQueue%5BT%5D%2CT%2Cptr.CancellationToken"><span class="Identifier">push</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">item</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">;</span>
+             <span class="Identifier">cancellation</span><span class="Other">:</span> <span class="Keyword">ptr</span> <a href="#CancellationToken"><span class="Identifier">CancellationToken</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">)</span><span class="Other">:</span> <a href="#QueueStatus"><span class="Identifier">QueueStatus</span></a></pre></dt>
   <dd>
     
     
@@ -292,7 +295,7 @@
 </div>
 <div id="requestCancel-procs-all">
   <div id="requestCancel,CancellationToken">
-  <dt><pre><span class="Keyword">proc</span> <a href="#requestCancel%2CCancellationToken"><span class="Identifier">requestCancel</span></a><span class="Other">(</span><span class="Identifier">token</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="bounded_queue.html#CancellationToken"><span class="Identifier">CancellationToken</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#requestCancel%2CCancellationToken"><span class="Identifier">requestCancel</span></a><span class="Other">(</span><span class="Identifier">token</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#CancellationToken"><span class="Identifier">CancellationToken</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -304,7 +307,7 @@
 </div>
 <div id="tryPop-procs-all">
   <div id="tryPop,BoundedQueue[T],T">
-  <dt><pre><span class="Keyword">proc</span> <a href="#tryPop%2CBoundedQueue%5BT%5D%2CT"><span class="Identifier">tryPop</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="bounded_queue.html#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">item</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">T</span><span class="Other">)</span><span class="Other">:</span> <a href="bounded_queue.html#QueueStatus"><span class="Identifier">QueueStatus</span></a></pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#tryPop%2CBoundedQueue%5BT%5D%2CT"><span class="Identifier">tryPop</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">item</span><span class="Other">:</span> <span class="Keyword">var</span> <span class="Identifier">T</span><span class="Other">)</span><span class="Other">:</span> <a href="#QueueStatus"><span class="Identifier">QueueStatus</span></a></pre></dt>
   <dd>
     
     
@@ -315,7 +318,7 @@
 </div>
 <div id="tryPush-procs-all">
   <div id="tryPush,BoundedQueue[T],T">
-  <dt><pre><span class="Keyword">proc</span> <a href="#tryPush%2CBoundedQueue%5BT%5D%2CT"><span class="Identifier">tryPush</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="bounded_queue.html#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">item</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">)</span><span class="Other">:</span> <a href="bounded_queue.html#QueueStatus"><span class="Identifier">QueueStatus</span></a></pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#tryPush%2CBoundedQueue%5BT%5D%2CT"><span class="Identifier">tryPush</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">item</span><span class="Other">:</span> <span class="Identifier">T</span><span class="Other">)</span><span class="Other">:</span> <a href="#QueueStatus"><span class="Identifier">QueueStatus</span></a></pre></dt>
   <dd>
     
     
@@ -326,7 +329,7 @@
 </div>
 <div id="wakeAll-procs-all">
   <div id="wakeAll,BoundedQueue[T]">
-  <dt><pre><span class="Keyword">proc</span> <a href="#wakeAll%2CBoundedQueue%5BT%5D"><span class="Identifier">wakeAll</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="bounded_queue.html#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span></pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#wakeAll%2CBoundedQueue%5BT%5D"><span class="Identifier">wakeAll</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">(</span><span class="Identifier">queue</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#BoundedQueue"><span class="Identifier">BoundedQueue</span></a><span class="Other">[</span><span class="Identifier">T</span><span class="Other">]</span><span class="Other">)</span></pre></dt>
   <dd>
     
     Wake waiters after an external cancellation flag changes.
@@ -345,7 +348,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-08-08 17:11:15 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-10-10 19:55:33 UTC</small>
       </div>
     </div>
   </div>

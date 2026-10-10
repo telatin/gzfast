@@ -16,13 +16,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../nimdoc.out.css?v=2.2.4">
+<link rel="stylesheet" type="text/css" href="../nimdoc.out.css?v=2.2.12">
 
 <!-- JS -->
-<script type="text/javascript" src="../dochack.js?v=2.2.4"></script>
+<script type="text/javascript" src="../dochack.js?v=2.2.12"></script>
 </head>
 <body>
   <div class="document" id="documentId">
+    <input type="checkbox" id="nav-toggle" hidden>
+    <label for="nav-toggle" id="nav-burger">&#9776;</label>
+    <label for="nav-toggle" id="nav-overlay"></label>
     <div class="container">
       <h1 class="title">src/gzfast/writer</h1>
       <div class="row">
@@ -125,7 +128,7 @@
   <h1><a class="toc-backref" href="#7">Types</a></h1>
   <dl class="item">
     <div id="GzFastWriter">
-  <dt><pre><a href="writer.html#GzFastWriter"><span class="Identifier">GzFastWriter</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span></pre></dt>
+  <dt><pre><a href="#GzFastWriter"><span class="Identifier">GzFastWriter</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span></pre></dt>
   <dd>
     
     Forward-only gzip writer. Not safe for concurrent calls from multiple threads.
@@ -140,7 +143,7 @@
   <dl class="item">
     <div id="close-procs-all">
   <div id="close,GzFastWriter">
-  <dt><pre><span class="Keyword">proc</span> <a href="#close%2CGzFastWriter"><span class="Identifier">close</span></a><span class="Other">(</span><span class="Identifier">w</span><span class="Other">:</span> <a href="writer.html#GzFastWriter"><span class="Identifier">GzFastWriter</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#close%2CGzFastWriter"><span class="Identifier">close</span></a><span class="Other">(</span><span class="Identifier">w</span><span class="Other">:</span> <a href="#GzFastWriter"><span class="Identifier">GzFastWriter</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">CatchableError</span><span class="Other">]</span><span class="Other">,</span>
                               <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -152,8 +155,8 @@
 </div>
 <div id="finish-procs-all">
   <div id="finish,GzFastWriter">
-  <dt><pre><span class="Keyword">proc</span> <a href="#finish%2CGzFastWriter"><span class="Identifier">finish</span></a><span class="Other">(</span><span class="Identifier">w</span><span class="Other">:</span> <a href="writer.html#GzFastWriter"><span class="Identifier">GzFastWriter</span></a><span class="Other">)</span><span class="Other">:</span> <a href="report.html#GzipWriteReport"><span class="Identifier">GzipWriteReport</span></a> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#finish%2CGzFastWriter"><span class="Identifier">finish</span></a><span class="Other">(</span><span class="Identifier">w</span><span class="Other">:</span> <a href="#GzFastWriter"><span class="Identifier">GzFastWriter</span></a><span class="Other">)</span><span class="Other">:</span> <a href="report.html#GzipWriteReport"><span class="Identifier">GzipWriteReport</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">CatchableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -167,7 +170,7 @@
 </div>
 <div id="flush-procs-all">
   <div id="flush,GzFastWriter">
-  <dt><pre><span class="Keyword">proc</span> <a href="#flush%2CGzFastWriter"><span class="Identifier">flush</span></a><span class="Other">(</span><span class="Identifier">w</span><span class="Other">:</span> <a href="writer.html#GzFastWriter"><span class="Identifier">GzFastWriter</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#flush%2CGzFastWriter"><span class="Identifier">flush</span></a><span class="Other">(</span><span class="Identifier">w</span><span class="Other">:</span> <a href="#GzFastWriter"><span class="Identifier">GzFastWriter</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span>
                               <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -182,9 +185,9 @@
 <div id="openGzFastWriter-procs-all">
   <div id="openGzFastWriter,File">
   <dt><pre><span class="Keyword">proc</span> <a href="#openGzFastWriter%2CFile"><span class="Identifier">openGzFastWriter</span></a><span class="Other">(</span><span class="Identifier">output</span><span class="Other">:</span> <span class="Identifier">File</span><span class="Other">;</span> <span class="Identifier">config</span> <span class="Other">=</span> <span class="Identifier">defaultGzFastWriteConfig</span><span class="Other">(</span><span class="Other">)</span><span class="Other">;</span>
-                      <span class="Identifier">ownsOutput</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="writer.html#GzFastWriter"><span class="Identifier">GzFastWriter</span></a> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">GzFastConfigError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+                      <span class="Identifier">ownsOutput</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">)</span><span class="Other">:</span> <a href="#GzFastWriter"><span class="Identifier">GzFastWriter</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">GzFastConfigError</span><span class="Other">,</span> <span class="Identifier">CatchableError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     <p>Open a gzip writer around an existing <tt class="docutils literal"><span class="pre"><span class="Identifier">File</span></span></tt>.</p>
@@ -194,9 +197,9 @@
   </dd>
 </div>
 <div id="openGzFastWriter,string">
-  <dt><pre><span class="Keyword">proc</span> <a href="#openGzFastWriter%2Cstring"><span class="Identifier">openGzFastWriter</span></a><span class="Other">(</span><span class="Identifier">path</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">config</span> <span class="Other">=</span> <span class="Identifier">defaultGzFastWriteConfig</span><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <a href="writer.html#GzFastWriter"><span class="Identifier">GzFastWriter</span></a> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastConfigError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#openGzFastWriter%2Cstring"><span class="Identifier">openGzFastWriter</span></a><span class="Other">(</span><span class="Identifier">path</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">config</span> <span class="Other">=</span> <span class="Identifier">defaultGzFastWriteConfig</span><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <a href="#GzFastWriter"><span class="Identifier">GzFastWriter</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastConfigError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">CatchableError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Create or truncate <tt class="docutils literal"><span class="pre"><span class="Identifier">path</span></span></tt> and open it for gzip writing.
@@ -207,7 +210,7 @@
 </div>
 <div id="writeBytes-procs-all">
   <div id="writeBytes,GzFastWriter,openArray[byte]">
-  <dt><pre><span class="Keyword">proc</span> <a href="#writeBytes%2CGzFastWriter%2CopenArray%5Bbyte%5D"><span class="Identifier">writeBytes</span></a><span class="Other">(</span><span class="Identifier">w</span><span class="Other">:</span> <a href="writer.html#GzFastWriter"><span class="Identifier">GzFastWriter</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <span class="Identifier">openArray</span><span class="Other">[</span><span class="Identifier">byte</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#writeBytes%2CGzFastWriter%2CopenArray%5Bbyte%5D"><span class="Identifier">writeBytes</span></a><span class="Other">(</span><span class="Identifier">w</span><span class="Other">:</span> <a href="#GzFastWriter"><span class="Identifier">GzFastWriter</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <span class="Identifier">openArray</span><span class="Other">[</span><span class="Identifier">byte</span><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
@@ -220,7 +223,7 @@
 </div>
 <div id="writeData-procs-all">
   <div id="writeData,GzFastWriter,pointer,int">
-  <dt><pre><span class="Keyword">proc</span> <a href="#writeData%2CGzFastWriter%2Cpointer%2Cint"><span class="Identifier">writeData</span></a><span class="Other">(</span><span class="Identifier">w</span><span class="Other">:</span> <a href="writer.html#GzFastWriter"><span class="Identifier">GzFastWriter</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <span class="Identifier">pointer</span><span class="Other">;</span> <span class="Identifier">len</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#writeData%2CGzFastWriter%2Cpointer%2Cint"><span class="Identifier">writeData</span></a><span class="Other">(</span><span class="Identifier">w</span><span class="Other">:</span> <a href="#GzFastWriter"><span class="Identifier">GzFastWriter</span></a><span class="Other">;</span> <span class="Identifier">data</span><span class="Other">:</span> <span class="Identifier">pointer</span><span class="Other">;</span> <span class="Identifier">len</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
@@ -235,7 +238,7 @@
 </div>
 <div id="writeLine-procs-all">
   <div id="writeLine,GzFastWriter,string">
-  <dt><pre><span class="Keyword">proc</span> <a href="#writeLine%2CGzFastWriter%2Cstring"><span class="Identifier">writeLine</span></a><span class="Other">(</span><span class="Identifier">w</span><span class="Other">:</span> <a href="writer.html#GzFastWriter"><span class="Identifier">GzFastWriter</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#writeLine%2CGzFastWriter%2Cstring"><span class="Identifier">writeLine</span></a><span class="Other">(</span><span class="Identifier">w</span><span class="Other">:</span> <a href="#GzFastWriter"><span class="Identifier">GzFastWriter</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
@@ -248,7 +251,7 @@
 </div>
 <div id="writeString-procs-all">
   <div id="writeString,GzFastWriter,string">
-  <dt><pre><span class="Keyword">proc</span> <a href="#writeString%2CGzFastWriter%2Cstring"><span class="Identifier">writeString</span></a><span class="Other">(</span><span class="Identifier">w</span><span class="Other">:</span> <a href="writer.html#GzFastWriter"><span class="Identifier">GzFastWriter</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#writeString%2CGzFastWriter%2Cstring"><span class="Identifier">writeString</span></a><span class="Other">(</span><span class="Identifier">w</span><span class="Other">:</span> <a href="#GzFastWriter"><span class="Identifier">GzFastWriter</span></a><span class="Other">;</span> <span class="Identifier">s</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">WriteIOEffect</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
@@ -269,7 +272,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-08-08 17:11:15 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-10-10 19:55:33 UTC</small>
       </div>
     </div>
   </div>

@@ -16,13 +16,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.4">
+<link rel="stylesheet" type="text/css" href="../../nimdoc.out.css?v=2.2.12">
 
 <!-- JS -->
-<script type="text/javascript" src="../../dochack.js?v=2.2.4"></script>
+<script type="text/javascript" src="../../dochack.js?v=2.2.12"></script>
 </head>
 <body>
   <div class="document" id="documentId">
+    <input type="checkbox" id="nav-toggle" hidden>
+    <label for="nav-toggle" id="nav-burger">&#9776;</label>
+    <label for="nav-toggle" id="nav-overlay"></label>
     <div class="container">
       <h1 class="title">src/gzfast/paths/sequential</h1>
       <div class="row">
@@ -58,12 +61,7 @@
   <details open>
     <summary><a class="reference reference-toplevel" href="#7" id="57">Types</a></summary>
     <ul class="simple simple-toc-section">
-      <li><a class="reference" href="#SequentialDecoder" title="SequentialDecoder = object
-  ## absolute compressed offset of inBuf[0]
-  ## running CRC32 over header bytes
-  ## header bytes fed for the current member
-  ## running member CRC32
-  ## decoded bytes in current member">SequentialDecoder</a></li>
+      <li><a class="reference" href="#SequentialDecoder" title="SequentialDecoder = object">SequentialDecoder</a></li>
 
     </ul>
   </details>
@@ -74,6 +72,10 @@
     <ul class="simple simple-toc-section">
       <ul class="simple nested-toc-section">atEnd
   <li><a class="reference" href="#atEnd%2CSequentialDecoder" title="atEnd(dec: var SequentialDecoder): bool">atEnd(dec: var SequentialDecoder): bool</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">checkpointProgress
+  <li><a class="reference" href="#checkpointProgress%2CSequentialDecoder" title="checkpointProgress(dec: SequentialDecoder): tuple[bytes: uint64, complete: bool]">checkpointProgress(dec: SequentialDecoder): tuple[bytes: uint64, complete: bool]</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">close
@@ -95,6 +97,18 @@
 </ul>
 <ul class="simple nested-toc-section">openSequentialDecoderAt
   <li><a class="reference" href="#openSequentialDecoderAt%2Cstring%2Cuint64%2CGzFastConfig" title="openSequentialDecoderAt(path: string; offset: uint64; config: GzFastConfig): SequentialDecoder">openSequentialDecoderAt(path: string; offset: uint64; config: GzFastConfig): SequentialDecoder</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">openSequentialDecoderAtCheckpoint
+  <li><a class="reference" href="#openSequentialDecoderAtCheckpoint%2Cstring%2Cuint64%2CopenArray%5Bbyte%5D%2Cuint32%2Cuint64%2Cuint64%2Cuint64%2CGzFastConfig" title="openSequentialDecoderAtCheckpoint(path: string; startBit: uint64;
+                                  dictionary: openArray[byte];
+                                  memberCrc: uint32;
+                                  memberBytes, totalOut, memberCount: uint64;
+                                  config: GzFastConfig): SequentialDecoder">openSequentialDecoderAtCheckpoint(path: string; startBit: uint64;
+                                  dictionary: openArray[byte];
+                                  memberCrc: uint32;
+                                  memberBytes, totalOut, memberCount: uint64;
+                                  config: GzFastConfig): SequentialDecoder</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">peekDecoded
@@ -142,12 +156,7 @@
   <h1><a class="toc-backref" href="#7">Types</a></h1>
   <dl class="item">
     <div id="SequentialDecoder">
-  <dt><pre><a href="sequential.html#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Comment">## absolute compressed offset of inBuf[0]</span>
-  <span class="Comment">## running CRC32 over header bytes</span>
-  <span class="Comment">## header bytes fed for the current member</span>
-  <span class="Comment">## running member CRC32</span>
-  <span class="Comment">## decoded bytes in current member</span></pre></dt>
+  <dt><pre><a href="#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a> <span class="Other">=</span> <span class="Keyword">object</span></pre></dt>
   <dd>
     
     
@@ -162,7 +171,7 @@
   <dl class="item">
     <div id="atEnd-procs-all">
   <div id="atEnd,SequentialDecoder">
-  <dt><pre><span class="Keyword">proc</span> <a href="#atEnd%2CSequentialDecoder"><span class="Identifier">atEnd</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="sequential.html#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#atEnd%2CSequentialDecoder"><span class="Identifier">atEnd</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -172,9 +181,21 @@
 </div>
 
 </div>
+<div id="checkpointProgress-procs-all">
+  <div id="checkpointProgress,SequentialDecoder">
+  <dt><pre><span class="Keyword">proc</span> <a href="#checkpointProgress%2CSequentialDecoder"><span class="Identifier">checkpointProgress</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <a href="#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span><span class="Identifier">bytes</span><span class="Other">:</span> <span class="Identifier">uint64</span><span class="Other">,</span>
+    <span class="Identifier">complete</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    
+    
+  </dd>
+</div>
+
+</div>
 <div id="close-procs-all">
   <div id="close,SequentialDecoder">
-  <dt><pre><span class="Keyword">proc</span> <a href="#close%2CSequentialDecoder"><span class="Identifier">close</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="sequential.html#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#close%2CSequentialDecoder"><span class="Identifier">close</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Release the inflater and, when owned, the input file. Idempotent.
@@ -185,7 +206,7 @@
 </div>
 <div id="consumeDecoded-procs-all">
   <div id="consumeDecoded,SequentialDecoder,int">
-  <dt><pre><span class="Keyword">proc</span> <a href="#consumeDecoded%2CSequentialDecoder%2Cint"><span class="Identifier">consumeDecoded</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="sequential.html#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#consumeDecoded%2CSequentialDecoder%2Cint"><span class="Identifier">consumeDecoded</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">;</span> <span class="Identifier">n</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span> {.<span class="Identifier">inline</span><span class="Other">,</span>
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -197,7 +218,7 @@
 </div>
 <div id="drainToFile-procs-all">
   <div id="drainToFile,SequentialDecoder,File">
-  <dt><pre><span class="Keyword">proc</span> <a href="#drainToFile%2CSequentialDecoder%2CFile"><span class="Identifier">drainToFile</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="sequential.html#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">;</span> <span class="Identifier">output</span><span class="Other">:</span> <span class="Identifier">File</span><span class="Other">)</span> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#drainToFile%2CSequentialDecoder%2CFile"><span class="Identifier">drainToFile</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">;</span> <span class="Identifier">output</span><span class="Other">:</span> <span class="Identifier">File</span><span class="Other">)</span> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
@@ -210,7 +231,7 @@
 </div>
 <div id="openSequentialDecoder-procs-all">
   <div id="openSequentialDecoder,Stream,GzFastConfig">
-  <dt><pre><span class="Keyword">proc</span> <a href="#openSequentialDecoder%2CStream%2CGzFastConfig"><span class="Identifier">openSequentialDecoder</span></a><span class="Other">(</span><span class="Identifier">input</span><span class="Other">:</span> <span class="Identifier">Stream</span><span class="Other">;</span> <span class="Identifier">config</span><span class="Other">:</span> <a href="../config.html#GzFastConfig"><span class="Identifier">GzFastConfig</span></a><span class="Other">)</span><span class="Other">:</span> <a href="sequential.html#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#openSequentialDecoder%2CStream%2CGzFastConfig"><span class="Identifier">openSequentialDecoder</span></a><span class="Other">(</span><span class="Identifier">input</span><span class="Other">:</span> <span class="Identifier">Stream</span><span class="Other">;</span> <span class="Identifier">config</span><span class="Other">:</span> <a href="../config.html#GzFastConfig"><span class="Identifier">GzFastConfig</span></a><span class="Other">)</span><span class="Other">:</span> <a href="#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -219,7 +240,7 @@
   </dd>
 </div>
 <div id="openSequentialDecoder,string,GzFastConfig">
-  <dt><pre><span class="Keyword">proc</span> <a href="#openSequentialDecoder%2Cstring%2CGzFastConfig"><span class="Identifier">openSequentialDecoder</span></a><span class="Other">(</span><span class="Identifier">path</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">config</span><span class="Other">:</span> <a href="../config.html#GzFastConfig"><span class="Identifier">GzFastConfig</span></a><span class="Other">)</span><span class="Other">:</span> <a href="sequential.html#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#openSequentialDecoder%2Cstring%2CGzFastConfig"><span class="Identifier">openSequentialDecoder</span></a><span class="Other">(</span><span class="Identifier">path</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">config</span><span class="Other">:</span> <a href="../config.html#GzFastConfig"><span class="Identifier">GzFastConfig</span></a><span class="Other">)</span><span class="Other">:</span> <a href="#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -231,7 +252,7 @@
 </div>
 <div id="openSequentialDecoderAt-procs-all">
   <div id="openSequentialDecoderAt,string,uint64,GzFastConfig">
-  <dt><pre><span class="Keyword">proc</span> <a href="#openSequentialDecoderAt%2Cstring%2Cuint64%2CGzFastConfig"><span class="Identifier">openSequentialDecoderAt</span></a><span class="Other">(</span><span class="Identifier">path</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">offset</span><span class="Other">:</span> <span class="Identifier">uint64</span><span class="Other">;</span> <span class="Identifier">config</span><span class="Other">:</span> <a href="../config.html#GzFastConfig"><span class="Identifier">GzFastConfig</span></a><span class="Other">)</span><span class="Other">:</span> <a href="sequential.html#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#openSequentialDecoderAt%2Cstring%2Cuint64%2CGzFastConfig"><span class="Identifier">openSequentialDecoderAt</span></a><span class="Other">(</span><span class="Identifier">path</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">offset</span><span class="Other">:</span> <span class="Identifier">uint64</span><span class="Other">;</span> <span class="Identifier">config</span><span class="Other">:</span> <a href="../config.html#GzFastConfig"><span class="Identifier">GzFastConfig</span></a><span class="Other">)</span><span class="Other">:</span> <a href="#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -241,9 +262,24 @@
 </div>
 
 </div>
+<div id="openSequentialDecoderAtCheckpoint-procs-all">
+  <div id="openSequentialDecoderAtCheckpoint,string,uint64,openArray[byte],uint32,uint64,uint64,uint64,GzFastConfig">
+  <dt><pre><span class="Keyword">proc</span> <a href="#openSequentialDecoderAtCheckpoint%2Cstring%2Cuint64%2CopenArray%5Bbyte%5D%2Cuint32%2Cuint64%2Cuint64%2Cuint64%2CGzFastConfig"><span class="Identifier">openSequentialDecoderAtCheckpoint</span></a><span class="Other">(</span><span class="Identifier">path</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">startBit</span><span class="Other">:</span> <span class="Identifier">uint64</span><span class="Other">;</span>
+                                       <span class="Identifier">dictionary</span><span class="Other">:</span> <span class="Identifier">openArray</span><span class="Other">[</span><span class="Identifier">byte</span><span class="Other">]</span><span class="Other">;</span>
+                                       <span class="Identifier">memberCrc</span><span class="Other">:</span> <span class="Identifier">uint32</span><span class="Other">;</span> <span class="Identifier">memberBytes</span><span class="Other">,</span> <span class="Identifier">totalOut</span><span class="Other">,</span>
+    <span class="Identifier">memberCount</span><span class="Other">:</span> <span class="Identifier">uint64</span><span class="Other">;</span> <span class="Identifier">config</span><span class="Other">:</span> <a href="../config.html#GzFastConfig"><span class="Identifier">GzFastConfig</span></a><span class="Other">)</span><span class="Other">:</span> <a href="#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">CatchableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Resume an authoritative raw-DEFLATE block boundary. Prefix counters seed verification and limits, but prefix bytes are never emitted again.
+    
+  </dd>
+</div>
+
+</div>
 <div id="peekDecoded-procs-all">
   <div id="peekDecoded,SequentialDecoder">
-  <dt><pre><span class="Keyword">proc</span> <a href="#peekDecoded%2CSequentialDecoder"><span class="Identifier">peekDecoded</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="sequential.html#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../span.html#DecodedSpan"><span class="Identifier">DecodedSpan</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#peekDecoded%2CSequentialDecoder"><span class="Identifier">peekDecoded</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../span.html#DecodedSpan"><span class="Identifier">DecodedSpan</span></a> {.<span class="Identifier">inline</span><span class="Other">,</span>
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -255,7 +291,7 @@
 </div>
 <div id="readData-procs-all">
   <div id="readData,SequentialDecoder,pointer,int">
-  <dt><pre><span class="Keyword">proc</span> <a href="#readData%2CSequentialDecoder%2Cpointer%2Cint"><span class="Identifier">readData</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="sequential.html#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">;</span> <span class="Identifier">buffer</span><span class="Other">:</span> <span class="Identifier">pointer</span><span class="Other">;</span> <span class="Identifier">bufLen</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#readData%2CSequentialDecoder%2Cpointer%2Cint"><span class="Identifier">readData</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">;</span> <span class="Identifier">buffer</span><span class="Other">:</span> <span class="Identifier">pointer</span><span class="Other">;</span> <span class="Identifier">bufLen</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">int</span> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -267,7 +303,7 @@
 </div>
 <div id="report-procs-all">
   <div id="report,SequentialDecoder">
-  <dt><pre><span class="Keyword">proc</span> <a href="#report%2CSequentialDecoder"><span class="Identifier">report</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <a href="sequential.html#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../report.html#DecodeReport"><span class="Identifier">DecodeReport</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#report%2CSequentialDecoder"><span class="Identifier">report</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <a href="#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../report.html#DecodeReport"><span class="Identifier">DecodeReport</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -279,7 +315,7 @@
 </div>
 <div id="statsSnapshot-procs-all">
   <div id="statsSnapshot,SequentialDecoder">
-  <dt><pre><span class="Keyword">proc</span> <a href="#statsSnapshot%2CSequentialDecoder"><span class="Identifier">statsSnapshot</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <a href="sequential.html#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../report.html#DecoderStats"><span class="Identifier">DecoderStats</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#statsSnapshot%2CSequentialDecoder"><span class="Identifier">statsSnapshot</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <a href="#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">)</span><span class="Other">:</span> <a href="../report.html#DecoderStats"><span class="Identifier">DecoderStats</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -291,7 +327,7 @@
 </div>
 <div id="verifyRemaining-procs-all">
   <div id="verifyRemaining,SequentialDecoder">
-  <dt><pre><span class="Keyword">proc</span> <a href="#verifyRemaining%2CSequentialDecoder"><span class="Identifier">verifyRemaining</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="sequential.html#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">)</span> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#verifyRemaining%2CSequentialDecoder"><span class="Identifier">verifyRemaining</span></a><span class="Other">(</span><span class="Identifier">dec</span><span class="Other">:</span> <span class="Keyword">var</span> <a href="#SequentialDecoder"><span class="Identifier">SequentialDecoder</span></a><span class="Other">)</span> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">ReadIOEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -311,7 +347,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-08-08 17:11:15 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-10-10 19:55:33 UTC</small>
       </div>
     </div>
   </div>

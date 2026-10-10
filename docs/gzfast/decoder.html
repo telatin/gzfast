@@ -16,13 +16,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../nimdoc.out.css?v=2.2.4">
+<link rel="stylesheet" type="text/css" href="../nimdoc.out.css?v=2.2.12">
 
 <!-- JS -->
-<script type="text/javascript" src="../dochack.js?v=2.2.4"></script>
+<script type="text/javascript" src="../dochack.js?v=2.2.12"></script>
 </head>
 <body>
   <div class="document" id="documentId">
+    <input type="checkbox" id="nav-toggle" hidden>
+    <label for="nav-toggle" id="nav-burger">&#9776;</label>
+    <label for="nav-toggle" id="nav-overlay"></label>
     <div class="container">
       <h1 class="title">src/gzfast/decoder</h1>
       <div class="row">
@@ -119,7 +122,7 @@
   <h1><a class="toc-backref" href="#7">Types</a></h1>
   <dl class="item">
     <div id="GzFastDecoder">
-  <dt><pre><a href="decoder.html#GzFastDecoder"><span class="Identifier">GzFastDecoder</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span></pre></dt>
+  <dt><pre><a href="#GzFastDecoder"><span class="Identifier">GzFastDecoder</span></a> <span class="Other">=</span> <span class="Keyword">ref</span> <span class="Keyword">object</span></pre></dt>
   <dd>
     
     
@@ -134,9 +137,10 @@
   <dl class="item">
     <div id="decodeTo-procs-all">
   <div id="decodeTo,GzFastDecoder,string,File">
-  <dt><pre><span class="Keyword">proc</span> <a href="#decodeTo%2CGzFastDecoder%2Cstring%2CFile"><span class="Identifier">decodeTo</span></a><span class="Other">(</span><span class="Identifier">decoder</span><span class="Other">:</span> <a href="decoder.html#GzFastDecoder"><span class="Identifier">GzFastDecoder</span></a><span class="Other">;</span> <span class="Identifier">inputPath</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">output</span><span class="Other">:</span> <span class="Identifier">File</span><span class="Other">)</span><span class="Other">:</span> <a href="report.html#DecodeReport"><span class="Identifier">DecodeReport</span></a> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#decodeTo%2CGzFastDecoder%2Cstring%2CFile"><span class="Identifier">decodeTo</span></a><span class="Other">(</span><span class="Identifier">decoder</span><span class="Other">:</span> <a href="#GzFastDecoder"><span class="Identifier">GzFastDecoder</span></a><span class="Other">;</span> <span class="Identifier">inputPath</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">output</span><span class="Other">:</span> <span class="Identifier">File</span><span class="Other">)</span><span class="Other">:</span> <a href="report.html#DecodeReport"><span class="Identifier">DecodeReport</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">CatchableError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span>
+    <span class="Identifier">CatchableError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Decode <tt class="docutils literal"><span class="pre"><span class="Identifier">inputPath</span></span></tt> writing to an open <tt class="docutils literal"><span class="pre"><span class="Identifier">File</span></span></tt>.
@@ -144,8 +148,9 @@
   </dd>
 </div>
 <div id="decodeTo,GzFastDecoder,string,Stream">
-  <dt><pre><span class="Keyword">proc</span> <a href="#decodeTo%2CGzFastDecoder%2Cstring%2CStream"><span class="Identifier">decodeTo</span></a><span class="Other">(</span><span class="Identifier">decoder</span><span class="Other">:</span> <a href="decoder.html#GzFastDecoder"><span class="Identifier">GzFastDecoder</span></a><span class="Other">;</span> <span class="Identifier">inputPath</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">output</span><span class="Other">:</span> <span class="Identifier">Stream</span><span class="Other">)</span><span class="Other">:</span> <a href="report.html#DecodeReport"><span class="Identifier">DecodeReport</span></a> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#decodeTo%2CGzFastDecoder%2Cstring%2CStream"><span class="Identifier">decodeTo</span></a><span class="Other">(</span><span class="Identifier">decoder</span><span class="Other">:</span> <a href="#GzFastDecoder"><span class="Identifier">GzFastDecoder</span></a><span class="Other">;</span> <span class="Identifier">inputPath</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">output</span><span class="Other">:</span> <span class="Identifier">Stream</span><span class="Other">)</span><span class="Other">:</span> <a href="report.html#DecodeReport"><span class="Identifier">DecodeReport</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
+    <span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">CatchableError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">,</span>
+    <span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">CatchableError</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -159,8 +164,9 @@
   <div id="decompressFile,string,string">
   <dt><pre><span class="Keyword">proc</span> <a href="#decompressFile%2Cstring%2Cstring"><span class="Identifier">decompressFile</span></a><span class="Other">(</span><span class="Identifier">inputPath</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">outputPath</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span>
                     <span class="Identifier">config</span> <span class="Other">=</span> <span class="Identifier">defaultGzFastConfig</span><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <a href="report.html#DecodeReport"><span class="Identifier">DecodeReport</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span>
-    <span class="Identifier">GzFastConfigError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+    <span class="Identifier">GzFastConfigError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">CatchableError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span>
+    <span class="Identifier">IOError</span><span class="Other">,</span> <span class="Identifier">OSError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">,</span> <span class="Identifier">WriteIOEffect</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     One-call file-to-file decompression.
@@ -171,7 +177,7 @@
 </div>
 <div id="initGzFastDecoder-procs-all">
   <div id="initGzFastDecoder">
-  <dt><pre><span class="Keyword">proc</span> <a href="#initGzFastDecoder"><span class="Identifier">initGzFastDecoder</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <a href="decoder.html#GzFastDecoder"><span class="Identifier">GzFastDecoder</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastConfigError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+  <dt><pre><span class="Keyword">proc</span> <a href="#initGzFastDecoder"><span class="Identifier">initGzFastDecoder</span></a><span class="Other">(</span><span class="Other">)</span><span class="Other">:</span> <a href="#GzFastDecoder"><span class="Identifier">GzFastDecoder</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastConfigError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -180,7 +186,7 @@
   </dd>
 </div>
 <div id="initGzFastDecoder,GzFastConfig">
-  <dt><pre><span class="Keyword">proc</span> <a href="#initGzFastDecoder%2CGzFastConfig"><span class="Identifier">initGzFastDecoder</span></a><span class="Other">(</span><span class="Identifier">config</span><span class="Other">:</span> <a href="config.html#GzFastConfig"><span class="Identifier">GzFastConfig</span></a><span class="Other">)</span><span class="Other">:</span> <a href="decoder.html#GzFastDecoder"><span class="Identifier">GzFastDecoder</span></a> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#initGzFastDecoder%2CGzFastConfig"><span class="Identifier">initGzFastDecoder</span></a><span class="Other">(</span><span class="Identifier">config</span><span class="Other">:</span> <a href="config.html#GzFastConfig"><span class="Identifier">GzFastConfig</span></a><span class="Other">)</span><span class="Other">:</span> <a href="#GzFastDecoder"><span class="Identifier">GzFastDecoder</span></a> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastConfigError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -189,7 +195,7 @@
   </dd>
 </div>
 <div id="initGzFastDecoder,int">
-  <dt><pre><span class="Keyword">proc</span> <a href="#initGzFastDecoder%2Cint"><span class="Identifier">initGzFastDecoder</span></a><span class="Other">(</span><span class="Identifier">threads</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <a href="decoder.html#GzFastDecoder"><span class="Identifier">GzFastDecoder</span></a> {.
+  <dt><pre><span class="Keyword">proc</span> <a href="#initGzFastDecoder%2Cint"><span class="Identifier">initGzFastDecoder</span></a><span class="Other">(</span><span class="Identifier">threads</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">)</span><span class="Other">:</span> <a href="#GzFastDecoder"><span class="Identifier">GzFastDecoder</span></a> {.
     <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastConfigError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
@@ -201,8 +207,9 @@
 </div>
 <div id="open-procs-all">
   <div id="open,GzFastDecoder,string">
-  <dt><pre><span class="Keyword">proc</span> <a href="#open%2CGzFastDecoder%2Cstring"><span class="Identifier">open</span></a><span class="Other">(</span><span class="Identifier">decoder</span><span class="Other">:</span> <a href="decoder.html#GzFastDecoder"><span class="Identifier">GzFastDecoder</span></a><span class="Other">;</span> <span class="Identifier">path</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="reader.html#GzFastStream"><span class="Identifier">GzFastStream</span></a> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dt><pre><span class="Keyword">proc</span> <a href="#open%2CGzFastDecoder%2Cstring"><span class="Identifier">open</span></a><span class="Other">(</span><span class="Identifier">decoder</span><span class="Other">:</span> <a href="#GzFastDecoder"><span class="Identifier">GzFastDecoder</span></a><span class="Other">;</span> <span class="Identifier">path</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <a href="reader.html#GzFastStream"><span class="Identifier">GzFastStream</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">CatchableError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Open <tt class="docutils literal"><span class="pre"><span class="Identifier">path</span></span></tt> for forward-only decompression. Path-based input will use the safest available path for the configured input.
@@ -214,8 +221,8 @@
 <div id="openGzFast-procs-all">
   <div id="openGzFast,string,int,int64">
   <dt><pre><span class="Keyword">proc</span> <a href="#openGzFast%2Cstring%2Cint%2Cint64"><span class="Identifier">openGzFast</span></a><span class="Other">(</span><span class="Identifier">path</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">threads</span> <span class="Other">=</span> <span class="DecNumber">0</span><span class="Other">;</span> <span class="Identifier">memoryLimit</span><span class="Other">:</span> <span class="Identifier">int64</span> <span class="Other">=</span> <span class="DecNumber">0</span><span class="Other">)</span><span class="Other">:</span> <a href="reader.html#GzFastStream"><span class="Identifier">GzFastStream</span></a> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">GzFastConfigError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">GzFastError</span><span class="Other">,</span> <span class="Identifier">CatchableError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">GzFastConfigError</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     Convenience one-call opener.
@@ -246,7 +253,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-08-08 17:11:15 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-10-10 19:55:33 UTC</small>
       </div>
     </div>
   </div>

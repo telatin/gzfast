@@ -6,6 +6,18 @@ nim	dpMultiMember	gzfast/report.html#dpMultiMember	DecodePath.dpMultiMember		4
 nim	dpMarkerWindow	gzfast/report.html#dpMarkerWindow	DecodePath.dpMarkerWindow		4
 nim	dpMixed	gzfast/report.html#dpMixed	DecodePath.dpMixed		4
 nim	DecodePath	gzfast/report.html#DecodePath	enum DecodePath		4
-nim	DecodeReport	gzfast/report.html#DecodeReport	object DecodeReport		12
-nim	DecoderStats	gzfast/report.html#DecoderStats	object DecoderStats		23
-nim	GzipWriteReport	gzfast/report.html#GzipWriteReport	object GzipWriteReport		33
+nim	mfrNone	gzfast/report.html#mfrNone	MarkerFallbackReason.mfrNone		12
+nim	mfrDecodeResultUnavailable	gzfast/report.html#mfrDecodeResultUnavailable	MarkerFallbackReason.mfrDecodeResultUnavailable		12
+nim	mfrDecodeRejected	gzfast/report.html#mfrDecodeRejected	MarkerFallbackReason.mfrDecodeRejected		12
+nim	mfrBoundaryMismatch	gzfast/report.html#mfrBoundaryMismatch	MarkerFallbackReason.mfrBoundaryMismatch		12
+nim	mfrUnresolvedHistory	gzfast/report.html#mfrUnresolvedHistory	MarkerFallbackReason.mfrUnresolvedHistory		12
+nim	mfrResolutionSubmitFailed	gzfast/report.html#mfrResolutionSubmitFailed	MarkerFallbackReason.mfrResolutionSubmitFailed		12
+nim	mfrResolutionResultUnavailable	gzfast/report.html#mfrResolutionResultUnavailable	MarkerFallbackReason.mfrResolutionResultUnavailable		12
+nim	mfrResolutionFailed	gzfast/report.html#mfrResolutionFailed	MarkerFallbackReason.mfrResolutionFailed		12
+nim	mfrMarkerFreeHandoff	gzfast/report.html#mfrMarkerFreeHandoff	MarkerFallbackReason.mfrMarkerFreeHandoff		12
+nim	mfrFollowingMember	gzfast/report.html#mfrFollowingMember	MarkerFallbackReason.mfrFollowingMember		12
+nim	MarkerFallbackReason	gzfast/report.html#MarkerFallbackReason	enum MarkerFallbackReason		12
+nim	MarkerDiagnostics	gzfast/report.html#MarkerDiagnostics	object MarkerDiagnostics		24
+nim	DecodeReport	gzfast/report.html#DecodeReport	object DecodeReport		39
+nim	DecoderStats	gzfast/report.html#DecoderStats	object DecoderStats		51
+nim	GzipWriteReport	gzfast/report.html#GzipWriteReport	object GzipWriteReport		61

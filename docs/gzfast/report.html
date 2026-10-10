@@ -16,13 +16,16 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../nimdoc.out.css?v=2.2.4">
+<link rel="stylesheet" type="text/css" href="../nimdoc.out.css?v=2.2.12">
 
 <!-- JS -->
-<script type="text/javascript" src="../dochack.js?v=2.2.4"></script>
+<script type="text/javascript" src="../dochack.js?v=2.2.12"></script>
 </head>
 <body>
   <div class="document" id="documentId">
+    <input type="checkbox" id="nav-toggle" hidden>
+    <label for="nav-toggle" id="nav-burger">&#9776;</label>
+    <label for="nav-toggle" id="nav-overlay"></label>
     <div class="container">
       <h1 class="title">src/gzfast/report</h1>
       <div class="row">
@@ -64,7 +67,8 @@
   pathsUsed*: set[DecodePath]
   crcVerified*: bool
   peakWorkers*: int
-  peakBufferedBytes*: uint64">DecodeReport</a></li>
+  peakBufferedBytes*: uint64
+  markerDiagnostics*: MarkerDiagnostics">DecodeReport</a></li>
 <li><a class="reference" href="#DecoderStats" title="DecoderStats = object
   compressedBytes*: uint64
   decompressedBytes*: uint64
@@ -77,6 +81,22 @@
   uncompressedBytes*: uint64
   crc32*: uint32
   isize*: uint32">GzipWriteReport</a></li>
+<li><a class="reference" href="#MarkerDiagnostics" title="MarkerDiagnostics = object
+  decodeJobs*: uint64
+  committedBytes*: uint64
+  exactBytes*: uint64
+  bytesBeforeFallback*: uint64
+  replayedBytes*: uint64     ## already committed bytes discarded during replay
+  fallbackBytes*: uint64     ## fresh sequential output, excluding replay
+  fallbackCompressedOffset*: uint64
+  fallbackReason*: MarkerFallbackReason ## first transition out of marker work
+  fallbackDetail*: string    ## worker status or unresolved-history status
+  exactStatus*: string       ## exact continuation outcome; empty if not attempted">MarkerDiagnostics</a></li>
+<li><a class="reference" href="#MarkerFallbackReason" title="MarkerFallbackReason = enum
+  mfrNone, mfrDecodeResultUnavailable, mfrDecodeRejected, mfrBoundaryMismatch,
+  mfrUnresolvedHistory, mfrResolutionSubmitFailed,
+  mfrResolutionResultUnavailable, mfrResolutionFailed, mfrMarkerFreeHandoff,
+  mfrFollowingMember">MarkerFallbackReason</a></li>
 
     </ul>
   </details>
@@ -94,7 +114,7 @@
   <h1><a class="toc-backref" href="#7">Types</a></h1>
   <dl class="item">
     <div id="DecodePath">
-  <dt><pre><a href="report.html#DecodePath"><span class="Identifier">DecodePath</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <dt><pre><a href="#DecodePath"><span class="Identifier">DecodePath</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
   <span class="Identifier">dpSequential</span><span class="Other">,</span> <span class="Identifier">dpStoredBlocks</span><span class="Other">,</span> <span class="Identifier">dpBgzf</span><span class="Other">,</span> <span class="Identifier">dpMultiMember</span><span class="Other">,</span> <span class="Identifier">dpMarkerWindow</span><span class="Other">,</span> <span class="Identifier">dpMixed</span></pre></dt>
   <dd>
     
@@ -103,14 +123,15 @@
   </dd>
 </div>
 <div id="DecodeReport">
-  <dt><pre><a href="report.html#DecodeReport"><span class="Identifier">DecodeReport</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <dt><pre><a href="#DecodeReport"><span class="Identifier">DecodeReport</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">compressedBytes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint64</span>
   <span class="Identifier">decompressedBytes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint64</span>
   <span class="Identifier">memberCount</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint64</span>
-  <span class="Identifier">pathsUsed</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">set</span><span class="Other">[</span><a href="report.html#DecodePath"><span class="Identifier">DecodePath</span></a><span class="Other">]</span>
+  <span class="Identifier">pathsUsed</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">set</span><span class="Other">[</span><a href="#DecodePath"><span class="Identifier">DecodePath</span></a><span class="Other">]</span>
   <span class="Identifier">crcVerified</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
   <span class="Identifier">peakWorkers</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
-  <span class="Identifier">peakBufferedBytes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint64</span></pre></dt>
+  <span class="Identifier">peakBufferedBytes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint64</span>
+  <span class="Identifier">markerDiagnostics</span><span class="Operator">*</span><span class="Other">:</span> <a href="#MarkerDiagnostics"><span class="Identifier">MarkerDiagnostics</span></a></pre></dt>
   <dd>
     
     Deterministic summary of a completed decode. Contains no timing values, so reports are comparable for equality in tests.
@@ -118,7 +139,7 @@
   </dd>
 </div>
 <div id="DecoderStats">
-  <dt><pre><a href="report.html#DecoderStats"><span class="Identifier">DecoderStats</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <dt><pre><a href="#DecoderStats"><span class="Identifier">DecoderStats</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">compressedBytes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint64</span>
   <span class="Identifier">decompressedBytes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint64</span>
   <span class="Identifier">memberCount</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint64</span>
@@ -132,7 +153,7 @@
   </dd>
 </div>
 <div id="GzipWriteReport">
-  <dt><pre><a href="report.html#GzipWriteReport"><span class="Identifier">GzipWriteReport</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <dt><pre><a href="#GzipWriteReport"><span class="Identifier">GzipWriteReport</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
   <span class="Identifier">compressedBytes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint64</span>
   <span class="Identifier">uncompressedBytes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint64</span>
   <span class="Identifier">crc32</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint32</span>
@@ -140,6 +161,36 @@
   <dd>
     
     Deterministic summary of a completed gzip write.
+    
+  </dd>
+</div>
+<div id="MarkerDiagnostics">
+  <dt><pre><a href="#MarkerDiagnostics"><span class="Identifier">MarkerDiagnostics</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">decodeJobs</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint64</span>
+  <span class="Identifier">committedBytes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint64</span>
+  <span class="Identifier">exactBytes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint64</span>
+  <span class="Identifier">bytesBeforeFallback</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint64</span>
+  <span class="Identifier">replayedBytes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint64</span>     <span class="Comment">## already committed bytes discarded during replay</span>
+  <span class="Identifier">fallbackBytes</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint64</span>     <span class="Comment">## fresh sequential output, excluding replay</span>
+  <span class="Identifier">fallbackCompressedOffset</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">uint64</span>
+  <span class="Identifier">fallbackReason</span><span class="Operator">*</span><span class="Other">:</span> <a href="#MarkerFallbackReason"><span class="Identifier">MarkerFallbackReason</span></a> <span class="Comment">## first transition out of marker work</span>
+  <span class="Identifier">fallbackDetail</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>    <span class="Comment">## worker status or unresolved-history status</span>
+  <span class="Identifier">exactStatus</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>       <span class="Comment">## exact continuation outcome; empty if not attempted</span></pre></dt>
+  <dd>
+    
+    Counters cover an admitted marker path, not unsuccessful open probes. Committed bytes count resolved worker output. Exact bytes count the accepted prefix/continuation; rejected speculative output is excluded.
+    
+  </dd>
+</div>
+<div id="MarkerFallbackReason">
+  <dt><pre><a href="#MarkerFallbackReason"><span class="Identifier">MarkerFallbackReason</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <span class="Identifier">mfrNone</span><span class="Other">,</span> <span class="Identifier">mfrDecodeResultUnavailable</span><span class="Other">,</span> <span class="Identifier">mfrDecodeRejected</span><span class="Other">,</span> <span class="Identifier">mfrBoundaryMismatch</span><span class="Other">,</span>
+  <span class="Identifier">mfrUnresolvedHistory</span><span class="Other">,</span> <span class="Identifier">mfrResolutionSubmitFailed</span><span class="Other">,</span>
+  <span class="Identifier">mfrResolutionResultUnavailable</span><span class="Other">,</span> <span class="Identifier">mfrResolutionFailed</span><span class="Other">,</span> <span class="Identifier">mfrMarkerFreeHandoff</span><span class="Other">,</span>
+  <span class="Identifier">mfrFollowingMember</span></pre></dt>
+  <dd>
+    
+    
     
   </dd>
 </div>
@@ -153,7 +204,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-08-08 17:11:15 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-10-10 19:55:33 UTC</small>
       </div>
     </div>
   </div>
