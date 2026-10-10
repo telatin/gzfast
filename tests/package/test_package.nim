@@ -11,6 +11,12 @@ proc run(cmd: string; workdir = ""): tuple[output: string, exitCode: int] =
              else: cmd
   execCmdEx(full, options = {poUsePath, poStdErrToStdOut})
 
+proc requireOk(r: tuple[output: string, exitCode: int]; step, cmd: string) =
+  if r.exitCode != 0:
+    raise newException(AssertionDefect,
+      step & " failed with exit code " & $r.exitCode & "\ncommand: " &
+      cmd & "\noutput:\n" & r.output)
+
 proc packageVersion(projectRoot: string): string =
   for line in lines(projectRoot / "gzfast.nimble"):
     let stripped = line.strip()
@@ -29,8 +35,9 @@ proc main() =
   defer: removeDir(tmp)
 
   echo "[pkg] nimble pack"
-  var r = run("nimble pack -y", projectRoot)
-  doAssert r.exitCode == 0, r.output
+  var cmd = "nimble pack -y"
+  var r = run(cmd, projectRoot)
+  requireOk(r, "nimble pack", cmd)
 
   let archive = projectRoot / ("gzfast-" & version & ".tar.gz")
   doAssert fileExists(archive), "no package archive produced"
@@ -39,16 +46,17 @@ proc main() =
   # Extract the archive and install from the extracted package dir.
   let unpackDir = tmp / "unpack"
   createDir(unpackDir)
-  r = run("tar -xzf " & quoteShell(archive), unpackDir)
-  doAssert r.exitCode == 0, r.output
+  cmd = "tar -xzf " & quoteShell(archive)
+  r = run(cmd, unpackDir)
+  requireOk(r, "extract package archive", cmd)
   let pkgDir = unpackDir / ("gzfast-" & version)
   doAssert dirExists(pkgDir)
 
   let nimbleDir = tmp / "nimble"
   echo "[pkg] installing into clean nimble dir"
-  r = run("nimble -y --nimbleDir:" & quoteShell(nimbleDir) & " install",
-          pkgDir)
-  doAssert r.exitCode == 0, r.output
+  cmd = "nimble -y --nimbleDir:" & quoteShell(nimbleDir) & " install"
+  r = run(cmd, pkgDir)
+  requireOk(r, "install package", cmd)
 
   # A consumer Nimble package compiled against the installed one.
   let consumerDir = tmp / "consumer"
@@ -95,13 +103,14 @@ echo "consumer-ok ", total, " writer-ok"
   copyFile(corpusDir / "concat_3.gz", consumerDir / "sample.gz")
 
   echo "[pkg] compiling consumer"
-  r = run("nimble -y --nimbleDir:" & quoteShell(nimbleDir) & " build",
-          consumerDir)
-  doAssert r.exitCode == 0, r.output
+  cmd = "nimble -y --nimbleDir:" & quoteShell(nimbleDir) & " build"
+  r = run(cmd, consumerDir)
+  requireOk(r, "compile consumer", cmd)
 
   echo "[pkg] running consumer"
-  r = run(quoteShell(consumerDir / "consumer"))
-  doAssert r.exitCode == 0, r.output
+  cmd = quoteShell(consumerDir / "consumer")
+  r = run(cmd)
+  requireOk(r, "run consumer", cmd)
   doAssert "consumer-ok 52880 writer-ok" in r.output, r.output
 
   echo "[pkg] inspecting binary dependencies"
