@@ -1,6 +1,6 @@
 # Package
 
-version       = "0.3.1"
+version       = "0.4.0"
 author        = "gzfast contributors"
 description   = "Fast, verified gzip I/O with a bundled zlib (no system libraries required)"
 license       = "MIT"
@@ -53,7 +53,7 @@ proc compileTask(taskName, source, flags: string; environment = "") =
 task test, "Run the complete normal test suite":
   for t in ["unit/test_zlib_api", "unit/test_header", "unit/test_footer",
             "unit/test_source", "unit/test_buffers", "unit/test_deflate_bitreader",
-            "unit/test_writer",
+            "unit/test_writer", "unit/test_process_cpu",
             "unit/test_deflate_huffman",
             "unit/test_deflate_structures",
             "unit/test_deflate_blockfinder",
@@ -83,7 +83,7 @@ task test, "Run the complete normal test suite":
 task testFast, "Run unit tests only":
   for t in ["unit/test_zlib_api", "unit/test_header", "unit/test_footer",
             "unit/test_source", "unit/test_buffers", "unit/test_deflate_bitreader",
-            "unit/test_writer",
+            "unit/test_writer", "unit/test_process_cpu",
             "unit/test_deflate_huffman",
             "unit/test_deflate_structures",
             "unit/test_deflate_blockfinder",

@@ -49,7 +49,13 @@ suite "independent member workers":
     runtime.joinWorkers()
     check total == fixture.length
     check crc == fixture.crc32
-    check runtime.workerStats().peak >= 2
+    let stats = runtime.workerStats()
+    check stats.started == 4
+    check stats.completed == ordinal
+    check stats.active == 0
+    # Tiny blocks may finish before another worker enters its thread function.
+    check stats.peak >= 1
+    check stats.peak <= 4
     check runtime.allocations().currentBytes == 0
 
   test "ordinary concatenated members decode in parallel":
