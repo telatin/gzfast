@@ -1,7 +1,8 @@
-## gzfast command-line utility. Uses only the public library API.
+## gzfast command-line utility, built on the public gzip library API.
 
 import std/[monotimes, os, parseopt, streams, strutils, terminal, times]
 import ./gzfast
+import ./gzfast/private/process_cpu
 
 const
   # Nimble injects `-d:NimblePkgVersion=<version>` from the .nimble file when
@@ -282,14 +283,14 @@ proc runCompression(opts: CliOptions): int =
     if opts.outputPath.len > 0: openGzFastWriter(opts.outputPath)
     else: openGzFastWriter(stdout, ownsOutput = false)
   let wallStart = getMonoTime()
-  let cpuStart = cpuTime()
+  let cpuStart = processCpuTime()
   var report: GzipWriteReport
   try:
     report = compressInput(input, writer)
   finally:
     writer.close()
   let elapsed = (getMonoTime() - wallStart).inNanoseconds.float / 1e9
-  let cpu = cpuTime() - cpuStart
+  let cpu = processCpuTime() - cpuStart
   if not opts.quiet and opts.outputPath.len > 0:
     stderr.writeLine("gzfast: wrote " & opts.outputPath)
   if opts.showStats:
@@ -357,14 +358,14 @@ proc main(): int =
     let decoder = initGzFastDecoder(opts.config)
     if opts.verifyOnly:
       let wallStart = getMonoTime()
-      let cpuStart = cpuTime()
+      let cpuStart = processCpuTime()
       let reader =
         if opts.fromStdin: openStdinReader(opts)
         else: decoder.open(opts.inputPath)
       let report = reader.finish()
       reader.close()
       let elapsed = (getMonoTime() - wallStart).inNanoseconds.float / 1e9
-      let cpu = cpuTime() - cpuStart
+      let cpu = processCpuTime() - cpuStart
       if not opts.quiet:
         let label = if opts.fromStdin: "<stdin>" else: opts.inputPath
         stderr.writeLine("gzfast: " & label & ": OK")
@@ -378,7 +379,7 @@ proc main(): int =
           "output to a terminal (use -f to force)")
         return 2
       let wallStart = getMonoTime()
-      let cpuStart = cpuTime()
+      let cpuStart = processCpuTime()
       let report =
         if opts.fromStdin:
           let reader = openStdinReader(opts)
@@ -389,7 +390,7 @@ proc main(): int =
         else:
           decoder.decodeTo(opts.inputPath, stdout)
       let elapsed = (getMonoTime() - wallStart).inNanoseconds.float / 1e9
-      let cpu = cpuTime() - cpuStart
+      let cpu = processCpuTime() - cpuStart
       if opts.showStats:
         printReport(report, elapsed, cpu)
       return 0
@@ -407,10 +408,10 @@ proc main(): int =
         " already exists (use -f to overwrite)")
       return 2
     let wallStart = getMonoTime()
-    let cpuStart = cpuTime()
+    let cpuStart = processCpuTime()
     let report = decompressFile(opts.inputPath, outPath, opts.config)
     let elapsed = (getMonoTime() - wallStart).inNanoseconds.float / 1e9
-    let cpu = cpuTime() - cpuStart
+    let cpu = processCpuTime() - cpuStart
     if not opts.quiet:
       stderr.writeLine("gzfast: wrote " & outPath)
     if opts.showStats:

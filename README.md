@@ -185,6 +185,9 @@ Exit codes: `0` success, `1` corrupt/truncated data, `2` usage error,
 `3` I/O error, `4` internal error. Progress and statistics always go to
 stderr, never into data written to stdout. `--stats` includes timing,
 throughput, and mode-specific decode or compression statistics.
+On Linux and other POSIX systems, `cpu=` is process-wide user plus system
+CPU time, including completed worker threads. It can exceed wall time during
+parallel decoding.
 
 ## Release status
 
